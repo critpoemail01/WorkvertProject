@@ -1,0 +1,104 @@
+@page
+@model Alivert.Pages.PricingModel
+@{
+    ViewData["Title"] = "Pricing";
+}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="surface p-4 p-md-5">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-8">
+                    <div class="hero-kicker mb-3">
+                        <i class="bi bi-credit-card-2-front-fill"></i>
+                        <span>Credit-based pricing</span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-2">Alivert pricing</h1>
+                    <p class="lead muted mb-0">1 credit = 1 active alert. You start with <strong>5 free</strong> on <strong>Alivert Free</strong>. With <strong>Alivert Plus</strong> you buy packs when you need more credits. With <strong>Alivert Pro</strong> you get unlimited alerts.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a class="btn btn-primary btn-lg" asp-area="Identity" asp-page="/Account/Register">Get started</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4 pricing-grid">
+    <!-- Alivert Free -->
+            <div class="col-lg-4">
+                <div class="surface plan">
+                    <div class="plan-title">Alivert Free</div>
+                    <div class="plan-price mt-2">€0</div>
+                    <div class="muted mt-2">Try it out and create your first alerts.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>5 credits (5 active alerts)</li>
+                        <li>Basic history</li>
+                        <li>1 canal (Email)</li>
+                    </ul>
+
+                    <a class="btn btn-outline-secondary w-100" asp-area="Identity" asp-page="/Account/Register">Create account</a>
+                </div>
+            </div>
+
+    <!-- Alivert Plus (credit packs) -->
+            <div class="col-lg-4">
+                <div class="surface plan">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="plan-title">Alivert Plus</div>
+                        <span class="plan-badge"><i class="bi bi-box-seam"></i> Packs</span>
+                    </div>
+
+                    <div class="muted mt-2">Buy credits when you need more. No subscription.</div>
+
+                    <div class="surface-solid p-3 mt-3">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" disabled>25 credits — €X</button>
+                            <button class="btn btn-primary" disabled>50 credits — €X</button>
+                            <button class="btn btn-primary" disabled>100 credits — €X</button>
+                        </div>
+                        <div class="small muted mt-2">(Checkout placeholder — liga Stripe depois.)</div>
+                    </div>
+
+                    <ul class="mt-3 muted">
+                        <li>Credits roll over</li>
+                        <li>Ideal for occasional use</li>
+                        <li>Pay only when you raise your limit</li>
+                    </ul>
+                </div>
+            </div>
+
+    <!-- Alivert Pro (ilimitado mensal) -->
+            <div class="col-lg-4">
+                <div class="surface plan plan-highlight">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="plan-title">Alivert Pro</div>
+                        <span class="plan-badge"><i class="bi bi-stars"></i> Ilimitado</span>
+                    </div>
+
+                    <div class="plan-price mt-2">€X<span class="fs-6 muted">/month</span></div>
+                    <div class="muted mt-2">For those who want always-on alerts with no limits.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>Unlimited credits (unlimited alerts)</li>
+                        <li>Advanced cooldowns</li>
+                        <li>Telegram/Discord/Webhooks (when you connect it)</li>
+                    </ul>
+
+                    <a class="btn btn-primary w-100" asp-area="Identity" asp-page="/Account/Register">Ativar Pro</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="surface p-4 mt-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <div class="fw-semibold">Precisas de ajuda a escolher?</div>
+                    <div class="muted">Free to try • Plus to raise your limit • Pro for unlimited alerts.</div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a class="btn btn-outline-secondary" asp-page="/HowItWorks">See how it works</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

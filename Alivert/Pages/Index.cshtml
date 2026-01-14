@@ -1,0 +1,131 @@
+@page
+@model Alivert.Pages.IndexModel
+@{
+    ViewData["Title"] = "Real-time asset alerts";
+}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="surface hero-card p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <div class="hero-kicker mb-3">
+                        <i class="bi bi-bell-fill"></i>
+                        <span>Real-time alerts • No noise</span>
+                    </div>
+
+                    <h1 class="display-5 fw-bold hero-title mb-3">Get alerts when the market moves — without living on the chart.</h1>
+                    <p class="lead mb-4 muted">
+                        Create price/condition alerts, apply presets in seconds, and get notifications with a cooldown to avoid spam.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-primary btn-lg" asp-area="Identity" asp-page="/Account/Register">
+                            Start free
+                        </a>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">See pricing</a>
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard">
+                                Open dashboard
+                            </a>
+                        }
+                    </div>
+
+                    <div class="mt-4 d-flex flex-wrap gap-3 small muted">
+                        <span><i class="bi bi-lightning-charge-fill me-1"></i>1 credit = 1 active alert</span>
+                        <span><i class="bi bi-gift-fill me-1"></i>5 credits free no Free</span>
+                        <span><i class="bi bi-telegram me-1"></i>Telegram/Discord (when you connect it)</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="mockup">
+                        <div class="mockup-header">
+                            <div class="mockup-dots" aria-hidden="true">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="badge badge-soft">Alivert • Live</span>
+                        </div>
+                        <div class="mockup-body">
+                            <div class="mockup-row">
+                                <div>
+                                    <div class="fw-semibold">BTCUSDT</div>
+                                    <div class="small muted">24h drop ≤ -3%</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-semibold">TRIGGER</div>
+                                    <div class="small muted">cooldown 4h</div>
+                                </div>
+                            </div>
+
+                            <div class="mockup-row">
+                                <div>
+                                    <div class="fw-semibold">AAPL</div>
+                                    <div class="small muted">Price below 172.50</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-semibold">MONITOR</div>
+                                    <div class="small muted">email</div>
+                                </div>
+                            </div>
+
+                            <div class="mockup-row" style="margin-bottom:0;">
+                                <div>
+                                    <div class="fw-semibold">ETHUSDT</div>
+                                    <div class="small muted">Price acima de 2400</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-semibold">MONITOR</div>
+                                    <div class="small muted">telegram</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="surface p-4 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-sliders2-vertical"></i>
+                        <h5 class="mb-0">Presets & Custom</h5>
+                    </div>
+                    <p class="mb-0 muted">Start from presets and tweak thresholds/cooldowns. Create in under 30 seconds.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="surface p-4 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-shield-check"></i>
+                        <h5 class="mb-0">No noise</h5>
+                    </div>
+                    <p class="mb-0 muted">Per-alert cooldown, deduping, and history. Fewer pings, more signal.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="surface p-4 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <h5 class="mb-0">Scalable</h5>
+                    </div>
+                    <p class="mb-0 muted">Background worker evaluates alerts. Swap the fake provider for your real provider whenever you&#39;re ready.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="surface p-4 p-md-5 mt-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-8">
+                    <h2 class="fw-bold mb-2">Simple credits, no headaches.</h2>
+                    <p class="mb-0 muted">On <strong>Alivert Free</strong> you start with 5 credits. With <strong>Alivert Plus</strong> you buy packs when you need more. With <strong>Alivert Pro</strong> you get unlimited alerts with a monthly subscription.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a class="btn btn-primary btn-lg" asp-page="/Pricing">See pricing</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

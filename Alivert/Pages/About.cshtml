@@ -1,0 +1,108 @@
+@page
+@model Alivert.Pages.AboutModel
+@{
+    ViewData["Title"] = "About";
+}
+
+<section class="hero-section">
+  <div class="container">
+    <div class="surface hero-card p-4 p-lg-5">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <div class="hero-kicker mb-3">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span>Alivert</span>
+          </div>
+          <h1 class="hero-title display-5 fw-bold mb-3">Alerts that keep you focused — not glued to charts.</h1>
+          <p class="lead muted mb-4">
+            Alivert is a lightweight alerting platform for traders and long-term investors.
+            Build custom rules, apply presets in seconds, and receive notifications where you actually react.
+          </p>
+
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary px-4" asp-page="/Pricing">See plans</a>
+            <button type="button" class="btn btn-outline-light px-4" data-auth-open="register">Get started</button>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="surface-solid p-4">
+            <div class="d-flex gap-3 align-items-start">
+              <div class="icon-pill"><i class="bi bi-shield-check"></i></div>
+              <div>
+                <div class="fw-semibold">Tool-first approach</div>
+                <div class="muted small">Alivert is monitoring software — not financial advice.</div>
+              </div>
+            </div>
+            <hr class="border-op" />
+            <div class="d-flex gap-3 align-items-start">
+              <div class="icon-pill"><i class="bi bi-bell"></i></div>
+              <div>
+                <div class="fw-semibold">Noise control</div>
+                <div class="muted small">Cooldowns and deduplication to prevent spam and alert fatigue.</div>
+              </div>
+            </div>
+            <hr class="border-op" />
+            <div class="d-flex gap-3 align-items-start">
+              <div class="icon-pill"><i class="bi bi-rocket-takeoff"></i></div>
+              <div>
+                <div class="fw-semibold">Fast setup</div>
+                <div class="muted small">Templates + presets so you can start in minutes.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="surface p-4 h-100">
+          <div class="fw-semibold mb-1">Mission</div>
+          <div class="muted">Give you the right signal at the right time — without distractions.</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="surface p-4 h-100">
+          <div class="fw-semibold mb-1">Why credits</div>
+          <div class="muted">1 credit = 1 active alert. Simple, predictable, and fair for casual users.</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="surface p-4 h-100">
+          <div class="fw-semibold mb-1">Pro for power users</div>
+          <div class="muted">Unlimited alerts with a monthly fee, built for active traders and teams.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface mt-4 p-4 p-lg-5">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <h2 class="h3 fw-bold mb-2">What we’re building next</h2>
+          <p class="muted mb-0">
+            Multi-channel notifications (Telegram/Discord/Webhooks), presets library, and shareable watchlists.
+            The goal is to make alerting feel effortless — from setup to action.
+          </p>
+        </div>
+        <div class="col-lg-5">
+          <div class="d-flex flex-column gap-2">
+            <div class="pill">Presets (RSI, breakouts, % moves)</div>
+            <div class="pill">Telegram / Discord</div>
+            <div class="pill">Public share links + cloning</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@section Scripts {
+  <script>
+    // Ensure About page buttons open the correct tab in the auth modal
+  </script>
+}

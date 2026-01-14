@@ -1,0 +1,77 @@
+@page
+@model Alivert.Pages.App.Alerts.CreateAlertModel
+@{
+    ViewData["Title"] = "New alert";
+}
+
+<h1 class="fw-bold">New alert</h1>
+<p class="text-muted">Set a symbol and condition to trigger.</p>
+
+@if (Model.IsUnlimited)
+{
+    <div class="alert alert-success"><strong>Unlimited</strong> plan is active. You can create alerts with no limits.</div>
+}
+else
+{
+    <div class="alert alert-info">
+        Credits: you can have up to <strong>@Model.Capacity</strong> active alerts. You currently have <strong>@Model.ActiveAlerts</strong>.
+        Remaining: <strong>@Model.RemainingSlots</strong>.
+        <a class="ms-1" asp-page="/Pricing">View packs</a>
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-6">
+        <form method="post" class="surface p-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Symbol" class="form-label"></label>
+                    <input asp-for="Input.Symbol" class="form-control" placeholder="AAPL / BTCUSDT" />
+                    <span asp-validation-for="Input.Symbol" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.RuleType" class="form-label"></label>
+                    <select asp-for="Input.RuleType" class="form-select" asp-items="Model.RuleTypeOptions"></select>
+                    <span asp-validation-for="Input.RuleType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Threshold" class="form-label"></label>
+                    <input asp-for="Input.Threshold" class="form-control" />
+                    <div class="form-text">e.g., 180.50 (price) or -3 (% drop in 24h)</div>
+                    <span asp-validation-for="Input.Threshold" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.CooldownMinutes" class="form-label"></label>
+                    <input asp-for="Input.CooldownMinutes" class="form-control" />
+                    <span asp-validation-for="Input.CooldownMinutes" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Channel" class="form-label"></label>
+                    <select asp-for="Input.Channel" class="form-select">
+                        <option>Email</option>
+                        <option>Telegram</option>
+                        <option>Discord</option>
+                    </select>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" asp-for="Input.IsEnabled" />
+                    <label class="form-check-label" asp-for="Input.IsEnabled"></label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                    <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Cancel</a>
+                </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

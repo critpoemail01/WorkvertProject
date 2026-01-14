@@ -1,0 +1,70 @@
+@page
+@model Alivert.Pages.App.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex align-items-end justify-content-between flex-wrap gap-2">
+    <div>
+        <h1 class="fw-bold mb-0">Dashboard</h1>
+        <p class="text-muted mb-0">Overview of your alerts and recent triggers.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-page="/App/Alerts/Create">New alert</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">View alerts</a>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="surface p-4">
+            <div class="small muted">Alerts</div>
+            <div class="display-6 fw-bold">@Model.TotalAlerts</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="surface p-4">
+            <div class="small muted">Assets</div>
+            <div class="display-6 fw-bold">@Model.UniqueSymbols</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="surface p-4">
+            <div class="small muted">Triggers (7 days)</div>
+            <div class="display-6 fw-bold">@Model.TriggersLast7Days</div>
+        </div>
+    </div>
+</div>
+
+<div class="surface p-4 mt-4">
+    <h5 class="mb-3">Recent triggers</h5>
+
+    @if (!Model.LatestTriggers.Any())
+    {
+        <p class="text-muted mb-0">No triggers yet. Create alerts and wait for the worker to evaluate them.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Symbol</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.LatestTriggers)
+                {
+                    <tr>
+                        <td class="text-muted" style="white-space:nowrap">@row.TriggeredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td><span class="badge badge-soft">@row.Symbol</span></td>
+                        <td>@row.Message</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

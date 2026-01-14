@@ -1,0 +1,63 @@
+@page "{id:int}"
+@model Alivert.Pages.App.Alerts.EditAlertModel
+@{
+    ViewData["Title"] = "Edit alert";
+}
+
+<h1 class="fw-bold">Edit alert</h1>
+<p class="text-muted">Update the condition, cooldown, and channel.</p>
+
+<div class="row">
+    <div class="col-lg-6">
+        <form method="post" class="surface p-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Symbol" class="form-label"></label>
+                    <input asp-for="Input.Symbol" class="form-control" />
+                    <span asp-validation-for="Input.Symbol" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.RuleType" class="form-label"></label>
+                    <select asp-for="Input.RuleType" class="form-select" asp-items="Model.RuleTypeOptions"></select>
+                    <span asp-validation-for="Input.RuleType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Threshold" class="form-label"></label>
+                    <input asp-for="Input.Threshold" class="form-control" />
+                    <span asp-validation-for="Input.Threshold" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.CooldownMinutes" class="form-label"></label>
+                    <input asp-for="Input.CooldownMinutes" class="form-control" />
+                    <span asp-validation-for="Input.CooldownMinutes" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Channel" class="form-label"></label>
+                    <select asp-for="Input.Channel" class="form-select">
+                        <option>Email</option>
+                        <option>Telegram</option>
+                        <option>Discord</option>
+                    </select>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" asp-for="Input.IsEnabled" />
+                    <label class="form-check-label" asp-for="Input.IsEnabled"></label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Save changes</button>
+                    <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Back</a>
+                </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

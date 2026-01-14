@@ -1,0 +1,26 @@
+@page "{id:int}"
+@model Alivert.Pages.App.Alerts.DeleteAlertModel
+@{
+    ViewData["Title"] = "Delete alert";
+}
+
+<h1 class="fw-bold">Delete alert</h1>
+<p class="text-muted">This action cannot be undone.</p>
+
+<div class="surface p-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Symbol</dt>
+            <dd class="col-sm-9">@Model.Symbol</dd>
+
+            <dt class="col-sm-3">Rule</dt>
+            <dd class="col-sm-9">@Model.RuleType</dd>
+
+            <dt class="col-sm-3">Threshold</dt>
+            <dd class="col-sm-9">@Model.Threshold</dd>
+        </dl>
+
+        <form method="post" class="mt-4 d-flex gap-2">
+            <button class="btn btn-danger" type="submit">Delete</button>
+            <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Cancel</a>
+        </form>
+</div>

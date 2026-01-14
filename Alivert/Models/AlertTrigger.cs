@@ -1,0 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Alivert.Models;
+
+public class AlertTrigger
+{
+    public int Id { get; set; }
+
+    public int AlertId { get; set; }
+    public Alert? Alert { get; set; }
+
+    public DateTime TriggeredAtUtc { get; set; } = DateTime.UtcNow;
+
+    [Required, StringLength(240)]
+    public string Message { get; set; } = string.Empty;
+
+    // For debugging/audit (MVP)
+    [StringLength(4000)]
+    public string? SnapshotJson { get; set; }
+}

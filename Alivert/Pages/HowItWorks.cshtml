@@ -1,0 +1,65 @@
+@page
+@model Alivert.Pages.HowItWorksModel
+@{
+    ViewData["Title"] = "How it works";
+}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="surface p-4 p-md-5">
+            <div class="hero-kicker mb-3">
+                <i class="bi bi-question-circle-fill"></i>
+                <span>Setup em minutos</span>
+            </div>
+            <h1 class="display-6 fw-bold mb-2">How it works</h1>
+            <p class="lead muted mb-0">Create condition-based alerts, let the worker monitor them, and get triggers when it happens.</p>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="surface p-4 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-plus-fill"></i>
+                        <h5 class="mb-0">1) Account</h5>
+                    </div>
+                    <p class="mb-0 muted">Sign up and log into the app area. Free already includes 5 credits.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="surface p-4 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-sliders2-vertical"></i>
+                        <h5 class="mb-0">2) Alerts</h5>
+                    </div>
+                    <p class="mb-0 muted">Pick the symbol and rule (above/below price, % drop in 24h) and set the cooldown.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="surface p-4 h-100">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-bell-fill"></i>
+                        <h5 class="mb-0">3) Triggers</h5>
+                    </div>
+                    <p class="mb-0 muted">The worker evaluates in the background and stores history. Connect Telegram/Discord whenever you want.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="surface p-4 mt-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <div class="fw-semibold">Credits</div>
+                    <div class="muted">1 credit = 1 active alert. Free starts with 5 credits. Plus lets you buy packs when you need more. Pro gives unlimited alerts with a monthly subscription.</div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a class="btn btn-primary" asp-page="/Pricing">See pricing</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="surface p-4 mt-4">
+            <div class="fw-semibold">MVP note</div>
+            <div class="muted">This project ships with a fake market data provider so you can test the full flow. Swap it for your real provider whenever you&#39;re ready.</div>
+        </div>
+    </div>
+</section>
