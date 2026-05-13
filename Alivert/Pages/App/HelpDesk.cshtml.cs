@@ -31,16 +31,25 @@ public class HelpDeskModel : PageModel
 
     public class InputModel
     {
-        [Required, StringLength(120)]
+        [Required(ErrorMessage = "Enter your name.")]
+        [StringLength(120, ErrorMessage = "Name can be up to 120 characters.")]
+        [Display(Name = "Name")]
         public string Name { get; set; } = string.Empty;
 
-        [Required, EmailAddress, StringLength(256)]
+        [Required(ErrorMessage = "Enter the email address where support should reply.")]
+        [EmailAddress(ErrorMessage = "Use a valid email address.")]
+        [StringLength(256, ErrorMessage = "Email can be up to 256 characters.")]
+        [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required, StringLength(160)]
+        [Required(ErrorMessage = "Add a short subject.")]
+        [StringLength(160, ErrorMessage = "Subject can be up to 160 characters.")]
+        [Display(Name = "Subject")]
         public string Subject { get; set; } = string.Empty;
 
-        [Required, StringLength(4000)]
+        [Required(ErrorMessage = "Describe the issue so support can help you.")]
+        [StringLength(4000, ErrorMessage = "Message can be up to 4000 characters.")]
+        [Display(Name = "Message")]
         public string Message { get; set; } = string.Empty;
     }
 
@@ -54,7 +63,10 @@ public class HelpDeskModel : PageModel
         await LoadTicketsAsync();
 
         if (!ModelState.IsValid)
+        {
+            ModelState.AddModelError(string.Empty, "Complete the required ticket details before submitting.");
             return Page();
+        }
 
         var user = await _userManager.GetUserAsync(User);
         if (user is null)

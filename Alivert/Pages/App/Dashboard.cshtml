@@ -11,8 +11,39 @@
         <p class="lead muted mb-0">Overview of your alerts, monitored assets and recent trigger activity.</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New alert</a>
         <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-bell me-1"></i>View alerts</a>
+    </div>
+</section>
+
+<section class="surface dashboard-plan-card mt-4">
+    <div class="dashboard-plan-main">
+        <span class="app-stat-icon dashboard-plan-icon"><i class="bi @(Model.IsUnlimitedPlan ? "bi-stars" : "bi-wallet2")"></i></span>
+        <div>
+            <div class="app-stat-label">Current plan</div>
+            <h2>@Model.PlanName</h2>
+            <p>@Model.PlanDescription</p>
+        </div>
+    </div>
+    <div class="dashboard-plan-usage">
+        <div class="dashboard-plan-meter-head">
+            <span>@Model.ActiveAlerts active</span>
+            <strong>@Model.PlanCapacityLabel</strong>
+        </div>
+        <div class="dashboard-plan-meter" aria-label="Plan usage">
+            <span style="width:@Model.PlanUsagePercent%"></span>
+        </div>
+        <div class="dashboard-plan-meta">
+            <span>@Model.PlanRemainingLabel</span>
+            @if (Model.PlanExpiresOnUtc is not null && Model.IsUnlimitedPlan)
+            {
+                <span>Expires @Model.PlanExpiresOnUtc.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
+            }
+        </div>
+    </div>
+    <div class="dashboard-plan-actions">
+        <a class="btn btn-primary" asp-page="/App/Billing">Manage plan</a>
+        <a class="btn btn-outline-secondary" asp-page="/Pricing">Compare plans</a>
     </div>
 </section>
 

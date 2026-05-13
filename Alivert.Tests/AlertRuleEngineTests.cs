@@ -67,6 +67,41 @@ public class AlertRuleEngineTests
             new MarketSnapshot("AAPL", 100.50m, 0, DateTime.UtcNow));
 
         Assert.True(result.Triggered);
+        Assert.True(alert.PriceZoneWasInside);
+        Assert.Contains("entered zone", result.Message);
+    }
+
+    [Fact]
+    public void PriceZone_DoesNotRepeat_WhenPriceStaysInsideConfiguredPercentBand()
+    {
+        var alert = Alert(AlertRuleType.PriceZone, 100);
+        alert.ZonePercent = 1;
+
+        var first = _engine.Evaluate(
+            alert,
+            new MarketSnapshot("AAPL", 100.50m, 0, DateTime.UtcNow));
+        var second = _engine.Evaluate(
+            alert,
+            new MarketSnapshot("AAPL", 100.25m, 0, DateTime.UtcNow));
+
+        Assert.True(first.Triggered);
+        Assert.False(second.Triggered);
+        Assert.True(alert.PriceZoneWasInside);
+    }
+
+    [Fact]
+    public void PriceZone_Rearms_WhenPriceLeavesConfiguredPercentBand()
+    {
+        var alert = Alert(AlertRuleType.PriceZone, 100);
+        alert.ZonePercent = 1;
+        alert.PriceZoneWasInside = true;
+
+        var result = _engine.Evaluate(
+            alert,
+            new MarketSnapshot("AAPL", 102m, 0, DateTime.UtcNow));
+
+        Assert.False(result.Triggered);
+        Assert.False(alert.PriceZoneWasInside);
     }
 
     [Fact]
@@ -100,6 +135,28 @@ public class AlertRuleEngineTests
             Alert(AlertRuleType.RsiAbove, 70),
             new MarketSnapshot("BTCUSDT", 100, 0, DateTime.UtcNow),
             Technical(rsi: 71, fast: 101, slow: 100));
+
+        Assert.True(result.Triggered);
+    }
+
+    [Fact]
+    public void EmaCrossUp_Triggers_WhenFastEmaCrossesAboveSlowEma()
+    {
+        var result = _engine.Evaluate(
+            Alert(AlertRuleType.EmaCrossUp, 0),
+            new MarketSnapshot("BTCUSDT", 100, 0, DateTime.UtcNow),
+            Technical(rsi: 50, fast: 102, slow: 100, previousFast: 99, previousSlow: 100));
+
+        Assert.True(result.Triggered);
+    }
+
+    [Fact]
+    public void EmaCrossDown_Triggers_WhenFastEmaCrossesBelowSlowEma()
+    {
+        var result = _engine.Evaluate(
+            Alert(AlertRuleType.EmaCrossDown, 0),
+            new MarketSnapshot("BTCUSDT", 100, 0, DateTime.UtcNow),
+            Technical(rsi: 50, fast: 98, slow: 100, previousFast: 101, previousSlow: 100));
 
         Assert.True(result.Triggered);
     }

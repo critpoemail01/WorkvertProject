@@ -24,59 +24,185 @@
 
         <section class="account-section mt-4">
             <div class="account-section-title">Notification delivery preferences</div>
-            <div class="settings-rows">
-                <label class="settings-row">
-                    <span>
-                        <strong>Email notifications</strong>
-                        <small>Email delivery is tracked until SMTP is connected.</small>
-                    </span>
-                    <span class="form-check form-switch m-0">
-                        <input class="form-check-input" asp-for="Input.EmailEnabled" />
-                    </span>
-                </label>
-                <div class="settings-row">
-                    <span>
-                        <strong>Webhook URL</strong>
-                        <small>Alivert posts a JSON payload when an alert triggers.</small>
-                    </span>
-                    <input asp-for="Input.WebhookUrl" class="form-control settings-control" placeholder="https://example.com/alivert-webhook" />
+            <div class="notification-channel-intro">
+                <div>
+                    <span class="tag">Most used channels</span>
+                    <h2>Send alerts where traders already react fastest</h2>
+                    <p>Email covers the fallback path, Telegram and Discord cover mobile/community workflows, Slack and Teams cover professional desks, and webhooks cover automations.</p>
                 </div>
-                <span asp-validation-for="Input.WebhookUrl" class="text-danger"></span>
-                <div class="settings-row">
-                    <span>
-                        <strong>Discord webhook</strong>
-                        <small>Optional Discord delivery destination.</small>
-                    </span>
-                    <input asp-for="Input.DiscordWebhookUrl" class="form-control settings-control" placeholder="https://discord.com/api/webhooks/..." />
-                </div>
-                <span asp-validation-for="Input.DiscordWebhookUrl" class="text-danger"></span>
-                <div class="settings-row">
-                    <span>
-                        <strong>Telegram chat ID</strong>
-                        <small>@(Model.TelegramBotConfigured ? "Telegram bot token is configured on the server." : "Set Notifications:TelegramBotToken before Telegram can send.")</small>
-                    </span>
-                    <input asp-for="Input.TelegramChatId" class="form-control settings-control" placeholder="123456789" />
-                </div>
-                <span asp-validation-for="Input.TelegramChatId" class="text-danger"></span>
+                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New alert</a>
+            </div>
+
+            <div class="notification-channel-grid">
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-envelope"></i></span>
+                        <div>
+                            <h3>Email</h3>
+                            <p>Best universal fallback for confirmations and slower review.</p>
+                        </div>
+                        <span class="notification-channel-status @(Model.Input.EmailEnabled && Model.EmailTransportConfigured ? "ready" : Model.Input.EmailEnabled ? "setup" : "muted")">
+                            @(Model.Input.EmailEnabled && Model.EmailTransportConfigured ? "Ready" : Model.Input.EmailEnabled ? "Setup" : "Muted")
+                        </span>
+                    </div>
+                    <label class="notification-channel-switch">
+                        <span>
+                            <strong>Email notifications</strong>
+                            <small>Uses the account email with the SMTP transport configured on the server.</small>
+                        </span>
+                        <span class="form-check form-switch m-0">
+                            <input class="form-check-input" asp-for="Input.EmailEnabled" />
+                        </span>
+                    </label>
+                    <small class="notification-channel-note">@(Model.EmailTransportConfigured ? "SMTP email transport is configured." : "Set Notifications:Email before email alerts can send.")</small>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-telegram"></i></span>
+                        <div>
+                            <h3>Telegram</h3>
+                            <p>Fast mobile delivery for active traders.</p>
+                        </div>
+                        <span class="notification-channel-status @(Model.TelegramBotConfigured && !string.IsNullOrWhiteSpace(Model.Input.TelegramChatId) ? "ready" : "setup")">
+                            @(Model.TelegramBotConfigured && !string.IsNullOrWhiteSpace(Model.Input.TelegramChatId) ? "Ready" : "Setup")
+                        </span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Telegram chat ID</span>
+                        <input asp-for="Input.TelegramChatId" class="form-control" placeholder="123456789" />
+                    </label>
+                    <small class="notification-channel-note">@(Model.TelegramBotConfigured ? "Server bot token is configured." : "Set Notifications:TelegramBotToken before Telegram can send.")</small>
+                    <span asp-validation-for="Input.TelegramChatId" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-discord"></i></span>
+                        <div>
+                            <h3>Discord</h3>
+                            <p>Useful for crypto communities and shared watchlists.</p>
+                        </div>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "Setup" : "Ready")</span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Discord webhook URL</span>
+                        <input asp-for="Input.DiscordWebhookUrl" class="form-control" placeholder="https://discord.com/api/webhooks/..." />
+                    </label>
+                    <span asp-validation-for="Input.DiscordWebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-slack"></i></span>
+                        <div>
+                            <h3>Slack</h3>
+                            <p>Best for trading teams already working in Slack.</p>
+                        </div>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "Setup" : "Ready")</span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Slack incoming webhook URL</span>
+                        <input asp-for="Input.SlackWebhookUrl" class="form-control" placeholder="https://hooks.slack.com/services/..." />
+                    </label>
+                    <span asp-validation-for="Input.SlackWebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-people"></i></span>
+                        <div>
+                            <h3>Microsoft Teams</h3>
+                            <p>Good for professional desks and operations channels.</p>
+                        </div>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "Setup" : "Ready")</span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Teams webhook URL</span>
+                        <input asp-for="Input.TeamsWebhookUrl" class="form-control" placeholder="https://...webhook.office.com/..." />
+                    </label>
+                    <span asp-validation-for="Input.TeamsWebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-braces"></i></span>
+                        <div>
+                            <h3>Webhook</h3>
+                            <p>For bots, workflows, CRMs and custom automation.</p>
+                        </div>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "Setup" : "Ready")</span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Webhook URL</span>
+                        <input asp-for="Input.WebhookUrl" class="form-control" placeholder="https://example.com/alivert-webhook" />
+                    </label>
+                    <span asp-validation-for="Input.WebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card notification-channel-card-disabled">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-phone-vibrate"></i></span>
+                        <div>
+                            <h3>Browser push and SMS</h3>
+                            <p>High-value next step for direct mobile alerts after web push/SMS provider setup.</p>
+                        </div>
+                        <span class="notification-channel-status muted">Planned</span>
+                    </div>
+                    <p class="notification-channel-note mb-0">Not selectable yet because it needs service worker/VAPID or a paid SMS provider before deliveries can be guaranteed.</p>
+                </article>
+            </div>
+
+            <div class="notification-channel-actions">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i> Save delivery channels</button>
+                <span>These destinations become selectable per alert when you create or edit an alert.</span>
             </div>
         </section>
 
         <section class="account-section mt-4">
             <div class="account-section-title">Notification time zone settings</div>
-            <p class="muted mb-3">Alert timestamps are stored in UTC. Select the local time zone you want to see in notification messages when this option is connected.</p>
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-                <select class="form-select settings-timezone" disabled>
-                    <option>UTC - default</option>
-                    <option>Europe/Lisbon</option>
-                </select>
-                <button class="btn btn-primary" type="submit">Save</button>
+            <div class="settings-timezone-panel" data-settings-timezone>
+                <div class="settings-timezone-copy">
+                    <span class="settings-timezone-icon"><i class="bi bi-globe2"></i></span>
+                    <div>
+                        <h2>Local timestamps in every notification</h2>
+                        <p>Alerts stay stored in UTC. This setting controls the local timestamp shown in email, Telegram, Discord, Slack, Teams and webhook notifications.</p>
+                    </div>
+                </div>
+
+                <div class="settings-timezone-control">
+                    <label class="modal-field-label" for="notificationTimeZone">Notification time zone</label>
+                    <select asp-for="Input.AlertTimeZone" class="form-select settings-timezone" id="notificationTimeZone" data-combo data-settings-timezone-select>
+                        @foreach (var zone in Model.NotificationTimeZones)
+                        {
+                            <option value="@zone.Id" selected="@(zone.Id == Model.Input.AlertTimeZone)">@zone.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.AlertTimeZone" class="text-danger"></span>
+                </div>
+
+                <div class="schedule-timezone-card settings-timezone-card">
+                    <div>
+                        <span>Detected on this device</span>
+                        <strong data-settings-browser-timezone>Detecting browser time zone...</strong>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" data-settings-use-browser-timezone disabled>Use detected</button>
+                    <div>
+                        <span>Selected notification time</span>
+                        <strong data-settings-selected-timezone-clock>Checking selected time...</strong>
+                    </div>
+                </div>
+
+                <div class="settings-timezone-actions">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i> Save notification settings</button>
+                    <span>Use UTC for exchange-neutral timestamps, or choose your local city for clearer alert delivery times.</span>
+                </div>
             </div>
-            <p class="small muted mt-3 mb-0">Time zone persistence can be enabled later without changing the notification delivery settings.</p>
         </section>
 
         <section class="account-section mt-4">
             <div class="account-section-title">Set up push-style alerts</div>
-            <p class="muted mb-3">Telegram is the fastest channel once you add your chat ID and configure the server bot token.</p>
+            <p class="muted mb-3">Telegram, Discord, Slack and Teams can deliver alerts quickly once their destination settings are connected.</p>
             <button class="btn btn-outline-secondary" type="button" disabled>
                 <i class="bi bi-telegram me-1"></i> Alerts bot setup wizard
             </button>
@@ -86,4 +212,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/alivert-combos.js" asp-append-version="true"></script>
 }

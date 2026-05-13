@@ -1,5 +1,6 @@
 using Alivert.Data;
 using Alivert.Models;
+using Alivert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,13 @@ public class LogModel : PageModel
 
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly IUserAccountService _accounts;
 
-    public LogModel(ApplicationDbContext db, UserManager<IdentityUser> userManager)
+    public LogModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts)
     {
         _db = db;
         _userManager = userManager;
+        _accounts = accounts;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -34,6 +37,8 @@ public class LogModel : PageModel
     public List<RuleFilterRow> RuleFilters { get; private set; } = new();
     public string SelectedAlertName { get; private set; } = "All alerts";
     public string SelectedTimeframe { get; private set; } = "all";
+    public bool IsUnlimitedPlan { get; private set; }
+    public string PlanCapacityLabel { get; private set; } = "5 active alert slots";
 
     public record AlertOption(int Id, string Label);
     public record LogRow(
@@ -51,6 +56,11 @@ public class LogModel : PageModel
     public async Task OnGetAsync()
     {
         var userId = _userManager.GetUserId(User) ?? string.Empty;
+        var limits = await _accounts.GetLimitsAsync(userId);
+        IsUnlimitedPlan = limits.IsUnlimited;
+        PlanCapacityLabel = limits.IsUnlimited
+            ? "Unlimited active alerts"
+            : $"{limits.ActiveAlerts}/{limits.Capacity} active alert slots used";
 
         var alerts = await _db.Alerts
             .AsNoTracking()

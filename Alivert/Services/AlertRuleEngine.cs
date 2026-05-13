@@ -18,6 +18,8 @@ public sealed class AlertRuleEngine : IAlertRuleEngine
             AlertRuleType.RsiAbove => EvalRsiAbove(alert, technical),
             AlertRuleType.RsiOversoldEmaCrossUp => EvalRsiOversoldEmaCrossUp(alert, technical),
             AlertRuleType.RsiOverboughtEmaCrossDown => EvalRsiOverboughtEmaCrossDown(alert, technical),
+            AlertRuleType.EmaCrossUp => EvalEmaCrossUp(alert, technical),
+            AlertRuleType.EmaCrossDown => EvalEmaCrossDown(alert, technical),
             _ => new RuleResult(false, "Unknown rule")
         };
     }
@@ -66,9 +68,20 @@ public sealed class AlertRuleEngine : IAlertRuleEngine
         var zonePercent = alert.ZonePercent <= 0 ? 1.0m : alert.ZonePercent;
         var min = alert.Threshold * (1 - zonePercent / 100m);
         var max = alert.Threshold * (1 + zonePercent / 100m);
-        var hit = s.Price >= min && s.Price <= max;
-        var msg = $"{s.Symbol}: price {s.Price} inside zone {min:0.####}-{max:0.####} around {alert.Threshold:0.####} (PriceZone)";
-        return new RuleResult(hit, msg);
+        var isInside = s.Price >= min && s.Price <= max;
+
+        if (!isInside)
+        {
+            alert.PriceZoneWasInside = false;
+            return new RuleResult(false, $"{s.Symbol}: price {s.Price:0.####} outside zone {min:0.####}-{max:0.####} around {alert.Threshold:0.####} (PriceZone)");
+        }
+
+        if (alert.PriceZoneWasInside)
+            return new RuleResult(false, $"{s.Symbol}: price {s.Price:0.####} still inside zone {min:0.####}-{max:0.####} around {alert.Threshold:0.####} (PriceZone)");
+
+        alert.PriceZoneWasInside = true;
+        var msg = $"{s.Symbol}: price {s.Price:0.####} entered zone {min:0.####}-{max:0.####} around {alert.Threshold:0.####} (PriceZone)";
+        return new RuleResult(true, msg);
     }
 
     private static RuleResult EvalRsiBelow(Alert alert, TechnicalIndicatorSnapshot? t)
@@ -137,5 +150,33 @@ public sealed class AlertRuleEngine : IAlertRuleEngine
         alert.IndicatorArmed = false;
         var msg = $"{t.Symbol}: [{t.Timeframe}] RSI({alert.RsiPeriod}) pulled back from >= {alert.Threshold:0.##}; EMA{alert.FastEmaPeriod} crossed below EMA{alert.SlowEmaPeriod} (RsiOverboughtEmaCrossDown)";
         return new RuleResult(true, msg);
+    }
+
+    private static RuleResult EvalEmaCrossUp(Alert alert, TechnicalIndicatorSnapshot? t)
+    {
+        if (t is null)
+            return new RuleResult(false, $"{alert.Symbol}: EMA data unavailable ({alert.Timeframe})");
+
+        var crossedUp = t.FastEma > t.SlowEma &&
+            (t.PreviousFastEma is null || t.PreviousSlowEma is null || t.PreviousFastEma <= t.PreviousSlowEma);
+
+        var msg = crossedUp
+            ? $"{t.Symbol}: [{t.Timeframe}] EMA{alert.FastEmaPeriod} crossed above EMA{alert.SlowEmaPeriod} (EmaCrossUp)"
+            : $"{t.Symbol}: waiting for EMA{alert.FastEmaPeriod} to cross above EMA{alert.SlowEmaPeriod}";
+        return new RuleResult(crossedUp, msg);
+    }
+
+    private static RuleResult EvalEmaCrossDown(Alert alert, TechnicalIndicatorSnapshot? t)
+    {
+        if (t is null)
+            return new RuleResult(false, $"{alert.Symbol}: EMA data unavailable ({alert.Timeframe})");
+
+        var crossedDown = t.FastEma < t.SlowEma &&
+            (t.PreviousFastEma is null || t.PreviousSlowEma is null || t.PreviousFastEma >= t.PreviousSlowEma);
+
+        var msg = crossedDown
+            ? $"{t.Symbol}: [{t.Timeframe}] EMA{alert.FastEmaPeriod} crossed below EMA{alert.SlowEmaPeriod} (EmaCrossDown)"
+            : $"{t.Symbol}: waiting for EMA{alert.FastEmaPeriod} to cross below EMA{alert.SlowEmaPeriod}";
+        return new RuleResult(crossedDown, msg);
     }
 }

@@ -16,6 +16,12 @@ public class UserNotificationSettings
     [StringLength(500)]
     public string? DiscordWebhookUrl { get; set; }
 
+    [StringLength(500)]
+    public string? SlackWebhookUrl { get; set; }
+
+    [StringLength(500)]
+    public string? TeamsWebhookUrl { get; set; }
+
     [StringLength(80)]
     public string? TelegramChatId { get; set; }
 

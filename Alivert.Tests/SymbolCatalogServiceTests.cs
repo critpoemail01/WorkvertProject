@@ -19,6 +19,8 @@ public class SymbolCatalogServiceTests
                   "symbols": [
                     { "symbol": "AAVEBTC", "status": "TRADING", "baseAsset": "AAVE", "quoteAsset": "BTC" },
                     { "symbol": "BTCUSDT", "status": "TRADING", "baseAsset": "BTC", "quoteAsset": "USDT" },
+                    { "symbol": "ETHARS", "status": "TRADING", "baseAsset": "ETH", "quoteAsset": "ARS" },
+                    { "symbol": "ETHUSDT", "status": "TRADING", "baseAsset": "ETH", "quoteAsset": "USDT" },
                     { "symbol": "OLDUSDT", "status": "BREAK", "baseAsset": "OLD", "quoteAsset": "USDT" }
                   ]
                 }
@@ -31,6 +33,9 @@ public class SymbolCatalogServiceTests
         Assert.Equal("BTCUSDT", results[0].Symbol);
         Assert.Contains(results, x => x.Symbol == "AAVEBTC");
         Assert.True(valid);
+
+        var ethResults = await service.SearchAsync(MarketType.Crypto, "eth", CancellationToken.None);
+        Assert.Equal("ETHUSDT", ethResults[0].Symbol);
     }
 
     [Fact]

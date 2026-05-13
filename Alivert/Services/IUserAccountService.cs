@@ -9,9 +9,11 @@ public interface IUserAccountService
 
     /// <summary>
     /// Returns (isUnlimited, allowedAlertCapacity, activeAlerts, remainingSlots).
-    /// Credits represent capacity (max active alerts).
+    /// Paid credit capacity is calculated from credit transactions that are still inside the 30-day validity window.
     /// </summary>
     Task<(bool IsUnlimited, int Capacity, int ActiveAlerts, int RemainingSlots)> GetLimitsAsync(string userId, CancellationToken ct = default);
+
+    Task<int> EnforceActiveAlertLimitAsync(string userId, CancellationToken ct = default);
 
     Task AddCreditsAsync(string userId, int credits, string reason, string? reference = null, CancellationToken ct = default);
 

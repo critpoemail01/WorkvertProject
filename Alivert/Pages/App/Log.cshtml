@@ -39,10 +39,28 @@
             <div class="log-table-wrap">
                 @if (!Model.Rows.Any())
                 {
-                    <div class="empty-state">
-                        <i class="bi bi-journal-text"></i>
-                        <h2>No log entries yet</h2>
-                        <p>Create or trigger alerts to see delivery attempts and schedule skips here.</p>
+                    <div class="log-empty-state">
+                        <div class="log-empty-icon">
+                            <i class="bi bi-journal-check"></i>
+                        </div>
+                        <div class="log-empty-copy">
+                            <span class="tag">Waiting for activity</span>
+                            <h2>No log entries yet</h2>
+                            <p>Delivery attempts, failed notifications and schedule skips will appear here after your alerts are evaluated by the background worker.</p>
+                        </div>
+                        <div class="log-empty-highlights" aria-label="Log entry types">
+                            <span><i class="bi bi-check2-circle"></i> Sent</span>
+                            <span><i class="bi bi-slash-circle"></i> Skipped</span>
+                            <span><i class="bi bi-exclamation-triangle"></i> Failed</span>
+                        </div>
+                        <div class="log-empty-actions">
+                            <a class="btn btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New alert</a>
+                            <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i> Delivery settings</a>
+                            @if (Model.AlertId is not null || Model.SelectedTimeframe != "all")
+                            {
+                                <a class="btn btn-outline-secondary" asp-page="/App/Log"><i class="bi bi-arrow-counterclockwise me-1"></i> Clear filters</a>
+                            }
+                        </div>
                     </div>
                 }
                 else
@@ -91,12 +109,30 @@
         </section>
 
         <aside class="log-side-panel">
-            <div class="timeframe-tabs">
-                <a class="@(Model.SelectedTimeframe == "all" ? "active" : "")" href="@Model.AllTimeframesUrl()">All</a>
-                @foreach (var timeframe in Model.Timeframes)
-                {
-                    <a class="@(Model.SelectedTimeframe == timeframe ? "active" : "")" href="@Model.TimeframeUrl(timeframe)">@timeframe</a>
-                }
+            <div class="timeframe-filter-card">
+                <div class="timeframe-filter-head">
+                    <div>
+                        <span>Timeframe</span>
+                        <small>Filter by alert interval</small>
+                    </div>
+                    @if (Model.SelectedTimeframe != "all")
+                    {
+                        <a href="@Model.AllTimeframesUrl()">Reset</a>
+                    }
+                </div>
+                <div class="timeframe-tabs" aria-label="Timeframe filter">
+                    <a class="@(Model.SelectedTimeframe == "all" ? "active" : "")" href="@Model.AllTimeframesUrl()" aria-current="@(Model.SelectedTimeframe == "all" ? "page" : null)">
+                        <span class="timeframe-label">All</span>
+                        <small>Every interval</small>
+                    </a>
+                    @foreach (var timeframe in Model.Timeframes)
+                    {
+                        <a class="@(Model.SelectedTimeframe == timeframe ? "active" : "")" href="@Model.TimeframeUrl(timeframe)" aria-current="@(Model.SelectedTimeframe == timeframe ? "page" : null)">
+                            <span class="timeframe-label">@TimeframeLabel(timeframe)</span>
+                            <small>@timeframe</small>
+                        </a>
+                    }
+                </div>
             </div>
 
             <div class="rule-filter-list">
@@ -121,11 +157,39 @@
                 }
             </div>
 
-            <div class="log-upgrade-card">
-                <span>Premium only</span>
-                <a asp-page="/App/Billing">Upgrade</a>
-                <p>Unlimited keeps every alert active without managing credit capacity.</p>
-            </div>
+            @if (Model.IsUnlimitedPlan)
+            {
+                <div class="log-upgrade-card plan-included">
+                    <span><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
+                    <a asp-page="/App/Billing">Manage plan</a>
+                    <p>@Model.PlanCapacityLabel. All alert rules, timeframes and log history are included on this account.</p>
+                </div>
+            }
+            else
+            {
+                <div class="log-upgrade-card">
+                    <span>Premium only</span>
+                    <a asp-page="/App/Billing">Upgrade</a>
+                    <p>@Model.PlanCapacityLabel. Unlimited keeps every alert active without managing credit capacity.</p>
+                </div>
+            }
         </aside>
     </div>
 </div>
+
+@functions {
+    private static string TimeframeLabel(string timeframe)
+    {
+        return timeframe switch
+        {
+            "5m" => "5 min",
+            "15m" => "15 min",
+            "1h" => "1 hour",
+            "4h" => "4 hours",
+            "1d" => "1 day",
+            "1wk" => "1 week",
+            "1mo" => "1 month",
+            _ => timeframe
+        };
+    }
+}

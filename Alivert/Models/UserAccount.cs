@@ -4,7 +4,7 @@ namespace Alivert.Models;
 
 /// <summary>
 /// Simple user billing/limits profile.
-/// Credits represent the maximum number of active alerts the user may have.
+/// Credits stores the current account credit snapshot; active paid capacity is calculated from recent credit transactions.
 /// If UnlimitedUntilUtc is set and in the future, the user is unlimited.
 /// </summary>
 public class UserAccount
@@ -14,7 +14,7 @@ public class UserAccount
     public string UserId { get; set; } = string.Empty;
 
     /// <summary>
-    /// Maximum number of active alerts allowed (capacity).
+    /// Current credit snapshot. Free capacity is 5; paid credit capacity expires from the related transaction window.
     /// </summary>
     [Range(0, 1000000)]
     public int Credits { get; set; } = 5;

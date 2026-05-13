@@ -24,7 +24,7 @@ public class UserAccountServiceTests
     public async Task GetLimitsAsync_CountsOnlyActiveAlerts()
     {
         await using var db = CreateDbContext();
-        db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 3 });
+        db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 5 });
         db.Alerts.AddRange(
             Alert("user-1", isEnabled: true),
             Alert("user-1", isEnabled: true),
@@ -36,9 +36,9 @@ public class UserAccountServiceTests
         var limits = await service.GetLimitsAsync("user-1");
 
         Assert.False(limits.IsUnlimited);
-        Assert.Equal(3, limits.Capacity);
+        Assert.Equal(5, limits.Capacity);
         Assert.Equal(2, limits.ActiveAlerts);
-        Assert.Equal(1, limits.RemainingSlots);
+        Assert.Equal(3, limits.RemainingSlots);
     }
 
     [Fact]
@@ -76,6 +76,79 @@ public class UserAccountServiceTests
         Assert.Equal(30, account.Credits);
         Assert.Equal(25, transaction.Delta);
         Assert.Equal("payment-1", transaction.Reference);
+    }
+
+    [Fact]
+    public async Task GetLimitsAsync_IncludesPaidCreditsOnlyForThirtyDays()
+    {
+        await using var db = CreateDbContext();
+        db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 30 });
+        db.CreditTransactions.Add(new CreditTransaction
+        {
+            UserId = "user-1",
+            Delta = 25,
+            Reason = "Credit purchase",
+            Reference = "active-credit",
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-29)
+        });
+        await db.SaveChangesAsync();
+
+        var service = new UserAccountService(db);
+        var limits = await service.GetLimitsAsync("user-1");
+
+        Assert.False(limits.IsUnlimited);
+        Assert.Equal(30, limits.Capacity);
+        Assert.Equal(30, limits.RemainingSlots);
+    }
+
+    [Fact]
+    public async Task GetLimitsAsync_ExcludesExpiredPaidCredits()
+    {
+        await using var db = CreateDbContext();
+        db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 30 });
+        db.CreditTransactions.Add(new CreditTransaction
+        {
+            UserId = "user-1",
+            Delta = 25,
+            Reason = "Credit purchase",
+            Reference = "expired-credit",
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-31)
+        });
+        await db.SaveChangesAsync();
+
+        var service = new UserAccountService(db);
+        var limits = await service.GetLimitsAsync("user-1");
+
+        Assert.False(limits.IsUnlimited);
+        Assert.Equal(5, limits.Capacity);
+        Assert.Equal(5, limits.RemainingSlots);
+    }
+
+    [Fact]
+    public async Task GetLimitsAsync_DisablesAlertsAboveExpiredCreditCapacity()
+    {
+        await using var db = CreateDbContext();
+        db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 30 });
+        db.CreditTransactions.Add(new CreditTransaction
+        {
+            UserId = "user-1",
+            Delta = 25,
+            Reason = "Credit purchase",
+            Reference = "expired-credit",
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-31)
+        });
+        db.Alerts.AddRange(Enumerable.Range(0, 8).Select(_ => Alert("user-1", isEnabled: true)));
+        await db.SaveChangesAsync();
+
+        var service = new UserAccountService(db);
+        var limits = await service.GetLimitsAsync("user-1");
+        var enabledAlerts = await db.Alerts.CountAsync(a => a.UserId == "user-1" && a.IsEnabled);
+
+        Assert.False(limits.IsUnlimited);
+        Assert.Equal(5, limits.Capacity);
+        Assert.Equal(5, limits.ActiveAlerts);
+        Assert.Equal(0, limits.RemainingSlots);
+        Assert.Equal(5, enabledAlerts);
     }
 
     [Fact]

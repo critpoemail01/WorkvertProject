@@ -63,20 +63,6 @@
                 <span>Log view</span>
             </a>
 
-            <div class="app-nav-section">Help & support</div>
-            <a class="app-nav-link @(isActive("/News") ? "active" : "")" asp-page="/News">
-                <i class="bi bi-megaphone-fill"></i>
-                <span>News & updates</span>
-            </a>
-            <a class="app-nav-link @(isActive("/HowItWorks") ? "active" : "")" asp-page="/HowItWorks">
-                <i class="bi bi-question-circle"></i>
-                <span>Knowledge base</span>
-            </a>
-            <a class="app-nav-link @(isActive("/App/HelpDesk") ? "active" : "")" asp-page="/App/HelpDesk">
-                <i class="bi bi-chat-left-text-fill"></i>
-                <span>Help desk</span>
-            </a>
-
             <div class="app-nav-section">Account & settings</div>
             <a class="app-nav-link @(isActivePrefix("/App/Account") ? "active" : "")" asp-page="/App/Account/Index">
                 <i class="bi bi-person-fill"></i>
@@ -90,11 +76,15 @@
                 <i class="bi bi-broadcast-pin"></i>
                 <span>Notification settings</span>
             </a>
+            <a class="app-nav-link @(isActive("/App/HelpDesk") ? "active" : "")" asp-page="/App/HelpDesk">
+                <i class="bi bi-chat-left-text-fill"></i>
+                <span>Help desk</span>
+            </a>
         </nav>
 
         <div class="app-sidebar-footer mt-auto">
             <div class="small text-muted">@User?.Identity?.Name</div>
-            <a class="btn btn-sm btn-primary w-100 mt-2" asp-page="/App/Billing">Upgrade plan</a>
+            @await Component.InvokeAsync("AppPlanCta")
         </div>
     </aside>
 
@@ -102,10 +92,11 @@
         <header class="app-topbar">
             <div class="app-topbar-status">
                 <span class="app-status-badge"><i class="bi bi-lightning-charge-fill"></i>Background alerts active</span>
+                @await Component.InvokeAsync("AppPlanBadge")
             </div>
             <div class="app-topbar-actions">
                 <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Account/Index"><i class="bi bi-person-circle me-1"></i>My account</a>
-                <a class="btn btn-sm btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New alert</a>
             </div>
         </header>
 

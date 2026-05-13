@@ -20,6 +20,8 @@ public class CreateAlertModel : PageModel
         "Email",
         "Telegram",
         "Discord",
+        "Slack",
+        "Teams",
         "Webhook"
     };
 
@@ -59,7 +61,7 @@ public class CreateAlertModel : PageModel
         [Required]
         public MarketType MarketType { get; set; } = MarketType.Crypto;
 
-        [Display(Name = "Rule")]
+        [Display(Name = "Alert type")]
         [Required]
         public AlertRuleType RuleType { get; set; } = AlertRuleType.PriceAbove;
 
@@ -118,6 +120,8 @@ public class CreateAlertModel : PageModel
         if (threshold is not null)
             Input.Threshold = threshold.Value;
 
+        NormalizeRuleInputs();
+
         var userId = _userManager.GetUserId(User) ?? string.Empty;
         var limits = await _accounts.GetLimitsAsync(userId);
         IsUnlimited = limits.IsUnlimited;
@@ -164,7 +168,7 @@ public class CreateAlertModel : PageModel
         var channel = (Input.Channel ?? "Email").Trim();
         if (!SupportedChannels.Contains(channel))
         {
-            ModelState.AddModelError("Input.Channel", "Unsupported channel. Allowed: Email, Telegram, Discord, Webhook.");
+            ModelState.AddModelError("Input.Channel", "Unsupported channel. Allowed: Email, Telegram, Discord, Slack, Teams, Webhook.");
             return Page();
         }
 
@@ -211,26 +215,58 @@ public class CreateAlertModel : PageModel
 
     private void LoadSelectLists()
     {
-        RuleTypeOptions = new SelectList(Enum.GetValues<AlertRuleType>());
+        RuleTypeOptions = new SelectList(
+            Enum.GetValues<AlertRuleType>().Select(rule => new { Value = rule.ToString(), Text = rule.DisplayName() }),
+            "Value",
+            "Text");
         TimeframeOptions = new SelectList(new[] { "5m", "15m", "1h", "4h", "1d", "1wk", "1mo" });
         MarketTypeOptions = new SelectList(Enum.GetValues<MarketType>());
     }
 
     private void ValidateRuleSpecificInputs()
     {
-        Input.Timeframe = NormalizeTimeframe(Input.Timeframe);
+        NormalizeRuleInputs();
 
-        if (Input.RuleType.RequiresTechnicalIndicators())
-        {
-            if (Input.Threshold < 0 || Input.Threshold > 100)
-                ModelState.AddModelError("Input.Threshold", "RSI threshold must be between 0 and 100.");
+        if (Input.RuleType.UsesRsi() && (Input.Threshold < 0 || Input.Threshold > 100))
+            ModelState.AddModelError("Input.Threshold", "RSI threshold must be between 0 and 100.");
 
-            if (Input.FastEmaPeriod >= Input.SlowEmaPeriod)
-                ModelState.AddModelError("Input.SlowEmaPeriod", "Slow EMA must be greater than fast EMA.");
-        }
+        if (Input.RuleType.UsesEma() && Input.FastEmaPeriod >= Input.SlowEmaPeriod)
+            ModelState.AddModelError("Input.SlowEmaPeriod", "Slow EMA must be greater than fast EMA.");
+
+        if (Input.RuleType is AlertRuleType.PriceAbove or AlertRuleType.PriceBelow && Input.Threshold <= 0)
+            ModelState.AddModelError("Input.Threshold", "Price level must be greater than zero.");
 
         if (Input.RuleType.UsesPriceZone() && Input.Threshold <= 0)
             ModelState.AddModelError("Input.Threshold", "Price zone center must be greater than zero.");
+
+        if (Input.RuleType == AlertRuleType.VolumeAbove24h && Input.Threshold <= 0)
+            ModelState.AddModelError("Input.Threshold", "Volume threshold must be greater than zero.");
+
+        if (Input.RuleType == AlertRuleType.PercentDrop24h && Input.Threshold >= 0)
+            ModelState.AddModelError("Input.Threshold", "Use a negative value for a 24h percent drop, for example -3.");
+
+        if (Input.RuleType == AlertRuleType.PercentRise24h && Input.Threshold <= 0)
+            ModelState.AddModelError("Input.Threshold", "Use a positive value for a 24h percent rise, for example 3.");
+    }
+
+    private void NormalizeRuleInputs()
+    {
+        Input.Timeframe = NormalizeTimeframe(Input.Timeframe);
+
+        if (!Input.RuleType.UsesThreshold())
+            Input.Threshold = 0;
+
+        if (!Input.RuleType.UsesPriceZone())
+            Input.ZonePercent = 1.0m;
+
+        if (!Input.RuleType.UsesRsi())
+            Input.RsiPeriod = 14;
+
+        if (!Input.RuleType.UsesEma())
+        {
+            Input.FastEmaPeriod = 3;
+            Input.SlowEmaPeriod = 5;
+        }
     }
 
     private static string NormalizeTimeframe(string? timeframe)

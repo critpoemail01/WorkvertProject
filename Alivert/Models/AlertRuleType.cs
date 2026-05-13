@@ -11,5 +11,7 @@ public enum AlertRuleType
     RsiBelow = 7,
     RsiAbove = 8,
     RsiOversoldEmaCrossUp = 9,
-    RsiOverboughtEmaCrossDown = 10
+    RsiOverboughtEmaCrossDown = 10,
+    EmaCrossUp = 11,
+    EmaCrossDown = 12
 }

@@ -6,6 +6,8 @@ namespace Alivert.Services;
 
 public sealed class UserAccountService : IUserAccountService
 {
+    private const int FreeCreditCapacity = 5;
+    private const int PaidCreditValidityDays = 30;
     private readonly ApplicationDbContext _db;
 
     public UserAccountService(ApplicationDbContext db)
@@ -35,17 +37,19 @@ public sealed class UserAccountService : IUserAccountService
 
     public async Task<(bool IsUnlimited, int Capacity, int ActiveAlerts, int RemainingSlots)> GetLimitsAsync(string userId, CancellationToken ct = default)
     {
-        await EnsureAsync(userId, ct);
-
-        var acc = await _db.UserAccounts.AsNoTracking().FirstAsync(x => x.UserId == userId, ct);
-
-        var isUnlimited = acc.UnlimitedUntilUtc is not null && acc.UnlimitedUntilUtc.Value > DateTime.UtcNow;
-        var capacity = isUnlimited ? int.MaxValue : Math.Max(0, acc.Credits);
+        var (isUnlimited, capacity) = await GetCapacityAsync(userId, ct);
+        await DisableExcessAlertsAsync(userId, isUnlimited, capacity, ct);
 
         var active = await _db.Alerts.AsNoTracking().CountAsync(a => a.UserId == userId && a.IsEnabled, ct);
         var remaining = isUnlimited ? int.MaxValue : Math.Max(0, capacity - active);
 
         return (isUnlimited, capacity, active, remaining);
+    }
+
+    public async Task<int> EnforceActiveAlertLimitAsync(string userId, CancellationToken ct = default)
+    {
+        var (isUnlimited, capacity) = await GetCapacityAsync(userId, ct);
+        return await DisableExcessAlertsAsync(userId, isUnlimited, capacity, ct);
     }
 
     public async Task AddCreditsAsync(string userId, int credits, string reason, string? reference = null, CancellationToken ct = default)
@@ -112,5 +116,52 @@ public sealed class UserAccountService : IUserAccountService
         });
 
         await _db.SaveChangesAsync(ct);
+    }
+
+    private async Task<(bool IsUnlimited, int Capacity)> GetCapacityAsync(string userId, CancellationToken ct)
+    {
+        await EnsureAsync(userId, ct);
+
+        var acc = await _db.UserAccounts.AsNoTracking().FirstAsync(x => x.UserId == userId, ct);
+        var nowUtc = DateTime.UtcNow;
+        var isUnlimited = acc.UnlimitedUntilUtc is not null && acc.UnlimitedUntilUtc.Value > nowUtc;
+        if (isUnlimited)
+            return (true, int.MaxValue);
+
+        var activePaidCredits = await _db.CreditTransactions
+            .AsNoTracking()
+            .Where(x => x.UserId == userId &&
+                        x.Delta > 0 &&
+                        x.CreatedAtUtc >= nowUtc.AddDays(-PaidCreditValidityDays))
+            .SumAsync(x => x.Delta, ct);
+
+        return (false, FreeCreditCapacity + activePaidCredits);
+    }
+
+    private async Task<int> DisableExcessAlertsAsync(string userId, bool isUnlimited, int capacity, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || isUnlimited)
+            return 0;
+
+        var activeCount = await _db.Alerts.CountAsync(a => a.UserId == userId && a.IsEnabled, ct);
+        if (activeCount <= capacity)
+            return 0;
+
+        var nowUtc = DateTime.UtcNow;
+        var alertsToDisable = await _db.Alerts
+            .Where(a => a.UserId == userId && a.IsEnabled)
+            .OrderByDescending(a => a.UpdatedAtUtc)
+            .ThenByDescending(a => a.Id)
+            .Skip(capacity)
+            .ToListAsync(ct);
+
+        foreach (var alert in alertsToDisable)
+        {
+            alert.IsEnabled = false;
+            alert.UpdatedAtUtc = nowUtc;
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return alertsToDisable.Count;
     }
 }

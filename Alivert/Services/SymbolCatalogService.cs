@@ -63,6 +63,7 @@ public sealed class SymbolCatalogService : ISymbolCatalogService
             })
             .Where(x => x.Rank < int.MaxValue)
             .OrderBy(x => x.Rank)
+            .ThenBy(x => GetCryptoPairRank(x.Symbol, normalized))
             .ThenBy(x => x.Symbol.Symbol)
             .Take(30)
             .Select(x => x.Symbol)
@@ -227,6 +228,24 @@ public sealed class SymbolCatalogService : ISymbolCatalogService
             return 4;
 
         return int.MaxValue;
+    }
+
+    private static int GetCryptoPairRank(SymbolSearchResult result, string query)
+    {
+        var symbol = result.Symbol;
+        if (symbol.Equals($"{query}USDT", StringComparison.OrdinalIgnoreCase))
+            return 0;
+
+        if (symbol.EndsWith("USDT", StringComparison.OrdinalIgnoreCase))
+            return 1;
+
+        if (symbol.EndsWith("USDC", StringComparison.OrdinalIgnoreCase))
+            return 2;
+
+        if (symbol.EndsWith("BTC", StringComparison.OrdinalIgnoreCase))
+            return 3;
+
+        return 4;
     }
 
     private static string? GetString(JsonElement element, string propertyName)

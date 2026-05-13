@@ -7,6 +7,7 @@ public sealed class PaymentOptions
     public string UnlimitedMonthlyCurrency { get; set; } = "EUR";
     public decimal UnlimitedAnnualAmount { get; set; } = 300;
     public string UnlimitedAnnualCurrency { get; set; } = "EUR";
+    public string? CreditCardSetupUrl { get; set; }
     public List<CreditPackOptions> CreditPacks { get; set; } = new();
     public Dictionary<string, string> ProviderCheckoutUrls { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }

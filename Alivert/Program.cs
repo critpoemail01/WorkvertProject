@@ -10,7 +10,8 @@ builder.Services.AddRazorPages(options =>
 {
     // Optional: force /App/* to require auth even if you forget [Authorize]
     options.Conventions.AuthorizeFolder("/App");
-});
+})
+.AddRazorRuntimeCompilation();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -13,12 +13,15 @@ namespace Alivert.Pages.App;
 [Authorize]
 public class BillingModel : PageModel
 {
-    private static readonly string[] Providers = ["PayPal", "Stripe", "CoinbaseCommerce", "Crypto"];
+    private const string CreditCardProvider = "CreditCard";
+    private const string StripeProvider = "Stripe";
+    private static readonly string[] Providers = [CreditCardProvider];
     private const string CreditPlanCode = "credits";
     private const string MonthlyPlanCode = "unlimited-monthly";
     private const string AnnualPlanCode = "unlimited-annual";
     private const int MonthlySubscriptionDays = 30;
     private const int AnnualSubscriptionDays = 365;
+    private const int CreditPackAccessDays = 30;
 
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
@@ -54,9 +57,10 @@ public class BillingModel : PageModel
     public DateTime? ExpiresOnUtc { get; private set; }
     public int? DaysRemaining { get; private set; }
     public IReadOnlyList<CreditPackOptions> Packs { get; private set; } = Array.Empty<CreditPackOptions>();
-    public IReadOnlyList<string> PaymentProviders { get; private set; } = Providers;
+    public string PrimaryPaymentProvider => CreditCardProvider;
     public List<CreditPurchase> Purchases { get; private set; } = new();
     public List<CreditTransaction> Transactions { get; private set; } = new();
+    public int CreditPackValidityDays => CreditPackAccessDays;
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -66,10 +70,53 @@ public class BillingModel : PageModel
         await LoadAsync();
     }
 
-    public async Task<IActionResult> OnPostCreatePurchaseAsync(string packId, string provider)
+    public async Task<IActionResult> OnPostCreateCheckoutAsync(string checkoutKind, string provider, string? packId, string plan = "monthly")
     {
         await LoadAsync();
 
+        if (string.Equals(checkoutKind, CreditPlanCode, StringComparison.OrdinalIgnoreCase))
+            return await CreateCreditPackPurchaseAsync(packId, provider);
+
+        if (string.Equals(checkoutKind, "unlimited", StringComparison.OrdinalIgnoreCase))
+            return await CreateUnlimitedPurchaseAsync(provider, plan);
+
+        ModelState.AddModelError(string.Empty, "Unsupported checkout selection.");
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAddCreditCardAsync(string provider)
+    {
+        await LoadAsync();
+
+        if (!Providers.Contains(provider, StringComparer.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(string.Empty, "Unsupported payment provider.");
+            return Page();
+        }
+
+        var reference = $"ALV-CARD-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}"[..36];
+        var setupUrl = BuildCreditCardSetupUrl(provider, reference);
+        if (!string.IsNullOrWhiteSpace(setupUrl))
+            return Redirect(setupUrl);
+
+        StatusMessage = "Credit card setup opened. Configure Payments:CreditCardSetupUrl to connect the hosted card setup flow.";
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostCreatePurchaseAsync(string packId, string provider)
+    {
+        await LoadAsync();
+        return await CreateCreditPackPurchaseAsync(packId, provider);
+    }
+
+    public async Task<IActionResult> OnPostCreateUnlimitedAsync(string provider, string plan = "monthly")
+    {
+        await LoadAsync();
+        return await CreateUnlimitedPurchaseAsync(provider, plan);
+    }
+
+    private async Task<IActionResult> CreateCreditPackPurchaseAsync(string? packId, string provider)
+    {
         var pack = Packs.FirstOrDefault(x => string.Equals(x.Id, packId, StringComparison.OrdinalIgnoreCase));
         if (pack is null)
         {
@@ -96,6 +143,7 @@ public class BillingModel : PageModel
             Provider = provider,
             Status = "Pending",
             PlanCode = CreditPlanCode,
+            SubscriptionDays = CreditPackAccessDays,
             ExternalReference = reference,
             CheckoutUrl = checkoutUrl
         };
@@ -106,14 +154,12 @@ public class BillingModel : PageModel
         if (!string.IsNullOrWhiteSpace(checkoutUrl))
             return Redirect(checkoutUrl);
 
-        StatusMessage = $"Pending {provider} purchase created. Configure Payments:ProviderCheckoutUrls:{provider} to redirect users to checkout.";
+        StatusMessage = $"Pending {provider} purchase created. Credit packs stay active for {CreditPackAccessDays} days after payment confirmation.";
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostCreateUnlimitedAsync(string provider, string plan = "monthly")
+    private async Task<IActionResult> CreateUnlimitedPurchaseAsync(string provider, string plan)
     {
-        await LoadAsync();
-
         if (!Providers.Contains(provider, StringComparer.OrdinalIgnoreCase))
         {
             ModelState.AddModelError(string.Empty, "Unsupported payment provider.");
@@ -184,8 +230,45 @@ public class BillingModel : PageModel
         }
 
         StatusMessage = purchase.Credits > 0
-            ? $"{purchase.Credits} credits added."
+            ? $"{purchase.Credits} credits added for {CreditPackAccessDays} days."
             : $"Unlimited alerts activated for {GetPurchaseUnlimitedPlan(purchase).DurationLabel}.";
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRemovePaidPlanAsync()
+    {
+        await LoadAsync();
+        if (!CanManuallyConfirm)
+            return Forbid();
+
+        var userId = _userManager.GetUserId(User) ?? string.Empty;
+        var nowUtc = DateTime.UtcNow;
+        var account = await _db.UserAccounts.FirstOrDefaultAsync(x => x.UserId == userId);
+        var paidUnlimitedPurchases = await _db.CreditPurchases
+            .Where(x => x.UserId == userId && x.Status == "Paid" && x.Credits == 0)
+            .ToListAsync();
+
+        var hadActivePlan = account?.UnlimitedUntilUtc is not null && account.UnlimitedUntilUtc.Value > nowUtc;
+
+        if (account is not null && account.UnlimitedUntilUtc is not null)
+        {
+            account.UnlimitedUntilUtc = null;
+            account.UpdatedAtUtc = nowUtc;
+        }
+
+        foreach (var purchase in paidUnlimitedPurchases)
+        {
+            purchase.Status = "TestRemoved";
+            purchase.PaidAtUtc = null;
+        }
+
+        if (account is not null || paidUnlimitedPurchases.Count > 0)
+            await _db.SaveChangesAsync();
+
+        StatusMessage = hadActivePlan || paidUnlimitedPurchases.Count > 0
+            ? "Paid Unlimited plan removed for testing. The account is back to Basic or credit-pack capacity."
+            : "No active paid Unlimited plan was found.";
+
         return RedirectToPage();
     }
 
@@ -197,7 +280,7 @@ public class BillingModel : PageModel
         ActiveAlerts = limits.ActiveAlerts;
         RemainingSlots = limits.RemainingSlots;
         IsUnlimited = limits.IsUnlimited;
-        CanManuallyConfirm = _environment.IsDevelopment() || _payments.CurrentValue.AllowManualPaymentConfirmation;
+        CanManuallyConfirm = AllowsBillingTestActions();
         UnlimitedMonthlyAmount = _payments.CurrentValue.UnlimitedMonthlyAmount > 0 ? _payments.CurrentValue.UnlimitedMonthlyAmount : 50;
         UnlimitedMonthlyCurrency = string.IsNullOrWhiteSpace(_payments.CurrentValue.UnlimitedMonthlyCurrency)
             ? "EUR"
@@ -225,11 +308,16 @@ public class BillingModel : PageModel
         DaysRemaining = ExpiresOnUtc is not null && ExpiresOnUtc.Value > DateTime.UtcNow
             ? Math.Max(0, (int)Math.Ceiling((ExpiresOnUtc.Value - DateTime.UtcNow).TotalDays))
             : null;
+        var isAnnualUnlimited = latestPaidUnlimited?.PlanCode == AnnualPlanCode ||
+                                latestPaidUnlimited?.SubscriptionDays >= AnnualSubscriptionDays ||
+                                DaysRemaining > 300;
         SubscriptionType = DaysRemaining is null
             ? "Basic (Free)"
             : latestPaidUnlimited is null
                 ? "Unlimited"
-                : GetPurchasePlanLabel(latestPaidUnlimited);
+                : isAnnualUnlimited
+                    ? "Unlimited annual"
+                    : GetPurchasePlanLabel(latestPaidUnlimited);
 
         Purchases = await _db.CreditPurchases
             .AsNoTracking()
@@ -249,18 +337,85 @@ public class BillingModel : PageModel
     public string GetPurchasePlanLabel(CreditPurchase purchase)
     {
         if (purchase.Credits > 0)
-            return $"{purchase.Credits} credits";
+            return $"{purchase.Credits} credits / {GetCreditPurchaseDays(purchase)} days";
 
         return GetPurchaseUnlimitedPlan(purchase).Label;
     }
 
+    public DateTime? GetCreditPurchaseExpiresOnUtc(CreditPurchase purchase)
+    {
+        if (purchase.Credits <= 0 || purchase.Status != "Paid")
+            return null;
+
+        return (purchase.PaidAtUtc ?? purchase.CreatedAtUtc).AddDays(GetCreditPurchaseDays(purchase));
+    }
+
+    public string GetPurchaseStatusLabel(CreditPurchase purchase)
+    {
+        var creditExpiresOnUtc = GetCreditPurchaseExpiresOnUtc(purchase);
+        if (creditExpiresOnUtc is not null && creditExpiresOnUtc.Value <= DateTime.UtcNow)
+            return "Expired";
+
+        return purchase.Status;
+    }
+
+    public string GetPurchaseStatusBadgeClass(CreditPurchase purchase)
+    {
+        return GetPurchaseStatusLabel(purchase) switch
+        {
+            "Paid" => "text-bg-success",
+            "Expired" => "text-bg-warning",
+            _ => "text-bg-secondary"
+        };
+    }
+
     private string? BuildCheckoutUrl(string provider, string reference)
     {
-        if (!_payments.CurrentValue.ProviderCheckoutUrls.TryGetValue(provider, out var url) || string.IsNullOrWhiteSpace(url))
+        var url = ResolveCardProcessorUrl(provider);
+        if (string.IsNullOrWhiteSpace(url))
             return null;
 
         var separator = url.Contains('?') ? "&" : "?";
         return $"{url}{separator}reference={Uri.EscapeDataString(reference)}";
+    }
+
+    private string? BuildCreditCardSetupUrl(string provider, string reference)
+    {
+        var url = _payments.CurrentValue.CreditCardSetupUrl;
+        if (string.IsNullOrWhiteSpace(url))
+            url = ResolveCardProcessorUrl(provider);
+
+        if (string.IsNullOrWhiteSpace(url))
+            return null;
+
+        var separator = url.Contains('?') ? "&" : "?";
+        return $"{url}{separator}reference={Uri.EscapeDataString(reference)}&purpose=card_setup";
+    }
+
+    private string? ResolveCardProcessorUrl(string provider)
+    {
+        if (_payments.CurrentValue.ProviderCheckoutUrls.TryGetValue(provider, out var url) && !string.IsNullOrWhiteSpace(url))
+            return url;
+
+        if (string.Equals(provider, CreditCardProvider, StringComparison.OrdinalIgnoreCase) &&
+            _payments.CurrentValue.ProviderCheckoutUrls.TryGetValue(StripeProvider, out url) &&
+            !string.IsNullOrWhiteSpace(url))
+        {
+            return url;
+        }
+
+        return null;
+    }
+
+    private bool AllowsBillingTestActions()
+    {
+        var host = HttpContext.Request.Host.Host;
+        var isLocalHost =
+            string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(host, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(host, "::1", StringComparison.OrdinalIgnoreCase);
+
+        return isLocalHost || _environment.IsDevelopment() || _payments.CurrentValue.AllowManualPaymentConfirmation;
     }
 
     private static IReadOnlyList<CreditPackOptions> DefaultPacks()
@@ -319,6 +474,11 @@ public class BillingModel : PageModel
                 "ALV-UNL-M",
                 "Unlimited monthly subscription",
                 "30 days");
+    }
+
+    private static int GetCreditPurchaseDays(CreditPurchase purchase)
+    {
+        return purchase.SubscriptionDays > 0 ? purchase.SubscriptionDays : CreditPackAccessDays;
     }
 
     private sealed record UnlimitedPlan(

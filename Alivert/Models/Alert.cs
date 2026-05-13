@@ -28,6 +28,8 @@ public class Alert
     [Range(0.01, 100)]
     public decimal ZonePercent { get; set; } = 1.0m;
 
+    public bool PriceZoneWasInside { get; set; }
+
     [Range(2, 100)]
     public int RsiPeriod { get; set; } = 14;
 

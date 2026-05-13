@@ -38,6 +38,22 @@ public sealed class AlertEvaluatorWorker : BackgroundService
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var dispatcher = scope.ServiceProvider.GetRequiredService<IAlertDispatcher>();
+                var accounts = scope.ServiceProvider.GetRequiredService<IUserAccountService>();
+
+                var activeUserIds = await db.Alerts
+                    .Where(a => a.IsEnabled)
+                    .Select(a => a.UserId)
+                    .Distinct()
+                    .ToListAsync(stoppingToken);
+
+                foreach (var userId in activeUserIds)
+                {
+                    var disabled = await accounts.EnforceActiveAlertLimitAsync(userId, stoppingToken);
+                    if (disabled > 0)
+                    {
+                        _logger.LogInformation("Disabled {Count} alert(s) for user {UserId} after credit capacity expired.", disabled, userId);
+                    }
+                }
 
                 var alerts = await db.Alerts
                     .Where(a => a.IsEnabled)
@@ -82,16 +98,13 @@ public sealed class AlertEvaluatorWorker : BackgroundService
                             snapshotCache[alert.MarketType] = snapshot;
                         }
 
-                        if (alert.LastTriggeredAtUtc is not null &&
-                            now - alert.LastTriggeredAtUtc.Value < TimeSpan.FromMinutes(alert.CooldownMinutes))
-                        {
-                            continue;
-                        }
+                        var isCoolingDown = alert.LastTriggeredAtUtc is not null &&
+                            now - alert.LastTriggeredAtUtc.Value < TimeSpan.FromMinutes(alert.CooldownMinutes);
 
                         TechnicalIndicatorSnapshot? technical = null;
                         if (alert.RuleType.RequiresTechnicalIndicators())
                         {
-                            var cacheKey = $"{alert.Symbol}|{alert.Timeframe}|{alert.RsiPeriod}|{alert.FastEmaPeriod}|{alert.SlowEmaPeriod}";
+                            var cacheKey = $"{alert.MarketType}|{alert.Symbol}|{alert.Timeframe}|{alert.RsiPeriod}|{alert.FastEmaPeriod}|{alert.SlowEmaPeriod}";
                             if (!technicalCache.TryGetValue(cacheKey, out technical))
                             {
                                 technical = await _technicalIndicators.GetSnapshotAsync(
@@ -109,6 +122,7 @@ public sealed class AlertEvaluatorWorker : BackgroundService
                         alert.LastEvaluatedAtUtc = now;
                         var result = _ruleEngine.Evaluate(alert, snapshot, technical);
                         if (!result.Triggered) continue;
+                        if (isCoolingDown) continue;
 
                         alert.LastTriggeredAtUtc = now;
                         alert.UpdatedAtUtc = now;

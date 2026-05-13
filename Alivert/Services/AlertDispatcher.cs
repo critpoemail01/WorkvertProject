@@ -2,7 +2,9 @@ using Alivert.Data;
 using Alivert.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Http.Json;
+using System.Net.Mail;
 using System.Text.Json;
 
 namespace Alivert.Services;
@@ -74,10 +76,10 @@ public sealed class AlertDispatcher : IAlertDispatcher
             {
                 "WEBHOOK" => await DeliverWebhookAsync(log, settings?.WebhookUrl, alert, snapshot, message, ct),
                 "DISCORD" => await DeliverDiscordAsync(log, settings?.DiscordWebhookUrl, message, ct),
+                "SLACK" => await DeliverSlackAsync(log, settings?.SlackWebhookUrl, message, ct),
+                "TEAMS" => await DeliverTeamsAsync(log, settings?.TeamsWebhookUrl, message, ct),
                 "TELEGRAM" => await DeliverTelegramAsync(log, settings?.TelegramChatId, message, ct),
-                "EMAIL" => Skip(log, settings?.EmailEnabled == false
-                    ? "Email notifications are disabled."
-                    : "Email transport is not configured yet."),
+                "EMAIL" => await DeliverEmailAsync(log, alert, snapshot, message, settings, ct),
                 _ => Skip(log, $"Unsupported channel '{channel}'.")
             };
         }
@@ -140,6 +142,45 @@ public sealed class AlertDispatcher : IAlertDispatcher
         return await PostJsonAsync(log, uri, payload, "Discord webhook", ct);
     }
 
+    private async Task<AlertDeliveryLog> DeliverSlackAsync(
+        AlertDeliveryLog log,
+        string? url,
+        string message,
+        CancellationToken ct)
+    {
+        if (!TryAbsoluteHttpUri(url, out var uri))
+            return Skip(log, "Slack webhook URL is not configured.");
+
+        var payload = new
+        {
+            text = Truncate($"Alivert alert\n{message}", 2900)
+        };
+
+        return await PostJsonAsync(log, uri, payload, "Slack webhook", ct);
+    }
+
+    private async Task<AlertDeliveryLog> DeliverTeamsAsync(
+        AlertDeliveryLog log,
+        string? url,
+        string message,
+        CancellationToken ct)
+    {
+        if (!TryAbsoluteHttpUri(url, out var uri))
+            return Skip(log, "Microsoft Teams webhook URL is not configured.");
+
+        var payload = new Dictionary<string, object>
+        {
+            ["@type"] = "MessageCard",
+            ["@context"] = "https://schema.org/extensions",
+            ["summary"] = "Alivert alert",
+            ["themeColor"] = "22c55e",
+            ["title"] = "Alivert alert",
+            ["text"] = Truncate(message, 2900)
+        };
+
+        return await PostJsonAsync(log, uri, payload, "Microsoft Teams webhook", ct);
+    }
+
     private async Task<AlertDeliveryLog> DeliverTelegramAsync(
         AlertDeliveryLog log,
         string? chatId,
@@ -162,6 +203,57 @@ public sealed class AlertDispatcher : IAlertDispatcher
         };
 
         return await PostJsonAsync(log, uri, payload, $"Telegram chat {chatId.Trim()}", ct);
+    }
+
+    private async Task<AlertDeliveryLog> DeliverEmailAsync(
+        AlertDeliveryLog log,
+        Alert alert,
+        MarketSnapshot snapshot,
+        string message,
+        UserNotificationSettings? settings,
+        CancellationToken ct)
+    {
+        if (settings?.EmailEnabled == false)
+            return Skip(log, "Email notifications are disabled.");
+
+        var emailOptions = _options.CurrentValue.Email;
+        if (!EmailTransportConfigured(emailOptions))
+            return Skip(log, "Email transport is not configured yet.");
+
+        var recipient = await _db.Users
+            .AsNoTracking()
+            .Where(user => user.Id == alert.UserId)
+            .Select(user => user.Email)
+            .FirstOrDefaultAsync(ct);
+
+        if (string.IsNullOrWhiteSpace(recipient))
+            return Skip(log, "User email address is not configured.");
+
+        using var mail = new MailMessage
+        {
+            From = new MailAddress(emailOptions.FromEmail!.Trim(), string.IsNullOrWhiteSpace(emailOptions.FromName) ? "Alivert" : emailOptions.FromName.Trim()),
+            Subject = Truncate($"Alivert alert - {alert.Symbol}", 120),
+            Body = BuildEmailBody(alert, snapshot, message),
+            IsBodyHtml = false
+        };
+        mail.To.Add(recipient.Trim());
+
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(_options.CurrentValue.RequestTimeoutSeconds, 1, 30)));
+
+        using var client = new SmtpClient(emailOptions.SmtpServer.Trim(), emailOptions.SmtpPort)
+        {
+            EnableSsl = emailOptions.EnableSsl,
+            Credentials = new NetworkCredential(
+                string.IsNullOrWhiteSpace(emailOptions.Username) ? emailOptions.FromEmail!.Trim() : emailOptions.Username.Trim(),
+                emailOptions.Password)
+        };
+
+        await client.SendMailAsync(mail, timeout.Token);
+
+        log.Status = "Sent";
+        log.Destination = recipient.Trim();
+        return log;
     }
 
     private async Task<AlertDeliveryLog> PostJsonAsync(AlertDeliveryLog log, Uri uri, object payload, string destination, CancellationToken ct)
@@ -199,7 +291,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         if (settings?.AlertScheduleEnabled != true)
             return null;
 
-        var zoneId = MapTimeZoneId(string.IsNullOrWhiteSpace(settings.AlertTimeZone) ? "UTC" : settings.AlertTimeZone.Trim());
+        var zoneId = TimeZoneCatalog.ToSystemTimeZoneId(settings.AlertTimeZone);
         TimeZoneInfo zone;
         try
         {
@@ -242,15 +334,6 @@ public sealed class AlertDispatcher : IAlertDispatcher
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
-    private static string MapTimeZoneId(string zoneId)
-    {
-        return zoneId switch
-        {
-            "Europe/Lisbon" => OperatingSystem.IsWindows() ? "GMT Standard Time" : zoneId,
-            _ => zoneId
-        };
-    }
-
     private static bool TryAbsoluteHttpUri(string? url, out Uri uri)
     {
         uri = null!;
@@ -263,6 +346,31 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         uri = parsed;
         return true;
+    }
+
+    private static bool EmailTransportConfigured(EmailNotificationOptions options)
+    {
+        return !string.IsNullOrWhiteSpace(options.FromEmail) &&
+            !string.IsNullOrWhiteSpace(options.Password) &&
+            !string.IsNullOrWhiteSpace(options.SmtpServer) &&
+            options.SmtpPort > 0;
+    }
+
+    private static string BuildEmailBody(Alert alert, MarketSnapshot snapshot, string message)
+    {
+        return string.Join(Environment.NewLine, new[]
+        {
+            "Alivert alert",
+            "",
+            message,
+            "",
+            $"Symbol: {alert.Symbol}",
+            $"Rule: {alert.RuleType}",
+            $"Timeframe: {alert.Timeframe}",
+            $"Price: {snapshot.Price:0.########}",
+            $"24h change: {snapshot.PercentChange24h:0.####}%",
+            $"Checked at UTC: {snapshot.AsOfUtc:yyyy-MM-dd HH:mm:ss}"
+        });
     }
 
     private static string Truncate(string value, int maxLength)

@@ -1,0 +1,10 @@
+@model Alivert.ViewComponents.AppPlanBadgeViewComponent.AppPlanBadgeModel
+
+<a class="app-plan-badge @Model.Variant" asp-page="/App/Billing" title="Current active plan">
+    <i class="bi @Model.IconClass"></i>
+    <span class="app-plan-copy">
+        <span class="app-plan-label">Current plan</span>
+        <strong>@Model.Name</strong>
+        <small>@Model.Meta</small>
+    </span>
+</a>

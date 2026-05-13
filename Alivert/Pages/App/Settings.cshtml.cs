@@ -35,6 +35,8 @@ public class SettingsModel : PageModel
     public string? StatusMessage { get; set; }
 
     public bool TelegramBotConfigured { get; private set; }
+    public bool EmailTransportConfigured { get; private set; }
+    public IReadOnlyList<ScheduleTimeZoneChoice> NotificationTimeZones { get; private set; } = TimeZoneCatalog.GetScheduleChoices(DateTime.UtcNow);
 
     public class InputModel
     {
@@ -49,14 +51,27 @@ public class SettingsModel : PageModel
         [StringLength(500)]
         public string? DiscordWebhookUrl { get; set; }
 
+        [Display(Name = "Slack webhook URL")]
+        [StringLength(500)]
+        public string? SlackWebhookUrl { get; set; }
+
+        [Display(Name = "Microsoft Teams webhook URL")]
+        [StringLength(500)]
+        public string? TeamsWebhookUrl { get; set; }
+
         [Display(Name = "Telegram chat ID")]
         [StringLength(80)]
         public string? TelegramChatId { get; set; }
+
+        [Display(Name = "Notification time zone")]
+        [StringLength(80)]
+        public string AlertTimeZone { get; set; } = TimeZoneCatalog.DefaultTimeZoneId;
     }
 
     public async Task OnGetAsync()
     {
         TelegramBotConfigured = !string.IsNullOrWhiteSpace(_notificationOptions.CurrentValue.TelegramBotToken);
+        EmailTransportConfigured = IsEmailTransportConfigured();
 
         var userId = _userManager.GetUserId(User) ?? string.Empty;
         var settings = await _db.UserNotificationSettings
@@ -68,16 +83,22 @@ public class SettingsModel : PageModel
             EmailEnabled = settings?.EmailEnabled ?? true,
             WebhookUrl = settings?.WebhookUrl,
             DiscordWebhookUrl = settings?.DiscordWebhookUrl,
-            TelegramChatId = settings?.TelegramChatId
+            SlackWebhookUrl = settings?.SlackWebhookUrl,
+            TeamsWebhookUrl = settings?.TeamsWebhookUrl,
+            TelegramChatId = settings?.TelegramChatId,
+            AlertTimeZone = TimeZoneCatalog.Normalize(settings?.AlertTimeZone)
         };
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
         TelegramBotConfigured = !string.IsNullOrWhiteSpace(_notificationOptions.CurrentValue.TelegramBotToken);
+        EmailTransportConfigured = IsEmailTransportConfigured();
 
         ValidateOptionalUrl("Input.WebhookUrl", Input.WebhookUrl);
         ValidateOptionalUrl("Input.DiscordWebhookUrl", Input.DiscordWebhookUrl);
+        ValidateOptionalUrl("Input.SlackWebhookUrl", Input.SlackWebhookUrl);
+        ValidateOptionalUrl("Input.TeamsWebhookUrl", Input.TeamsWebhookUrl);
 
         if (!ModelState.IsValid)
             return Page();
@@ -93,7 +114,10 @@ public class SettingsModel : PageModel
         settings.EmailEnabled = Input.EmailEnabled;
         settings.WebhookUrl = Clean(Input.WebhookUrl);
         settings.DiscordWebhookUrl = Clean(Input.DiscordWebhookUrl);
+        settings.SlackWebhookUrl = Clean(Input.SlackWebhookUrl);
+        settings.TeamsWebhookUrl = Clean(Input.TeamsWebhookUrl);
         settings.TelegramChatId = Clean(Input.TelegramChatId);
+        settings.AlertTimeZone = TimeZoneCatalog.Normalize(Input.AlertTimeZone);
 
         await _db.SaveChangesAsync();
         StatusMessage = "Notification settings saved.";
@@ -117,5 +141,14 @@ public class SettingsModel : PageModel
     {
         var cleaned = value?.Trim();
         return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
+    }
+
+    private bool IsEmailTransportConfigured()
+    {
+        var email = _notificationOptions.CurrentValue.Email;
+        return !string.IsNullOrWhiteSpace(email.FromEmail) &&
+            !string.IsNullOrWhiteSpace(email.Password) &&
+            !string.IsNullOrWhiteSpace(email.SmtpServer) &&
+            email.SmtpPort > 0;
     }
 }

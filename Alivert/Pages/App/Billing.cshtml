@@ -11,7 +11,14 @@
             <h1 class="fw-bold mb-0">Subscription details</h1>
             <p class="muted mb-0">Review your plan, payment options and alert capacity.</p>
         </div>
-        <a class="btn btn-primary" href="#change-subscription">Upgrade plan</a>
+        @if (Model.IsUnlimited)
+        {
+            <span class="tag"><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
+        }
+        else
+        {
+            <a class="btn btn-primary" href="#change-subscription">Upgrade plan</a>
+        }
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
@@ -25,7 +32,14 @@
             <div class="account-row">
                 <span>Subscription type</span>
                 <strong>@Model.SubscriptionType</strong>
-                <a href="#change-subscription">Upgrade</a>
+                @if (Model.IsUnlimited)
+                {
+                    <span class="account-state-pill"><i class="bi bi-check2-circle"></i>Active</span>
+                }
+                else
+                {
+                    <a href="#change-subscription">Upgrade</a>
+                }
             </div>
             <div class="account-row">
                 <span>Purchased on</span>
@@ -39,6 +53,23 @@
                 <span>Days remaining</span>
                 <strong>@(Model.DaysRemaining is null ? "-" : Model.DaysRemaining)</strong>
             </div>
+            @if (Model.CanManuallyConfirm)
+            {
+                <div class="account-row">
+                    <span>Testing controls</span>
+                    <strong>@(Model.IsUnlimited ? "Paid Unlimited plan active" : "No paid Unlimited plan active")</strong>
+                    @if (Model.IsUnlimited)
+                    {
+                        <form method="post" asp-page-handler="RemovePaidPlan" onsubmit="return confirm('Remove the active paid Unlimited plan for testing and return this account to Basic or credit-pack capacity?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove paid plan</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="small muted">Ready to test checkout</span>
+                    }
+                </div>
+            }
         </div>
     </section>
 
@@ -65,12 +96,21 @@
 
     <section class="account-section mt-4">
         <div class="account-section-title">Payment details</div>
-        <p class="muted mb-4">Use hosted checkout from PayPal, Stripe, Coinbase Commerce or crypto. Alivert does not store raw card details.</p>
-        <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentMethodModal">
-                Add payment method
-            </button>
-            <a class="btn btn-outline-secondary" href="#credit-packs">Buy credits</a>
+        <div class="billing-payment-panel">
+            <div class="billing-payment-icon">
+                <i class="bi bi-credit-card-2-front"></i>
+            </div>
+            <div>
+                <h2 class="h5 fw-bold mb-1">Secure card checkout</h2>
+                <p class="muted mb-0">Choose a plan or credit pack, confirm the billing details and complete payment through the configured card processor. Alivert never stores raw card numbers.</p>
+            </div>
+            <div class="billing-payment-actions">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCreditCardModal">
+                    <i class="bi bi-credit-card-2-front me-1"></i> Add credit card
+                </button>
+                <a class="btn btn-outline-secondary" href="#change-subscription">Choose plan</a>
+                <a class="btn btn-outline-secondary" href="#credit-packs">Buy credits</a>
+            </div>
         </div>
     </section>
 
@@ -88,14 +128,19 @@
                     <li>Renews manually through checkout</li>
                 </ul>
                 <div class="d-grid gap-2 mt-3">
-                    @foreach (var provider in Model.PaymentProviders)
-                    {
-                        <form method="post" asp-page-handler="CreateUnlimited">
-                            <input type="hidden" name="plan" value="monthly" />
-                            <input type="hidden" name="provider" value="@provider" />
-                            <button type="submit" class="btn btn-outline-secondary w-100">Monthly with @provider</button>
-                        </form>
-                    }
+                    <button type="button"
+                            class="btn btn-primary w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#cardCheckoutModal"
+                            data-checkout-open
+                            data-checkout-kind="unlimited"
+                            data-checkout-plan="monthly"
+                            data-checkout-pack=""
+                            data-checkout-title="Unlimited monthly"
+                            data-checkout-price="@($"{Model.UnlimitedMonthlyCurrency} {Model.UnlimitedMonthlyAmount:0}/month")"
+                            data-checkout-detail="Unlimited active alerts for 30 days. Best when you want to keep every setup active month to month.">
+                        <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
+                    </button>
                 </div>
             </div>
 
@@ -110,14 +155,19 @@
                     <li>No alert counting or capacity checks</li>
                 </ul>
                 <div class="d-grid gap-2 mt-3">
-                    @foreach (var provider in Model.PaymentProviders)
-                    {
-                        <form method="post" asp-page-handler="CreateUnlimited">
-                            <input type="hidden" name="plan" value="annual" />
-                            <input type="hidden" name="provider" value="@provider" />
-                            <button type="submit" class="btn btn-primary w-100">Annual with @provider</button>
-                        </form>
-                    }
+                    <button type="button"
+                            class="btn btn-primary w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#cardCheckoutModal"
+                            data-checkout-open
+                            data-checkout-kind="unlimited"
+                            data-checkout-plan="annual"
+                            data-checkout-pack=""
+                            data-checkout-title="Unlimited annual"
+                            data-checkout-price="@($"{Model.UnlimitedAnnualCurrency} {Model.UnlimitedAnnualAmount:0}/year")"
+                            data-checkout-detail="One year of unlimited alerts with the best committed-trader price.">
+                        <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
+                    </button>
                 </div>
             </div>
         </div>
@@ -125,7 +175,7 @@
 
     <section class="account-section mt-4" id="credit-packs">
         <div class="account-section-title">Credit packs</div>
-        <p class="muted mb-4">1 credit = 1 active alert slot. Packs are useful when you need a fixed watchlist without a subscription.</p>
+        <p class="muted mb-4">1 paid credit = 1 active alert slot for @Model.CreditPackValidityDays days after payment confirmation. Packs are useful when you need a fixed short-term watchlist without a subscription.</p>
         <div class="row g-3">
             @foreach (var pack in Model.Packs)
             {
@@ -134,22 +184,31 @@
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
                                 <div class="fw-semibold">@pack.Credits credits</div>
-                                <div class="muted small">Adds @pack.Credits active alert slots</div>
+                                <div class="muted small">Adds @pack.Credits active alert slots for @Model.CreditPackValidityDays days</div>
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold">@pack.Currency @pack.Amount.ToString("0")</div>
                                 <div class="muted small">@pack.Currency @((pack.Amount / pack.Credits).ToString("0.00"))/credit</div>
                             </div>
                         </div>
+                        <div class="credit-validity-note mt-3">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span>Expires @Model.CreditPackValidityDays days after payment. Choose Unlimited for continuous capacity.</span>
+                        </div>
                         <div class="d-grid gap-2 mt-3">
-                            @foreach (var provider in Model.PaymentProviders)
-                            {
-                                <form method="post" asp-page-handler="CreatePurchase">
-                                    <input type="hidden" name="packId" value="@pack.Id" />
-                                    <input type="hidden" name="provider" value="@provider" />
-                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with @provider</button>
-                                </form>
-                            }
+                            <button type="button"
+                                    class="btn btn-primary w-100"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#cardCheckoutModal"
+                                    data-checkout-open
+                                    data-checkout-kind="credits"
+                                    data-checkout-plan=""
+                                    data-checkout-pack="@pack.Id"
+                                    data-checkout-title="@($"{pack.Credits} credits")"
+                                    data-checkout-price="@($"{pack.Currency} {pack.Amount:0}")"
+                                    data-checkout-detail="@($"Adds {pack.Credits} active alert slots for {Model.CreditPackValidityDays} days after payment confirmation.")">
+                                <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -186,13 +245,19 @@
                         <tr>
                             <td class="text-muted">@purchase.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                             <td>@purchase.Provider</td>
-                            <td>@Model.GetPurchasePlanLabel(purchase)</td>
+                            <td>
+                                @Model.GetPurchasePlanLabel(purchase)
+                                @if (Model.GetCreditPurchaseExpiresOnUtc(purchase) is DateTime creditExpiresOnUtc)
+                                {
+                                    <div class="small muted">Expires @creditExpiresOnUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+                                }
+                            </td>
                             <td>@purchase.Currency @purchase.Amount.ToString("0.00")</td>
                             <td>
-                                <span class="badge @(purchase.Status == "Paid" ? "text-bg-success" : "text-bg-secondary")">@purchase.Status</span>
+                                <span class="badge @Model.GetPurchaseStatusBadgeClass(purchase)">@Model.GetPurchaseStatusLabel(purchase)</span>
                             </td>
                             <td class="text-end">
-                                @if (Model.CanManuallyConfirm && purchase.Status != "Paid")
+                                @if (Model.CanManuallyConfirm && purchase.Status == "Pending")
                                 {
                                     <form method="post" asp-page-handler="MarkPaid" class="d-inline">
                                         <input type="hidden" name="id" value="@purchase.Id" />
@@ -209,25 +274,180 @@
     </section>
 </div>
 
-<div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content account-modal">
+<div class="modal fade" id="addCreditCardModal" tabindex="-1" aria-labelledby="addCreditCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content account-modal card-checkout-modal">
             <div class="modal-header border-0">
-                <h2 class="modal-title h3" id="paymentMethodModalLabel">Add payment method</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div>
+                    <span class="tag mb-2"><i class="bi bi-shield-check me-1"></i> Payment method</span>
+                    <h2 class="modal-title h3 mb-0" id="addCreditCardModalLabel">Add credit card</h2>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p class="muted">Card data should be collected by a PCI-compliant provider. Use one of the hosted checkout options below.</p>
-                <div class="payment-placeholder-grid">
-                    <input class="form-control" value="Card number - handled by Stripe checkout" disabled />
-                    <input class="form-control" value="Name on card - handled by provider" disabled />
-                    <input class="form-control" value="Billing address - handled by provider" disabled />
+                <div class="checkout-summary">
+                    <div>
+                        <div class="small muted">Card on file</div>
+                        <strong>Use this card for future purchases</strong>
+                        <p class="muted mb-0">Save a payment method before choosing a plan or credit pack. Card details are handled by the configured card processor.</p>
+                    </div>
+                    <div class="checkout-summary-price"><i class="bi bi-lock-fill"></i></div>
                 </div>
-                <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="#change-subscription" data-bs-dismiss="modal">Choose a plan</a>
-                </div>
+
+                <form method="post" asp-page-handler="AddCreditCard" class="checkout-card-form mt-4">
+                    <input type="hidden" name="provider" value="@Model.PrimaryPaymentProvider" />
+
+                    <div class="checkout-form-section">
+                        <div class="checkout-form-heading">
+                            <span>Payment information</span>
+                            <span class="checkout-provider-pill"><i class="bi bi-lock-fill"></i> Card processor hosted</span>
+                        </div>
+                        <div class="checkout-card-grid">
+                            <div class="checkout-field checkout-field-card">
+                                <i class="bi bi-credit-card"></i>
+                                <input class="form-control" autocomplete="cc-number" inputmode="numeric" placeholder="Card number" />
+                                <span class="autofill-pill">Autofill link</span>
+                            </div>
+                            <input class="form-control" autocomplete="cc-name" placeholder="Name on card" />
+                            <input class="form-control" autocomplete="address-line1" placeholder="Address Line 1" />
+                            <input class="form-control" autocomplete="address-line2" placeholder="Address Line 2" />
+                            <input class="form-control" autocomplete="address-level2" placeholder="City" />
+                            <div class="checkout-split">
+                                <select class="form-select" autocomplete="country-name" aria-label="Country">
+                                    <option selected>Country</option>
+                                    <option>Portugal</option>
+                                    <option>Spain</option>
+                                    <option>United States</option>
+                                    <option>United Kingdom</option>
+                                </select>
+                                <input class="form-control" autocomplete="address-level1" placeholder="State" />
+                            </div>
+                            <input class="form-control" autocomplete="postal-code" placeholder="Zip / Postal Code" />
+                        </div>
+                        <p class="checkout-terms muted mt-3 mb-0">
+                            The server only starts the card setup flow. It does not receive or store card numbers, CVC or billing address fields.
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-lock-fill me-1"></i> Submit
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="cardCheckoutModal" tabindex="-1" aria-labelledby="cardCheckoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content account-modal card-checkout-modal">
+            <div class="modal-header border-0">
+                <div>
+                    <span class="tag mb-2"><i class="bi bi-shield-check me-1"></i> Secure checkout</span>
+                    <h2 class="modal-title h3 mb-0" id="cardCheckoutModalLabel">Card checkout</h2>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="checkout-summary">
+                    <div>
+                        <div class="small muted">Selected product</div>
+                        <strong data-checkout-summary-title>Checkout</strong>
+                        <p class="muted mb-0" data-checkout-summary-detail>Confirm your payment details to continue.</p>
+                    </div>
+                    <div class="checkout-summary-price" data-checkout-summary-price>EUR</div>
+                </div>
+
+                <form method="post" asp-page-handler="CreateCheckout" id="cardCheckoutForm" class="checkout-card-form mt-4">
+                    <input type="hidden" name="checkoutKind" id="checkoutKindInput" value="" />
+                    <input type="hidden" name="packId" id="checkoutPackInput" value="" />
+                    <input type="hidden" name="plan" id="checkoutPlanInput" value="" />
+                    <input type="hidden" name="provider" value="@Model.PrimaryPaymentProvider" />
+
+                    <div class="checkout-form-section">
+                        <div class="checkout-form-heading">
+                            <span>Payment information</span>
+                            <span class="checkout-provider-pill"><i class="bi bi-lock-fill"></i> Card processor hosted</span>
+                        </div>
+                        <div class="checkout-card-grid">
+                            <div class="checkout-field checkout-field-card">
+                                <i class="bi bi-credit-card"></i>
+                                <input class="form-control" autocomplete="cc-number" inputmode="numeric" placeholder="Card number" />
+                                <span class="autofill-pill">Autofill link</span>
+                            </div>
+                            <input class="form-control" autocomplete="cc-name" placeholder="Name on card" />
+                            <input class="form-control" autocomplete="address-line1" placeholder="Address Line 1" />
+                            <input class="form-control" autocomplete="address-line2" placeholder="Address Line 2" />
+                            <input class="form-control" autocomplete="address-level2" placeholder="City" />
+                            <div class="checkout-split">
+                                <select class="form-select" autocomplete="country-name" aria-label="Country">
+                                    <option selected>Country</option>
+                                    <option>Portugal</option>
+                                    <option>Spain</option>
+                                    <option>United States</option>
+                                    <option>United Kingdom</option>
+                                </select>
+                                <input class="form-control" autocomplete="address-level1" placeholder="State" />
+                            </div>
+                            <input class="form-control" autocomplete="postal-code" placeholder="Zip / Postal Code" />
+                        </div>
+                    </div>
+
+                    <div class="checkout-form-section mt-3">
+                        <label class="form-label mb-2">Discount code</label>
+                        <div class="checkout-discount-row">
+                            <input class="form-control" placeholder="FIRST-50" />
+                            <span class="checkout-check"><i class="bi bi-check-lg"></i></span>
+                        </div>
+                        <p class="checkout-terms muted mt-3 mb-0">
+                            Card fields are presented for the checkout experience and should be handled by the configured card processor. The server only receives the selected product and generated purchase reference.
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-lock-fill me-1"></i> Submit payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const modal = document.getElementById('cardCheckoutModal');
+            const form = document.getElementById('cardCheckoutForm');
+            if (!modal || !form) {
+                return;
+            }
+
+            const fields = {
+                kind: document.getElementById('checkoutKindInput'),
+                pack: document.getElementById('checkoutPackInput'),
+                plan: document.getElementById('checkoutPlanInput'),
+                title: modal.querySelector('[data-checkout-summary-title]'),
+                detail: modal.querySelector('[data-checkout-summary-detail]'),
+                price: modal.querySelector('[data-checkout-summary-price]')
+            };
+
+            document.querySelectorAll('[data-checkout-open]').forEach((trigger) => {
+                trigger.addEventListener('click', () => {
+                    form.reset();
+                    fields.kind.value = trigger.dataset.checkoutKind || '';
+                    fields.pack.value = trigger.dataset.checkoutPack || '';
+                    fields.plan.value = trigger.dataset.checkoutPlan || '';
+                    fields.title.textContent = trigger.dataset.checkoutTitle || 'Checkout';
+                    fields.detail.textContent = trigger.dataset.checkoutDetail || 'Confirm your payment details to continue.';
+                    fields.price.textContent = trigger.dataset.checkoutPrice || 'EUR';
+                });
+            });
+        })();
+    </script>
+}
