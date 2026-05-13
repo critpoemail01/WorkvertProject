@@ -6,51 +6,81 @@
 
 <section class="hero-section">
   <div class="container">
-    <div class="surface hero-card p-4 p-lg-5">
-      <div class="row align-items-center g-4">
-        <div class="col-lg-7">
+    <div class="page-hero">
+      <div class="page-hero-grid">
+        <div>
           <div class="hero-kicker mb-3">
-            <i class="bi bi-newspaper"></i>
-            <span>Updates</span>
+            <i class="bi bi-megaphone-fill"></i>
+            <span>Product updates</span>
           </div>
-          <h1 class="hero-title display-5 fw-bold mb-3">News & product updates</h1>
-          <p class="lead muted mb-0">
-            Changelog-style posts about new features, fixes and what we’re building next.
+          <h1 class="hero-title display-5 fw-bold mb-3">News, fixes and roadmap notes.</h1>
+          <p class="lead muted mb-4">
+            Follow the improvements that make Alivert faster to set up, easier to trust and more useful as your watchlist grows.
           </p>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Create account</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View plans</a>
+          </div>
         </div>
-        <div class="col-lg-5">
-          <div class="surface-solid p-4">
-            <div class="fw-semibold mb-2">Get updates</div>
-            <div class="muted small mb-3">Follow along as we add channels, presets and shareable watchlists.</div>
-            <div class="d-flex gap-2">
-              <a class="btn btn-primary" asp-page="/Pricing">Plans</a>
-              <button type="button" class="btn btn-outline-light" data-auth-open="register">Create account</button>
+
+        <div class="proof-panel">
+          <div class="proof-row">
+            <i class="bi bi-credit-card-2-front"></i>
+            <div>
+              <strong>Pricing updates</strong>
+              <span>Credits, monthly Unlimited and annual Unlimited in one billing flow.</span>
+            </div>
+          </div>
+          <div class="proof-row">
+            <i class="bi bi-bell-fill"></i>
+            <div>
+              <strong>Alert quality</strong>
+              <span>Cooldowns, schedules and delivery logs reduce uncertainty.</span>
+            </div>
+          </div>
+          <div class="proof-row">
+            <i class="bi bi-send"></i>
+            <div>
+              <strong>Delivery roadmap</strong>
+              <span>More channels are being prepared for faster response.</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="py-4">
-  <div class="container">
-    <div class="row g-4">
-      @foreach (var p in Model.Posts.OrderByDescending(x => x.DateUtc))
-      {
-        <div class="col-12">
-          <div class="surface p-4">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-              <div class="d-flex align-items-center gap-2">
-                <span class="tag">@p.Tag</span>
-                <span class="muted small">@p.DateUtc.ToString("yyyy-MM-dd")</span>
-              </div>
+    <section class="mt-5">
+      <div class="section-header">
+        <span class="section-eyebrow"><i class="bi bi-newspaper"></i> Latest</span>
+        <h2 class="section-title">Product updates with practical impact.</h2>
+        <p class="section-copy">Each update is focused on either faster setup, clearer pricing or more reliable notifications.</p>
+      </div>
+
+      <div class="news-grid">
+        @foreach (var p in Model.Posts.OrderByDescending(x => x.DateUtc))
+        {
+          <article class="news-card">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <span class="tag">@p.Tag</span>
+              <span class="muted small">@p.DateUtc.ToString("yyyy-MM-dd")</span>
             </div>
-            <h2 class="h4 fw-semibold mt-3 mb-2">@p.Title</h2>
-            <p class="muted mb-0">@p.Excerpt</p>
-          </div>
-        </div>
-      }
+            <h2>@p.Title</h2>
+            <p class="mb-0">@p.Excerpt</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <div class="conversion-band mt-5">
+      <div>
+        <span class="tag mb-2">Stay ahead</span>
+        <h2 class="h3 fw-bold mb-2">The best way to follow progress is inside the app.</h2>
+        <p class="mb-0 muted">Create a free account, test alerts with 5 credits and watch new features land in the dashboard.</p>
+      </div>
+      <div class="conversion-actions">
+        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
+      </div>
     </div>
   </div>
 </section>

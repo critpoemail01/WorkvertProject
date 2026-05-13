@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Help desk - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=tVsVIa6Hr6HwP_Ja3fM256B-5IC5Ru0t-orYeOUHCgU" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVpJs0Pf9F-WrxSc-j5phr7qBBhrKYW8Y9JFJ0QkapLAGbJPXRhWqMq1bPQrZlubjF1QHZmTy1HdbGL3Oc24hukMbOVzH0-vedYkYQUuxv1LIFCMgDUyifUj0NyqkTZRv01taGF-Rr3wUtgfmY_EfH2ONdOMJG8TqVoMw7Z9nF4XPQ" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link " href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+            <a class="app-nav-link " href="/App/Log">
+                <i class="bi bi-clock-history"></i>
+                <span>Log view</span>
+            </a>
+
+            <div class="app-nav-section">Help & support</div>
+            <a class="app-nav-link " href="/News">
+                <i class="bi bi-megaphone-fill"></i>
+                <span>News & updates</span>
+            </a>
+            <a class="app-nav-link " href="/HowItWorks">
+                <i class="bi bi-question-circle"></i>
+                <span>Knowledge base</span>
+            </a>
+            <a class="app-nav-link active" href="/App/HelpDesk">
+                <i class="bi bi-chat-left-text-fill"></i>
+                <span>Help desk</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link " href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link " href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link " href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">qa-helpdesk-log-20260513013959@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Help & support</span>
+            <h1 class="fw-bold mb-0">Help desk</h1>
+            <p class="muted mb-0">Open a support ticket when something is broken or you need help with alerts, billing or notifications.</p>
+        </div>
+    </div>
+
+        <div class="alert alert-success mt-4 mb-0">Support ticket #3 opened. We will reply to qa-helpdesk-log-20260513013959@example.com.</div>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Open new support ticket</div>
+        <form method="post" class="helpdesk-form">
+            
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <input class="form-control" placeholder="Name" type="text" data-val="true" data-val-length="The field Name must be a string with a maximum length of 120." data-val-length-max="120" data-val-required="The Name field is required." id="Input_Name" maxlength="120" name="Input.Name" value="qa-helpdesk-log-20260513013959@example.com" />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Name" data-valmsg-replace="true"></span>
+                </div>
+                <div class="col-md-6">
+                    <input class="form-control" placeholder="Email" type="email" data-val="true" data-val-email="The Email field is not a valid e-mail address." data-val-length="The field Email must be a string with a maximum length of 256." data-val-length-max="256" data-val-required="The Email field is required." id="Input_Email" maxlength="256" name="Input.Email" value="qa-helpdesk-log-20260513013959@example.com" />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Email" data-valmsg-replace="true"></span>
+                </div>
+                <div class="col-md-7">
+                    <input class="form-control" placeholder="Subject" type="text" data-val="true" data-val-length="The field Subject must be a string with a maximum length of 160." data-val-length-max="160" data-val-required="The Subject field is required." id="Input_Subject" maxlength="160" name="Input.Subject" value="" />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Subject" data-valmsg-replace="true"></span>
+                </div>
+                <div class="col-12">
+                    <textarea class="form-control helpdesk-message" placeholder="Message" data-val="true" data-val-length="The field Message must be a string with a maximum length of 4000." data-val-length-max="4000" data-val-required="The Message field is required." id="Input_Message" maxlength="4000" name="Input.Message">
+</textarea>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Message" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-4" type="submit">Submit new ticket</button>
+        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVpJs0Pf9F-WrxSc-j5phr7qBBhrKYW8Y9JFJ0QkapLAGbJPXRhWqMq1bPQrZlubjF1QHZmTy1HdbGL3Oc24hukMbOVzH0-vedYkYQUuxv1LIFCMgDUyifUj0NyqkTZRv01taGF-Rr3wUtgfmY_EfH2ONdOMJG8TqVoMw7Z9nF4XPQ" /></form>
+        <p class="small muted mt-4 mb-0">
+            Note: please do not open duplicate tickets for the same issue. Add follow-up details by replying to the confirmation email or opening a new ticket only when the issue is different.
+        </p>
+    </section>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Recent tickets</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-muted">2026-05-13 01:40</td>
+                            <td>QA support ticket</td>
+                            <td><span class="badge text-bg-secondary">Open</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    </section>
+</div>
+
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+
+
+</body>
+</html>
+

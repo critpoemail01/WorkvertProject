@@ -9,15 +9,39 @@ public class Alert
     [Required]
     public string UserId { get; set; } = string.Empty;
 
-    [Required, StringLength(24), RegularExpression(@"^[A-Z0-9._-]{1,24}$", ErrorMessage = "Symbol may contain A-Z, 0-9, dot, underscore, dash only.")]
-    public string Symbol { get; set; } = "AAPL";
+    [Required, StringLength(32), RegularExpression(@"^[A-Za-z0-9.^=_-]{1,32}$", ErrorMessage = "Symbol may contain letters, digits, dot, caret, equals, underscore, dash only.")]
+    public string Symbol { get; set; } = "BTCUSDT";
+
+    [Required]
+    public MarketType MarketType { get; set; } = MarketType.Crypto;
 
     [Required]
     public AlertRuleType RuleType { get; set; }
 
-    // Example: 180.50 for PriceAbove/Below; -3 for PercentDrop24h
+    // Example: 180.50 for PriceAbove/Below; -3 for PercentDrop24h; 30/70 for RSI rules.
     [Required]
     public decimal Threshold { get; set; }
+
+    [Required, StringLength(8)]
+    public string Timeframe { get; set; } = "4h";
+
+    [Range(0.01, 100)]
+    public decimal ZonePercent { get; set; } = 1.0m;
+
+    [Range(2, 100)]
+    public int RsiPeriod { get; set; } = 14;
+
+    [Range(1, 200)]
+    public int FastEmaPeriod { get; set; } = 3;
+
+    [Range(2, 250)]
+    public int SlowEmaPeriod { get; set; } = 5;
+
+    public bool IndicatorArmed { get; set; }
+
+    public decimal? LastIndicatorValue { get; set; }
+
+    public DateTime? LastEvaluatedAtUtc { get; set; }
 
     [Range(1, 1440)]
     public int CooldownMinutes { get; set; } = 240;

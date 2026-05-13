@@ -6,123 +6,137 @@
 
 <section class="hero-section">
     <div class="container">
+        <div class="promo-strip mb-4">
+            <div>
+                <span class="promo-label">Launch promo</span>
+                <span class="promo-copy">Start with 5 free alert credits. Upgrade to Unlimited from EUR 50/month or EUR 300/year when you want every setup covered.</span>
+            </div>
+            <a class="promo-link" asp-page="/Pricing">Compare plans <i class="bi bi-arrow-right-short"></i></a>
+        </div>
+
         <div class="surface hero-card p-4 p-md-5">
             <div class="row align-items-center g-4">
                 <div class="col-lg-7">
                     <div class="hero-kicker mb-3">
-                        <i class="bi bi-bell-fill"></i>
-                        <span>Real-time alerts • No noise</span>
+                        <i class="bi bi-radar"></i>
+                        <span>Crypto and traditional markets</span>
                     </div>
 
-                    <h1 class="display-5 fw-bold hero-title mb-3">Get alerts when the market moves — without living on the chart.</h1>
+                    <h1 class="display-5 fw-bold hero-title mb-3">Stop watching charts. Let Alivert catch the move.</h1>
                     <p class="lead mb-4 muted">
-                        Create price/condition alerts, apply presets in seconds, and get notifications with a cooldown to avoid spam.
+                        Build price, zone, RSI and EMA-cross alerts for Binance crypto pairs and Yahoo Finance symbols. Get notified only when the setup matters.
                     </p>
 
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Get started</button>
-                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">See pricing</a>
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">
+                            Start free
+                        </button>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">See plans</a>
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard">
-                                Open dashboard
-                            </a>
+                            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard">Open dashboard</a>
                         }
                     </div>
 
-                    <div class="mt-4 d-flex flex-wrap gap-3 small muted">
-                        <span><i class="bi bi-lightning-charge-fill me-1"></i>1 credit = 1 active alert</span>
-                        <span><i class="bi bi-gift-fill me-1"></i>5 credits free no Free</span>
-                        <span><i class="bi bi-telegram me-1"></i>Telegram/Discord (when you connect it)</span>
+                    <div class="micro-proof-row">
+                        <span><i class="bi bi-check2"></i> 5 free credits</span>
+                        <span><i class="bi bi-check2"></i> No subscription required to start</span>
+                        <span><i class="bi bi-check2"></i> Upgrade only when ready</span>
+                    </div>
+
+                    <div class="hero-proof mt-4">
+                        <div>
+                            <strong>5</strong>
+                            <span>free credits</span>
+                        </div>
+                        <div>
+                            <strong>EUR 50</strong>
+                            <span>Unlimited/month</span>
+                        </div>
+                        <div>
+                            <strong>EUR 300</strong>
+                            <span>Unlimited/year</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-lg-5">
-                    <div class="mockup">
-                        <div class="mockup-header">
-                            <div class="mockup-dots" aria-hidden="true">
-                                <span></span><span></span><span></span>
-                            </div>
-                            <span class="badge badge-soft">Alivert • Live</span>
+                    <div class="market-panel">
+                        <div class="market-panel-header">
+                            <span class="badge badge-soft">Live alert desk</span>
+                            <span class="market-dot"></span>
                         </div>
-                        <div class="mockup-body">
-                            <div class="mockup-row">
-                                <div>
-                                    <div class="fw-semibold">BTCUSDT</div>
-                                    <div class="small muted">24h drop ≤ -3%</div>
-                                </div>
-                                <div class="text-end">
-                                    <div class="fw-semibold">TRIGGER</div>
-                                    <div class="small muted">cooldown 4h</div>
-                                </div>
+                        <div class="market-card active">
+                            <div>
+                                <div class="fw-semibold">BTCUSDT</div>
+                                <div class="small muted">RSI oversold, EMA 3/5 cross up</div>
                             </div>
-
-                            <div class="mockup-row">
-                                <div>
-                                    <div class="fw-semibold">AAPL</div>
-                                    <div class="small muted">Price below 172.50</div>
-                                </div>
-                                <div class="text-end">
-                                    <div class="fw-semibold">MONITOR</div>
-                                    <div class="small muted">email</div>
-                                </div>
+                            <span class="signal signal-buy">Armed</span>
+                        </div>
+                        <div class="market-card">
+                            <div>
+                                <div class="fw-semibold">AAPL</div>
+                                <div class="small muted">Price inside zone +/- 1%</div>
                             </div>
-
-                            <div class="mockup-row" style="margin-bottom:0;">
-                                <div>
-                                    <div class="fw-semibold">ETHUSDT</div>
-                                    <div class="small muted">Price acima de 2400</div>
-                                </div>
-                                <div class="text-end">
-                                    <div class="fw-semibold">MONITOR</div>
-                                    <div class="small muted">telegram</div>
-                                </div>
+                            <span class="signal">Watching</span>
+                        </div>
+                        <div class="market-card">
+                            <div>
+                                <div class="fw-semibold">ETHUSDT</div>
+                                <div class="small muted">Price above 2400</div>
                             </div>
+                            <span class="signal">Monitoring</span>
+                        </div>
+                        <div class="market-panel-footer">
+                            <i class="bi bi-bell-fill"></i>
+                            <span>One clean notification. No chart staring.</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4 mt-4">
-            <div class="col-md-4">
-                <div class="surface p-4 h-100">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <i class="bi bi-sliders2-vertical"></i>
-                        <h5 class="mb-0">Presets & Custom</h5>
-                    </div>
-                    <p class="mb-0 muted">Start from presets and tweak thresholds/cooldowns. Create in under 30 seconds.</p>
-                </div>
+        <section class="mt-5">
+            <div class="section-header">
+                <span class="section-eyebrow"><i class="bi bi-stars"></i> Why it converts chart watching into action</span>
+                <h2 class="section-title">Everything important is visible, measurable and easy to act on.</h2>
+                <p class="section-copy">Alivert is positioned around three outcomes: faster setup, fewer distractions and pricing that scales with your routine.</p>
             </div>
-            <div class="col-md-4">
-                <div class="surface p-4 h-100">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <i class="bi bi-shield-check"></i>
-                        <h5 class="mb-0">No noise</h5>
-                    </div>
-                    <p class="mb-0 muted">Per-alert cooldown, deduping, and history. Fewer pings, more signal.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="surface p-4 h-100">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <i class="bi bi-cloud-arrow-up"></i>
-                        <h5 class="mb-0">Scalable</h5>
-                    </div>
-                    <p class="mb-0 muted">Background worker evaluates alerts. Swap the fake provider for your real provider whenever you&#39;re ready.</p>
-                </div>
-            </div>
-        </div>
 
-        <div class="surface p-4 p-md-5 mt-4">
-            <div class="row g-4 align-items-center">
-                <div class="col-md-8">
-                    <h2 class="fw-bold mb-2">Simple credits, no headaches.</h2>
-                    <p class="mb-0 muted">On <strong>Alivert Free</strong> you start with 5 credits. With <strong>Alivert Plus</strong> you buy packs when you need more. With <strong>Alivert Pro</strong> you get unlimited alerts with a monthly subscription.</p>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="surface feature-card h-100">
+                        <div class="icon-pill mb-3"><i class="bi bi-sliders2-vertical"></i></div>
+                        <h5>Advanced rules</h5>
+                        <p class="mb-0 muted">Price zones, RSI thresholds, EMA cross confirmations, 24h moves and volume alerts.</p>
+                    </div>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <a class="btn btn-primary btn-lg" asp-page="/Pricing">See pricing</a>
+                <div class="col-md-4">
+                    <div class="surface feature-card h-100">
+                        <div class="icon-pill mb-3"><i class="bi bi-globe2"></i></div>
+                        <h5>Two market sources</h5>
+                        <p class="mb-0 muted">Search Binance spot pairs for crypto and Yahoo Finance symbols for traditional assets.</p>
+                    </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="surface feature-card h-100">
+                        <div class="icon-pill mb-3"><i class="bi bi-wallet2"></i></div>
+                        <h5>Scale when ready</h5>
+                        <p class="mb-0 muted">Use credits for occasional setups or switch to Unlimited when every watchlist needs alerts.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="conversion-band mt-4">
+            <div>
+                <span class="tag mb-2">Best next step</span>
+                <h2 class="fw-bold mb-2">Try 5 alerts free, then choose how you grow.</h2>
+                <p class="mb-0 muted">Credit packs start at EUR 25. Unlimited is EUR 50/month or EUR 300/year for active traders who want every symbol and timeframe covered.</p>
+            </div>
+            <div class="conversion-actions">
+                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View pricing</a>
             </div>
         </div>
     </div>

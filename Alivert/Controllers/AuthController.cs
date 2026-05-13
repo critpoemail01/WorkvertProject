@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using Alivert.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +13,18 @@ public sealed class AuthController : Controller
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserAccountService _accountService;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
         SignInManager<IdentityUser> signInManager,
         UserManager<IdentityUser> userManager,
-        IUserAccountService accountService)
+        IUserAccountService accountService,
+        IConfiguration configuration)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _accountService = accountService;
+        _configuration = configuration;
     }
 
     public sealed class LoginRequest
@@ -68,8 +72,7 @@ public sealed class AuthController : Controller
 
         await _accountService.EnsureAsync(user.Id);
 
-        var redirect = SafeReturnUrl(req.ReturnUrl) ?? Url.Page("/App/Dashboard")!;
-        return Ok(new { redirect });
+        return Ok(new { redirect = DashboardUrl() });
     }
 
     [HttpPost("register")]
@@ -92,8 +95,7 @@ public sealed class AuthController : Controller
         await _signInManager.SignInAsync(user, isPersistent: false);
         await _accountService.EnsureAsync(user.Id);
 
-        var redirect = SafeReturnUrl(req.ReturnUrl) ?? Url.Page("/App/Dashboard")!;
-        return Ok(new { redirect });
+        return Ok(new { redirect = DashboardUrl() });
     }
 
     [HttpPost("logout")]
@@ -104,12 +106,70 @@ public sealed class AuthController : Controller
         return Ok(new { redirect = Url.Page("/Index")! });
     }
 
-    private static string? SafeReturnUrl(string? returnUrl)
+    [HttpGet("google")]
+    public IActionResult Google([FromQuery] string? returnUrl = null)
     {
-        if (string.IsNullOrWhiteSpace(returnUrl))
-            return null;
+        if (!GoogleIsConfigured())
+            return RedirectToPage("/Index", new { login = 1, externalError = "Google sign-in is not configured yet." });
 
-        // Only allow local URLs (avoid open redirects)
-        return returnUrl.StartsWith('/') && !returnUrl.StartsWith("//") ? returnUrl : null;
+        var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth");
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+        return Challenge(properties, "Google");
+    }
+
+    [HttpGet("google-callback")]
+    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl = null, [FromQuery] string? remoteError = null)
+    {
+        if (!string.IsNullOrWhiteSpace(remoteError))
+            return RedirectToPage("/Index", new { login = 1, externalError = "Google sign-in was cancelled or rejected." });
+
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info is null)
+            return RedirectToPage("/Index", new { login = 1, externalError = "Could not read Google sign-in information." });
+
+        var signIn = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+        if (signIn.Succeeded)
+        {
+            var existing = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (existing is not null)
+                await _accountService.EnsureAsync(existing.Id);
+
+            return LocalRedirect(DashboardUrl());
+        }
+
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email))
+            return RedirectToPage("/Index", new { login = 1, externalError = "Google account did not provide an email address." });
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            user = new IdentityUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
+
+            var create = await _userManager.CreateAsync(user);
+            if (!create.Succeeded)
+                return RedirectToPage("/Index", new { login = 1, externalError = "Could not create the account from Google sign-in." });
+        }
+
+        var addLogin = await _userManager.AddLoginAsync(user, info);
+        if (!addLogin.Succeeded && !addLogin.Errors.Any(e => e.Code == "LoginAlreadyAssociated"))
+            return RedirectToPage("/Index", new { login = 1, externalError = "Could not attach Google sign-in to this account." });
+
+        await _signInManager.SignInAsync(user, isPersistent: false);
+        await _accountService.EnsureAsync(user.Id);
+        return LocalRedirect(DashboardUrl());
+    }
+
+    private string DashboardUrl() => Url.Page("/App/Dashboard")!;
+
+    private bool GoogleIsConfigured()
+    {
+        return !string.IsNullOrWhiteSpace(_configuration["Authentication:Google:ClientId"]) &&
+            !string.IsNullOrWhiteSpace(_configuration["Authentication:Google:ClientSecret"]);
     }
 }

@@ -1,0 +1,89 @@
+@page
+@model Alivert.Pages.App.SettingsModel
+@{
+    ViewData["Title"] = "Notification settings";
+}
+
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">Notification settings</h1>
+            <p class="muted mb-0">Choose where Alivert sends alert notifications.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Back to alerts</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
+
+        <section class="account-section mt-4">
+            <div class="account-section-title">Notification delivery preferences</div>
+            <div class="settings-rows">
+                <label class="settings-row">
+                    <span>
+                        <strong>Email notifications</strong>
+                        <small>Email delivery is tracked until SMTP is connected.</small>
+                    </span>
+                    <span class="form-check form-switch m-0">
+                        <input class="form-check-input" asp-for="Input.EmailEnabled" />
+                    </span>
+                </label>
+                <div class="settings-row">
+                    <span>
+                        <strong>Webhook URL</strong>
+                        <small>Alivert posts a JSON payload when an alert triggers.</small>
+                    </span>
+                    <input asp-for="Input.WebhookUrl" class="form-control settings-control" placeholder="https://example.com/alivert-webhook" />
+                </div>
+                <span asp-validation-for="Input.WebhookUrl" class="text-danger"></span>
+                <div class="settings-row">
+                    <span>
+                        <strong>Discord webhook</strong>
+                        <small>Optional Discord delivery destination.</small>
+                    </span>
+                    <input asp-for="Input.DiscordWebhookUrl" class="form-control settings-control" placeholder="https://discord.com/api/webhooks/..." />
+                </div>
+                <span asp-validation-for="Input.DiscordWebhookUrl" class="text-danger"></span>
+                <div class="settings-row">
+                    <span>
+                        <strong>Telegram chat ID</strong>
+                        <small>@(Model.TelegramBotConfigured ? "Telegram bot token is configured on the server." : "Set Notifications:TelegramBotToken before Telegram can send.")</small>
+                    </span>
+                    <input asp-for="Input.TelegramChatId" class="form-control settings-control" placeholder="123456789" />
+                </div>
+                <span asp-validation-for="Input.TelegramChatId" class="text-danger"></span>
+            </div>
+        </section>
+
+        <section class="account-section mt-4">
+            <div class="account-section-title">Notification time zone settings</div>
+            <p class="muted mb-3">Alert timestamps are stored in UTC. Select the local time zone you want to see in notification messages when this option is connected.</p>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <select class="form-select settings-timezone" disabled>
+                    <option>UTC - default</option>
+                    <option>Europe/Lisbon</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </div>
+            <p class="small muted mt-3 mb-0">Time zone persistence can be enabled later without changing the notification delivery settings.</p>
+        </section>
+
+        <section class="account-section mt-4">
+            <div class="account-section-title">Set up push-style alerts</div>
+            <p class="muted mb-3">Telegram is the fastest channel once you add your chat ID and configure the server bot token.</p>
+            <button class="btn btn-outline-secondary" type="button" disabled>
+                <i class="bi bi-telegram me-1"></i> Alerts bot setup wizard
+            </button>
+        </section>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

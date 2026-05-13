@@ -28,18 +28,50 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.SaveTokens = true;
+        });
+}
+
 // Redirect unauthenticated users to the home page (where we open a modal)
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Keep ReturnUrl so we can send the user back after login
-    options.LoginPath = "/?login=1";
-    options.AccessDeniedPath = "/?login=1";
+    options.LoginPath = "/";
+    options.AccessDeniedPath = "/";
     options.ReturnUrlParameter = "returnUrl";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var returnUrl = $"{context.Request.PathBase}{context.Request.Path}{context.Request.QueryString}";
+        context.Response.Redirect($"/?login=1&returnUrl={Uri.EscapeDataString(returnUrl)}");
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.Redirect("/?login=1");
+        return Task.CompletedTask;
+    };
 });
 
 // JSON auth endpoints used by the modal (instead of full-page Identity UI)
 builder.Services.AddControllers();
 
+builder.Services.Configure<MarketDataOptions>(builder.Configuration.GetSection("MarketData"));
+builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection("Notifications"));
+builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection("Payments"));
+builder.Services.AddHttpClient("market-data", client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; Alivert/1.0; +https://alivert.local)");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+});
+builder.Services.AddHttpClient("notifications");
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -53,13 +85,19 @@ builder.Services.AddRateLimiter(options =>
 
 
 // Market data + rules + notifications (MVP: fake market + DB triggers)
-builder.Services.AddSingleton<IMarketDataService, FakeMarketDataService>();
+builder.Services.AddSingleton<FakeMarketDataService>();
+builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
+builder.Services.AddSingleton<ITechnicalIndicatorService, TechnicalIndicatorService>();
+builder.Services.AddSingleton<ISymbolCatalogService, SymbolCatalogService>();
 builder.Services.AddSingleton<IAlertRuleEngine, AlertRuleEngine>();
 builder.Services.AddScoped<IAlertDispatcher, AlertDispatcher>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 
 // Background evaluator
-builder.Services.AddHostedService<AlertEvaluatorWorker>();
+if (!EF.IsDesignTime)
+{
+    builder.Services.AddHostedService<AlertEvaluatorWorker>();
+}
 
 var app = builder.Build();
 
@@ -67,9 +105,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

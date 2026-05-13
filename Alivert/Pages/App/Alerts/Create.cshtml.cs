@@ -27,18 +27,22 @@ public class CreateAlertModel : PageModel
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserAccountService _accounts;
+    private readonly ISymbolCatalogService _symbols;
 
-    public CreateAlertModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts)
+    public CreateAlertModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts, ISymbolCatalogService symbols)
     {
         _db = db;
         _userManager = userManager;
         _accounts = accounts;
+        _symbols = symbols;
     }
 
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
     public SelectList RuleTypeOptions { get; private set; } = default!;
+    public SelectList TimeframeOptions { get; private set; } = default!;
+    public SelectList MarketTypeOptions { get; private set; } = default!;
 
     public bool IsUnlimited { get; private set; }
     public int RemainingSlots { get; private set; }
@@ -48,8 +52,12 @@ public class CreateAlertModel : PageModel
     public class InputModel
     {
         [Display(Name = "Symbol")]
-        [Required, StringLength(24), RegularExpression(@"^[A-Z0-9._-]{1,24}$", ErrorMessage = "Symbol may contain A-Z, 0-9, dot, underscore, dash only.")]
-        public string Symbol { get; set; } = "AAPL";
+        [Required, StringLength(32), RegularExpression(@"^[A-Za-z0-9.^=_-]{1,32}$", ErrorMessage = "Symbol may contain letters, digits, dot, caret, equals, underscore, dash only.")]
+        public string Symbol { get; set; } = "BTCUSDT";
+
+        [Display(Name = "Market")]
+        [Required]
+        public MarketType MarketType { get; set; } = MarketType.Crypto;
 
         [Display(Name = "Rule")]
         [Required]
@@ -58,6 +66,26 @@ public class CreateAlertModel : PageModel
         [Display(Name = "Threshold")]
         [Required]
         public decimal Threshold { get; set; } = 100m;
+
+        [Display(Name = "Timeframe")]
+        [Required, StringLength(8)]
+        public string Timeframe { get; set; } = "4h";
+
+        [Display(Name = "Zone percent")]
+        [Range(0.01, 100)]
+        public decimal ZonePercent { get; set; } = 1.0m;
+
+        [Display(Name = "RSI period")]
+        [Range(2, 100)]
+        public int RsiPeriod { get; set; } = 14;
+
+        [Display(Name = "Fast EMA")]
+        [Range(1, 200)]
+        public int FastEmaPeriod { get; set; } = 3;
+
+        [Display(Name = "Slow EMA")]
+        [Range(2, 250)]
+        public int SlowEmaPeriod { get; set; } = 5;
 
         [Display(Name = "Cooldown (min)")]
         [Range(1, 1440)]
@@ -71,9 +99,24 @@ public class CreateAlertModel : PageModel
         public string Channel { get; set; } = "Email";
     }
 
-    public async Task OnGetAsync()
+    public async Task OnGetAsync(MarketType? marketType = null, string? symbol = null, AlertRuleType? ruleType = null, string? timeframe = null, decimal? threshold = null)
     {
-        RuleTypeOptions = new SelectList(Enum.GetValues<AlertRuleType>());
+        LoadSelectLists();
+
+        if (marketType is not null)
+            Input.MarketType = marketType.Value;
+
+        if (!string.IsNullOrWhiteSpace(symbol))
+            Input.Symbol = symbol.Trim().ToUpperInvariant();
+
+        if (ruleType is not null)
+            Input.RuleType = ruleType.Value;
+
+        if (!string.IsNullOrWhiteSpace(timeframe))
+            Input.Timeframe = NormalizeTimeframe(timeframe);
+
+        if (threshold is not null)
+            Input.Threshold = threshold.Value;
 
         var userId = _userManager.GetUserId(User) ?? string.Empty;
         var limits = await _accounts.GetLimitsAsync(userId);
@@ -85,10 +128,7 @@ public class CreateAlertModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        RuleTypeOptions = new SelectList(Enum.GetValues<AlertRuleType>());
-
-        if (!ModelState.IsValid)
-            return Page();
+        LoadSelectLists();
 
         var userId = _userManager.GetUserId(User) ?? string.Empty;
 
@@ -98,6 +138,13 @@ public class CreateAlertModel : PageModel
         ActiveAlerts = limits.ActiveAlerts;
         Capacity = limits.Capacity;
 
+        if (!ModelState.IsValid)
+            return Page();
+
+        ValidateRuleSpecificInputs();
+        if (!ModelState.IsValid)
+            return Page();
+
         if (Input.IsEnabled && !IsUnlimited && RemainingSlots <= 0)
         {
             ModelState.AddModelError(string.Empty, "No credits available to activate more alerts. Buy a credit pack or upgrade to the Unlimited plan.");
@@ -105,16 +152,35 @@ public class CreateAlertModel : PageModel
         }
         var symbol = (Input.Symbol ?? "").Trim().ToUpperInvariant();
 
+        if (!await _symbols.IsValidSymbolAsync(Input.MarketType, symbol, HttpContext.RequestAborted))
+        {
+            ModelState.AddModelError("Input.Symbol", Input.MarketType == MarketType.Crypto
+                ? "Choose a valid Binance spot symbol."
+                : "Choose a symbol available on Yahoo Finance.");
+            return Page();
+        }
+
         
         var channel = (Input.Channel ?? "Email").Trim();
         if (!SupportedChannels.Contains(channel))
         {
-            ModelState.AddModelError(nameof(Input.Channel), "Unsupported channel. Allowed: Email, Telegram, Discord, Webhook.");
+            ModelState.AddModelError("Input.Channel", "Unsupported channel. Allowed: Email, Telegram, Discord, Webhook.");
             return Page();
         }
 
-// Optional: prevent duplicates by symbol+ruletype+threshold
-        var exists = await _db.Alerts.AnyAsync(a => a.UserId == userId && a.Symbol == symbol && a.RuleType == Input.RuleType && a.Threshold == Input.Threshold);
+        // Optional: prevent duplicates by symbol+rule type+threshold
+        var timeframe = NormalizeTimeframe(Input.Timeframe);
+        var exists = await _db.Alerts.AnyAsync(a =>
+            a.UserId == userId &&
+            a.Symbol == symbol &&
+            a.MarketType == Input.MarketType &&
+            a.RuleType == Input.RuleType &&
+            a.Threshold == Input.Threshold &&
+            a.Timeframe == timeframe &&
+            a.ZonePercent == Input.ZonePercent &&
+            a.RsiPeriod == Input.RsiPeriod &&
+            a.FastEmaPeriod == Input.FastEmaPeriod &&
+            a.SlowEmaPeriod == Input.SlowEmaPeriod);
         if (exists)
         {
             ModelState.AddModelError(string.Empty, "An identical alert already exists.");
@@ -125,8 +191,14 @@ public class CreateAlertModel : PageModel
         {
             UserId = userId,
             Symbol = symbol,
+            MarketType = Input.MarketType,
             RuleType = Input.RuleType,
             Threshold = Input.Threshold,
+            Timeframe = timeframe,
+            ZonePercent = Input.ZonePercent,
+            RsiPeriod = Input.RsiPeriod,
+            FastEmaPeriod = Input.FastEmaPeriod,
+            SlowEmaPeriod = Input.SlowEmaPeriod,
             CooldownMinutes = Input.CooldownMinutes,
             IsEnabled = Input.IsEnabled,
             Channel = channel
@@ -135,5 +207,44 @@ public class CreateAlertModel : PageModel
         await _db.SaveChangesAsync();
 
         return RedirectToPage("/App/Alerts/Index");
+    }
+
+    private void LoadSelectLists()
+    {
+        RuleTypeOptions = new SelectList(Enum.GetValues<AlertRuleType>());
+        TimeframeOptions = new SelectList(new[] { "5m", "15m", "1h", "4h", "1d", "1wk", "1mo" });
+        MarketTypeOptions = new SelectList(Enum.GetValues<MarketType>());
+    }
+
+    private void ValidateRuleSpecificInputs()
+    {
+        Input.Timeframe = NormalizeTimeframe(Input.Timeframe);
+
+        if (Input.RuleType.RequiresTechnicalIndicators())
+        {
+            if (Input.Threshold < 0 || Input.Threshold > 100)
+                ModelState.AddModelError("Input.Threshold", "RSI threshold must be between 0 and 100.");
+
+            if (Input.FastEmaPeriod >= Input.SlowEmaPeriod)
+                ModelState.AddModelError("Input.SlowEmaPeriod", "Slow EMA must be greater than fast EMA.");
+        }
+
+        if (Input.RuleType.UsesPriceZone() && Input.Threshold <= 0)
+            ModelState.AddModelError("Input.Threshold", "Price zone center must be greater than zero.");
+    }
+
+    private static string NormalizeTimeframe(string? timeframe)
+    {
+        return timeframe?.Trim().ToLowerInvariant() switch
+        {
+            "5m" => "5m",
+            "15m" => "15m",
+            "1h" => "1h",
+            "4h" => "4h",
+            "1d" => "1d",
+            "1wk" or "1w" => "1wk",
+            "1mo" => "1mo",
+            _ => "4h"
+        };
     }
 }

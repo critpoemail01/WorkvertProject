@@ -47,4 +47,70 @@ public sealed class UserAccountService : IUserAccountService
 
         return (isUnlimited, capacity, active, remaining);
     }
+
+    public async Task AddCreditsAsync(string userId, int credits, string reason, string? reference = null, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || credits <= 0)
+            return;
+
+        await EnsureAsync(userId, ct);
+
+        if (!string.IsNullOrWhiteSpace(reference))
+        {
+            var existingTransaction = await _db.CreditTransactions
+                .AsNoTracking()
+                .AnyAsync(x => x.Reference == reference, ct);
+            if (existingTransaction)
+                return;
+        }
+
+        var account = await _db.UserAccounts.FirstAsync(x => x.UserId == userId, ct);
+        account.Credits += credits;
+        account.UpdatedAtUtc = DateTime.UtcNow;
+
+        _db.CreditTransactions.Add(new CreditTransaction
+        {
+            UserId = userId,
+            Delta = credits,
+            Reason = reason,
+            Reference = reference
+        });
+
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task ActivateUnlimitedAsync(string userId, TimeSpan duration, string reason, string? reference = null, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || duration <= TimeSpan.Zero)
+            return;
+
+        await EnsureAsync(userId, ct);
+
+        if (!string.IsNullOrWhiteSpace(reference))
+        {
+            var existingTransaction = await _db.CreditTransactions
+                .AsNoTracking()
+                .AnyAsync(x => x.Reference == reference, ct);
+            if (existingTransaction)
+                return;
+        }
+
+        var account = await _db.UserAccounts.FirstAsync(x => x.UserId == userId, ct);
+        var startsAt = account.UnlimitedUntilUtc is not null && account.UnlimitedUntilUtc.Value > DateTime.UtcNow
+            ? account.UnlimitedUntilUtc.Value
+            : DateTime.UtcNow;
+
+        account.UnlimitedUntilUtc = startsAt.Add(duration);
+        account.UpdatedAtUtc = DateTime.UtcNow;
+
+        _db.CreditTransactions.Add(new CreditTransaction
+        {
+            UserId = userId,
+            Delta = 0,
+            Reason = reason,
+            Reference = reference
+        });
+
+        await _db.SaveChangesAsync(ct);
+    }
 }

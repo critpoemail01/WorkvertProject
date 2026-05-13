@@ -4,44 +4,72 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="d-flex align-items-end justify-content-between flex-wrap gap-2">
+<section class="app-page-hero">
     <div>
-        <h1 class="fw-bold mb-0">Dashboard</h1>
-        <p class="text-muted mb-0">Overview of your alerts and recent triggers.</p>
+        <span class="tag mb-3">Live workspace</span>
+        <h1 class="hero-title fw-bold mb-2">Dashboard</h1>
+        <p class="lead muted mb-0">Overview of your alerts, monitored assets and recent trigger activity.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-primary" asp-page="/App/Alerts/Create">New alert</a>
-        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">View alerts</a>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-bell me-1"></i>View alerts</a>
+    </div>
+</section>
+
+<div class="dashboard-stat-grid mt-4">
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-bell-fill"></i></span>
+        <div>
+            <div class="app-stat-label">Alerts</div>
+            <div class="app-stat-value">@Model.TotalAlerts</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-activity"></i></span>
+        <div>
+            <div class="app-stat-label">Active</div>
+            <div class="app-stat-value">@Model.ActiveAlerts</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-currency-exchange"></i></span>
+        <div>
+            <div class="app-stat-label">Assets</div>
+            <div class="app-stat-value">@Model.UniqueSymbols</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+        <div>
+            <div class="app-stat-label">Triggers (7 days)</div>
+            <div class="app-stat-value">@Model.TriggersLast7Days</div>
+        </div>
     </div>
 </div>
 
-<div class="row g-3 mt-3">
-    <div class="col-md-4">
-        <div class="surface p-4">
-            <div class="small muted">Alerts</div>
-            <div class="display-6 fw-bold">@Model.TotalAlerts</div>
-        </div>
+@if (Model.FailedDeliveriesLast7Days > 0)
+{
+    <div class="alert alert-warning mt-4 mb-0">
+        @Model.FailedDeliveriesLast7Days notification delivery attempt(s) failed in the last 7 days.
+        <a asp-page="/App/Settings">Check notification settings</a>.
     </div>
-    <div class="col-md-4">
-        <div class="surface p-4">
-            <div class="small muted">Assets</div>
-            <div class="display-6 fw-bold">@Model.UniqueSymbols</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="surface p-4">
-            <div class="small muted">Triggers (7 days)</div>
-            <div class="display-6 fw-bold">@Model.TriggersLast7Days</div>
-        </div>
-    </div>
-</div>
+}
 
-<div class="surface p-4 mt-4">
-    <h5 class="mb-3">Recent triggers</h5>
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Recent triggers</h2>
+            <p>Latest alert signals evaluated by the worker.</p>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Open log</a>
+    </div>
 
     @if (!Model.LatestTriggers.Any())
     {
-        <p class="text-muted mb-0">No triggers yet. Create alerts and wait for the worker to evaluate them.</p>
+        <div class="empty-state compact">
+            <i class="bi bi-bell"></i>
+            <span>No triggers yet. Create alerts and wait for the worker to evaluate them.</span>
+        </div>
     }
     else
     {
@@ -67,4 +95,63 @@
             </table>
         </div>
     }
-</div>
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Recent deliveries</h2>
+            <p>Email and notification delivery attempts.</p>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Settings">Delivery settings</a>
+    </div>
+
+    @if (!Model.LatestDeliveries.Any())
+    {
+        <div class="empty-state compact">
+            <i class="bi bi-send"></i>
+            <span>No delivery attempts yet.</span>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Symbol</th>
+                        <th>Channel</th>
+                        <th>Status</th>
+                        <th>Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.LatestDeliveries)
+                {
+                    <tr>
+                        <td class="text-muted" style="white-space:nowrap">@row.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td><span class="badge badge-soft">@row.Symbol</span></td>
+                        <td>@row.Channel</td>
+                        <td>
+                            @if (row.Status == "Sent")
+                            {
+                                <span class="badge text-bg-success">Sent</span>
+                            }
+                            else if (row.Status == "Failed")
+                            {
+                                <span class="badge text-bg-danger">Failed</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Skipped</span>
+                            }
+                        </td>
+                        <td class="text-muted">@row.ErrorMessage</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

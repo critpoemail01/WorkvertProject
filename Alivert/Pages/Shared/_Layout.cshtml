@@ -1,7 +1,23 @@
 @using Microsoft.AspNetCore.Antiforgery
 @inject IAntiforgery Antiforgery
+@inject IConfiguration Configuration
 @{
     var tokens = Antiforgery.GetAndStoreTokens(Context);
+    var googleConfigured = !string.IsNullOrWhiteSpace(Configuration["Authentication:Google:ClientId"]) &&
+        !string.IsNullOrWhiteSpace(Configuration["Authentication:Google:ClientSecret"]);
+    var currentPath = (Context.Request.Path.Value ?? "/").TrimEnd('/');
+    currentPath = string.IsNullOrWhiteSpace(currentPath) ? "/" : currentPath;
+    var isActive = (string pagePath) =>
+        currentPath.Equals(pagePath, StringComparison.OrdinalIgnoreCase) ||
+        (pagePath == "/Index" && currentPath == "/");
+    var isActivePrefix = (string pagePath) =>
+        currentPath.StartsWith(pagePath, StringComparison.OrdinalIgnoreCase);
+    var pricingActive = isActive("/Pricing");
+    var howItWorksActive = isActive("/HowItWorks");
+    var aboutActive = isActive("/About");
+    var newsActive = isActive("/News");
+    var dashboardActive = isActive("/App/Dashboard");
+    var alertsActive = isActivePrefix("/App/Alerts");
 }
 <!DOCTYPE html>
 <html lang="en-US" data-bs-theme="dark">
@@ -14,8 +30,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/svg+xml" href="~/assets/brand/alivert_favicon.svg" asp-append-version="true" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/assets/brand/alivert_favicon_32.png" asp-append-version="true" />
-    <link rel="apple-touch-icon" sizes="512x512" href="~/assets/brand/alivert_icon_512.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="512x512" href="~/assets/brand/alivert_icon_512_clean.png" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <meta name="csrf-token" content="@tokens.RequestToken" />
 </head>
@@ -23,28 +40,32 @@
 <header>
     <nav class="navbar navbar-expand-lg alivert-nav">
         <div class="container">
-            <a class="navbar-brand fw-semibold brand-lockup" asp-page="/Index">
-                
-                <img class="brand-logo" src="~/assets/brand/alivert_icon_transparent.png"
-                     srcset="~/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x"
-                     width="72" height="28" asp-append-version="true" alt="Alivert" />
-
+            <a class="navbar-brand brand-lockup" asp-page="/Index" aria-label="Alivert home">
+                <span class="brand-mark">
+                    <img src="~/assets/brand/alivert_brand_mark.svg" width="42" height="42" asp-append-version="true" alt="" />
+                </span>
+                <span class="brand-wordmark">
+                    <span class="brand-title">Alivert<sup>TM</sup></span>
+                    <span class="brand-subtitle">Market Alert Engine</span>
+                </span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler alivert-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Open navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
 
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" asp-page="/Pricing">Pricing</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-page="/HowItWorks">How it works</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-page="/About">About</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-page="/News">News</a></li>
+                    <li class="nav-item"><a class="nav-link @(pricingActive ? "active" : "")" asp-page="/Pricing" aria-current="@(pricingActive ? "page" : null)"><i class="bi bi-credit-card-2-front"></i><span>Pricing</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(howItWorksActive ? "active" : "")" asp-page="/HowItWorks" aria-current="@(howItWorksActive ? "page" : null)"><i class="bi bi-diagram-3"></i><span>How it works</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(aboutActive ? "active" : "")" asp-page="/About" aria-current="@(aboutActive ? "page" : null)"><i class="bi bi-info-circle"></i><span>About</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(newsActive ? "active" : "")" asp-page="/News" aria-current="@(newsActive ? "page" : null)"><i class="bi bi-megaphone"></i><span>News</span></a></li>
 
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
-                        <li class="nav-item"><a class="nav-link" asp-page="/App/Dashboard">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/App/Alerts/Index">Alerts</a></li>
+                        <li class="nav-item"><a class="nav-link @(dashboardActive ? "active" : "")" asp-page="/App/Dashboard" aria-current="@(dashboardActive ? "page" : null)"><i class="bi bi-bar-chart-fill"></i><span>Dashboard</span></a></li>
+                        <li class="nav-item"><a class="nav-link @(alertsActive ? "active" : "")" asp-page="/App/Alerts/Index" aria-current="@(alertsActive ? "page" : null)"><i class="bi bi-bell-fill"></i><span>Alerts</span></a></li>
                     }
                 </ul>
 
@@ -58,22 +79,60 @@
     @RenderBody()
 </main>
 
-<footer class="footer">
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <img class="brand-icon-sm" src="~/assets/brand/alivert_icon_transparent.png" srcset="~/assets/brand/alivert_icon_28.png 1x, ~/assets/brand/alivert_icon_56.png 2x" width="22" height="22" asp-append-version="true" alt="Alivert" />
-                <span class="text-muted small">© @DateTime.Now.Year Alivert</span>
+<footer class="footer site-footer" id="site-footer">
+    <div class="container">
+        <div class="footer-main">
+            <div class="footer-brand-panel">
+                <a class="brand-lockup footer-brand" asp-page="/Index" aria-label="Alivert home">
+                    <span class="brand-mark footer-brand-mark">
+                        <img src="~/assets/brand/alivert_brand_mark.svg" width="48" height="48" asp-append-version="true" alt="" />
+                    </span>
+                    <span class="brand-wordmark">
+                        <span class="brand-title">Alivert<sup>TM</sup></span>
+                        <span class="brand-subtitle">Market Alert Engine</span>
+                    </span>
+                </a>
+                <p>Crypto and traditional market alerts with price zones, RSI and EMA cross confirmations.</p>
+                <div class="footer-badges">
+                    <span><i class="bi bi-lightning-charge-fill"></i> Real-time alert flow</span>
+                    <span><i class="bi bi-shield-check"></i> Secure account area</span>
+                </div>
             </div>
-            <div class="d-flex gap-3 small">
-                <a class="footer-link" asp-page="/Pricing">Pricing</a>
-                <a class="footer-link" asp-page="/HowItWorks">How it works</a>
-                <a class="footer-link" asp-page="/About">About</a>
-                <a class="footer-link" asp-page="/News">News</a>
-            </div>
+
+            <nav class="footer-nav-grid" aria-label="Footer navigation">
+                <div>
+                    <h2>Product</h2>
+                    <a class="footer-link" asp-page="/Pricing">Pricing</a>
+                    <a class="footer-link" asp-page="/HowItWorks">How it works</a>
+                    <a class="footer-link" asp-page="/News">News & updates</a>
+                </div>
+                <div>
+                    <h2>Platform</h2>
+                    <a class="footer-link" asp-page="/About">About</a>
+                    <a class="footer-link" asp-page="/App/HelpDesk">Help desk</a>
+                    <a class="footer-link" asp-page="/App/Settings">Notifications</a>
+                </div>
+                <div>
+                    <h2>Account</h2>
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <a class="footer-link" asp-page="/App/Dashboard">Dashboard</a>
+                        <a class="footer-link" asp-page="/App/Alerts/Index">My alerts</a>
+                        <a class="footer-link" asp-page="/App/Billing">Subscription</a>
+                    }
+                    else
+                    {
+                        <button type="button" class="footer-link footer-button-link" data-auth-open="register">Create account</button>
+                        <button type="button" class="footer-link footer-button-link" data-auth-open="login">Sign in</button>
+                        <a class="footer-link" asp-page="/Pricing">Compare plans</a>
+                    }
+                </div>
+            </nav>
         </div>
-        <div class="text-muted small mt-3">
-            Monitoring tool. Not financial advice.
+
+        <div class="footer-bottom">
+            <span>&copy; @DateTime.Now.Year Alivert. All rights reserved.</span>
+            <span>Monitoring tool. Not financial advice.</span>
         </div>
     </div>
 </footer>
@@ -82,82 +141,162 @@
 <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered auth-modal">
     <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <div class="d-flex align-items-center gap-2">
-          <img class="brand-logo" src="~/assets/brand/alivert_icon_transparent.png"
-                     srcset="~/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x"
-                     width="62" height="24" asp-append-version="true" alt="Alivert" />
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+      <button type="button" class="auth-close" data-bs-dismiss="modal" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
 
-      <div class="modal-body pt-2">
-        <ul class="nav nav-pills auth-tabs" id="authTabs" role="tablist">
-<li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-register" data-bs-toggle="pill" data-bs-target="#pane-register" type="button" role="tab">Get Started</button>
-          </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login" type="button" role="tab">Sign In</button>
-          </li>
-          
-</ul>
-
-        <div class="tab-content mt-3">
-          <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
-            <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
-            <form id="loginForm" class="auth-form" method="post" autocomplete="on">
-              <input type="hidden" name="ReturnUrl" id="loginReturnUrl" />
-              <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input name="Email" type="email" class="form-control" required />
-              </div>
-              <div class="mb-2">
-                <label class="form-label">Password</label>
-                <input name="Password" type="password" class="form-control" required />
-              </div>
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-check">
-                  <input class="form-check-input" type="checkbox" name="RememberMe" />
-                  <span class="form-check-label">Remember me</span>
-                </label>
-                <a class="small" asp-area="Identity" asp-page="/Account/ForgotPassword">Forgot password?</a>
-              </div>
-              <button class="btn btn-primary w-100" type="submit">SIGN IN</button>
-            </form>
+      <div class="auth-shell">
+        <section class="auth-form-panel">
+          <div class="auth-brand-row">
+            <span class="brand-mark brand-mark-sm">
+              <img src="~/assets/brand/alivert_brand_mark.svg" width="36" height="36" asp-append-version="true" alt="" />
+            </span>
+            <span class="brand-wordmark">
+              <span class="brand-title">Alivert<sup>TM</sup></span>
+              <span class="brand-subtitle">Market Alert Engine</span>
+            </span>
+            <span class="auth-security-badge">Secure access</span>
           </div>
 
-          <div class="tab-pane fade" id="pane-register" role="tabpanel">
-            <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
-            <form id="registerForm" class="auth-form" method="post" autocomplete="on">
-              <input type="hidden" name="ReturnUrl" id="registerReturnUrl" />
-              <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input name="Email" type="email" class="form-control" required />
+          <ul class="nav nav-pills auth-tabs" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-register" data-bs-toggle="pill" data-bs-target="#pane-register" type="button" role="tab">
+                Get Started
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login" type="button" role="tab">
+                Sign In
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
+              <div class="auth-copy">
+                <h2>Welcome back</h2>
+                <p>Sign in to manage alerts, billing and delivery settings.</p>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input name="Password" type="password" class="form-control" minlength="6" required />
+
+              <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+              <form id="loginForm" class="auth-form" method="post" autocomplete="on">
+                <input type="hidden" name="ReturnUrl" id="loginReturnUrl" />
+                <div class="mb-3">
+                  <label class="form-label" for="authLoginEmail">Email</label>
+                  <div class="auth-field">
+                    <i class="bi bi-envelope"></i>
+                    <input id="authLoginEmail" name="Email" type="email" class="form-control" placeholder="you@example.com" required />
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label" for="authLoginPassword">Password</label>
+                  <div class="auth-field">
+                    <i class="bi bi-lock"></i>
+                    <input id="authLoginPassword" name="Password" type="password" class="form-control" placeholder="Your password" required />
+                  </div>
+                </div>
+                <div class="auth-options">
+                  <label class="form-check">
+                    <input class="form-check-input" type="checkbox" name="RememberMe" />
+                    <span class="form-check-label">Remember me</span>
+                  </label>
+                  <a class="small" asp-area="Identity" asp-page="/Account/ForgotPassword">Forgot password?</a>
+                </div>
+                <button class="btn btn-primary auth-submit" type="submit">
+                  <i class="bi bi-box-arrow-in-right"></i>
+                  Sign in
+                </button>
+                <a class="btn auth-google @(googleConfigured ? "" : "disabled")" href="/auth/google" data-google-auth aria-disabled="@(!googleConfigured)">
+                  <i class="bi bi-google"></i> Continue with Google
+                </a>
+                @if (!googleConfigured)
+                {
+                    <div class="auth-provider-note">
+                      <i class="bi bi-info-circle"></i>
+                      Google sign-in needs Authentication:Google credentials.
+                    </div>
+                }
+              </form>
+            </div>
+
+            <div class="tab-pane fade" id="pane-register" role="tabpanel">
+              <div class="auth-copy">
+                <h2>Create your account</h2>
+                <p>Start with free credits and upgrade when your alert setup grows.</p>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Password confirmation</label>
-                <input name="ConfirmPassword" type="password" class="form-control" minlength="6" required />
-              </div>
-              <div class="small text-muted mb-3">
-                By creating an account, you agree to our terms and privacy policy.
-              </div>
-              <button class="btn btn-primary w-100" type="submit">CREATE ACCOUNT</button>
-            </form>
-            <div class="text-muted small mt-3">
-              You start with <strong>5 free credits</strong>. 1 credit = 1 active alert.
+
+              <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
+              <form id="registerForm" class="auth-form" method="post" autocomplete="on">
+                <input type="hidden" name="ReturnUrl" id="registerReturnUrl" />
+                <div class="mb-3">
+                  <label class="form-label" for="authRegisterEmail">Email</label>
+                  <div class="auth-field">
+                    <i class="bi bi-envelope"></i>
+                    <input id="authRegisterEmail" name="Email" type="email" class="form-control" placeholder="you@example.com" required />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="authRegisterPassword">Password</label>
+                  <div class="auth-field">
+                    <i class="bi bi-lock"></i>
+                    <input id="authRegisterPassword" name="Password" type="password" class="form-control" minlength="6" placeholder="Minimum 6 characters" required />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="authRegisterConfirm">Confirm password</label>
+                  <div class="auth-field">
+                    <i class="bi bi-shield-check"></i>
+                    <input id="authRegisterConfirm" name="ConfirmPassword" type="password" class="form-control" minlength="6" placeholder="Repeat your password" required />
+                  </div>
+                </div>
+                <div class="auth-terms">
+                  By creating an account, you agree to our terms and privacy policy.
+                </div>
+                <button class="btn btn-primary auth-submit" type="submit">
+                  <i class="bi bi-person-plus"></i>
+                  Create account
+                </button>
+                <a class="btn auth-google @(googleConfigured ? "" : "disabled")" href="/auth/google" data-google-auth aria-disabled="@(!googleConfigured)">
+                  <i class="bi bi-google"></i> Continue with Google
+                </a>
+              </form>
             </div>
           </div>
+        </section>
+
+        <aside class="auth-aside">
+          <div class="auth-aside-badge">
+            <i class="bi bi-lightning-charge-fill"></i>
+            Live market alerts
+          </div>
+          <h3>Turn price movement into fast decisions.</h3>
+          <p>Monitor crypto and traditional markets with RSI, EMA cross and price-zone alerts from one dashboard.</p>
+
+          <div class="auth-metric-grid">
+            <div>
+              <span>5</span>
+              <small>free credits</small>
+            </div>
+            <div>
+              <span>EUR 50</span>
+              <small>monthly unlimited</small>
+            </div>
+          </div>
+
+          <div class="auth-aside-list">
+            <div><i class="bi bi-check2"></i> Binance and Yahoo Finance symbols</div>
+            <div><i class="bi bi-check2"></i> Email, Telegram, Discord and webhook delivery</div>
+            <div><i class="bi bi-check2"></i> Annual unlimited plan for EUR 300</div>
+          </div>
         </div>
+        </aside>
       </div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/alivert-nav.js" asp-append-version="true"></script>
 <script src="~/js/alivert-auth.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>

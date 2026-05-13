@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My account - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=QZkPp6djtDhs0gLVTIrdNW2wK07JUvVV8KMjHUv4FJg" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVo9AmskbVXu8-3eyP2zLGQxh8yEDaCdqC-6vJPdPLWsOfnpCIvBx8hyv8cNdVdvQfAJQ4VCUQdkDqwphCOFZjKtv-PXARqj5AV_JzoPvHlghti0EWo2e9j0fQjWskIMJHYY1XJjN0dUQfhkCuPNN84h75mUNffxVd25bFDY176EYQ" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link " href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link active" href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link " href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link " href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">userareaqa&#x2B;1778630966145@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">My account</h1>
+            <p class="muted mb-0">Manage your login details and account profile.</p>
+        </div>
+        <a class="btn btn-primary" href="/App/Billing">Manage subscription</a>
+    </div>
+
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Account details</div>
+        <div class="account-rows">
+            <div class="account-row">
+                <span>Email</span>
+                <strong>userareaqa&#x2B;1778630966145@example.com</strong>
+            </div>
+            <div class="account-row">
+                <span>Phone number</span>
+                <strong>Not set</strong>
+            </div>
+            <div class="account-row">
+                <span>Registered since</span>
+                <strong>maio 13, 2026</strong>
+            </div>
+            <div class="account-row">
+                <span>Password</span>
+                <strong>Configured</strong>
+            </div>
+        </div>
+    </section>
+
+    <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+            <section class="account-section h-100">
+                <div class="account-section-title">Update profile</div>
+                <form method="post" class="account-form" action="/App/Account?handler=Contact">
+                    
+                    <label class="form-label" for="email">Email</label>
+                    <input class="form-control" id="email" name="email" type="email" value="userareaqa&#x2B;1778630966145@example.com" required />
+
+                    <label class="form-label mt-3" for="phoneNumber">Phone number</label>
+                    <input class="form-control" id="phoneNumber" name="phoneNumber" placeholder="+351 900 000 000" />
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button class="btn btn-primary" type="submit">Save profile</button>
+                    </div>
+                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVo9AmskbVXu8-3eyP2zLGQxh8yEDaCdqC-6vJPdPLWsOfnpCIvBx8hyv8cNdVdvQfAJQ4VCUQdkDqwphCOFZjKtv-PXARqj5AV_JzoPvHlghti0EWo2e9j0fQjWskIMJHYY1XJjN0dUQfhkCuPNN84h75mUNffxVd25bFDY176EYQ" /></form>
+            </section>
+        </div>
+
+        <div class="col-lg-6">
+            <section class="account-section h-100">
+                <div class="account-section-title">Security</div>
+                <form method="post" class="account-form" action="/App/Account?handler=Password">
+                        <label class="form-label" for="currentPassword">Current password</label>
+                        <input class="form-control" id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" />
+
+                    <label class="form-label mt-3" for="newPassword">New password</label>
+                    <input class="form-control" id="newPassword" name="newPassword" type="password" minlength="6" autocomplete="new-password" />
+
+                    <label class="form-label mt-3" for="confirmPassword">Confirm password</label>
+                    <input class="form-control" id="confirmPassword" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" />
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button class="btn btn-primary" type="submit">Update password</button>
+                    </div>
+                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVo9AmskbVXu8-3eyP2zLGQxh8yEDaCdqC-6vJPdPLWsOfnpCIvBx8hyv8cNdVdvQfAJQ4VCUQdkDqwphCOFZjKtv-PXARqj5AV_JzoPvHlghti0EWo2e9j0fQjWskIMJHYY1XJjN0dUQfhkCuPNN84h75mUNffxVd25bFDY176EYQ" /></form>
+            </section>
+        </div>
+    </div>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title account-section-title-danger">Delete account</div>
+        <p class="muted mb-3">
+            Account deletion removes profile data, alert rules and delivery history. For now, deletion is handled by support so payment and audit records are reviewed before removal.
+        </p>
+        <a class="btn btn-outline-danger" href="mailto:support@alivert.local?subject=Delete%20my%20Alivert%20account">
+            Request account deletion
+        </a>
+    </section>
+</div>
+
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+
+
+</body>
+</html>

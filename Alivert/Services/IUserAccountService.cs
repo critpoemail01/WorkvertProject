@@ -12,4 +12,8 @@ public interface IUserAccountService
     /// Credits represent capacity (max active alerts).
     /// </summary>
     Task<(bool IsUnlimited, int Capacity, int ActiveAlerts, int RemainingSlots)> GetLimitsAsync(string userId, CancellationToken ct = default);
+
+    Task AddCreditsAsync(string userId, int credits, string reason, string? reference = null, CancellationToken ct = default);
+
+    Task ActivateUnlimitedAsync(string userId, TimeSpan duration, string reason, string? reference = null, CancellationToken ct = default);
 }

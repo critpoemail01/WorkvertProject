@@ -1,4 +1,5 @@
 using Alivert.Data;
+using Alivert.Models;
 using Alivert.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,13 +9,20 @@ public sealed class AlertEvaluatorWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMarketDataService _market;
+    private readonly ITechnicalIndicatorService _technicalIndicators;
     private readonly IAlertRuleEngine _ruleEngine;
     private readonly ILogger<AlertEvaluatorWorker> _logger;
 
-    public AlertEvaluatorWorker(IServiceScopeFactory scopeFactory, IMarketDataService market, IAlertRuleEngine ruleEngine, ILogger<AlertEvaluatorWorker> logger)
+    public AlertEvaluatorWorker(
+        IServiceScopeFactory scopeFactory,
+        IMarketDataService market,
+        ITechnicalIndicatorService technicalIndicators,
+        IAlertRuleEngine ruleEngine,
+        ILogger<AlertEvaluatorWorker> logger)
     {
         _scopeFactory = scopeFactory;
         _market = market;
+        _technicalIndicators = technicalIndicators;
         _ruleEngine = ruleEngine;
         _logger = logger;
     }
@@ -32,28 +40,76 @@ public sealed class AlertEvaluatorWorker : BackgroundService
                 var dispatcher = scope.ServiceProvider.GetRequiredService<IAlertDispatcher>();
 
                 var alerts = await db.Alerts
-                    .AsNoTracking()
                     .Where(a => a.IsEnabled)
                     .ToListAsync(stoppingToken);
 
                 var now = DateTime.UtcNow;
+                var technicalCache = new Dictionary<string, TechnicalIndicatorSnapshot?>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var group in alerts.GroupBy(a => a.Symbol))
                 {
-                    var snapshot = await _market.GetSnapshotAsync(group.Key, stoppingToken);
+                    var snapshotCache = new Dictionary<MarketType, MarketSnapshot>();
 
                     foreach (var alert in group)
                     {
+                        if (!snapshotCache.TryGetValue(alert.MarketType, out var snapshot))
+                        {
+                            try
+                            {
+                                snapshot = await _market.GetSnapshotAsync(group.Key, alert.MarketType, stoppingToken);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
+                                if (ex is InvalidOperationException &&
+                                    ex.Message.Contains("was not found", StringComparison.Ordinal))
+                                {
+                                    alert.IsEnabled = false;
+                                    alert.UpdatedAtUtc = now;
+                                    _logger.LogWarning(ex, "Disabled alert {AlertId}: {MarketType} symbol {Symbol} was not found.", alert.Id, alert.MarketType, alert.Symbol);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning(ex, "Skipping alert {AlertId}: could not load {MarketType} market data for {Symbol}.", alert.Id, alert.MarketType, alert.Symbol);
+                                }
+
+                                continue;
+                            }
+
+                            snapshotCache[alert.MarketType] = snapshot;
+                        }
+
                         if (alert.LastTriggeredAtUtc is not null &&
                             now - alert.LastTriggeredAtUtc.Value < TimeSpan.FromMinutes(alert.CooldownMinutes))
                         {
                             continue;
                         }
 
-                        var result = _ruleEngine.Evaluate(alert, snapshot);
+                        TechnicalIndicatorSnapshot? technical = null;
+                        if (alert.RuleType.RequiresTechnicalIndicators())
+                        {
+                            var cacheKey = $"{alert.Symbol}|{alert.Timeframe}|{alert.RsiPeriod}|{alert.FastEmaPeriod}|{alert.SlowEmaPeriod}";
+                            if (!technicalCache.TryGetValue(cacheKey, out technical))
+                            {
+                                technical = await _technicalIndicators.GetSnapshotAsync(
+                                    alert.Symbol,
+                                    alert.MarketType,
+                                    alert.Timeframe,
+                                    alert.RsiPeriod,
+                                    alert.FastEmaPeriod,
+                                    alert.SlowEmaPeriod,
+                                    stoppingToken);
+                                technicalCache[cacheKey] = technical;
+                            }
+                        }
+
+                        alert.LastEvaluatedAtUtc = now;
+                        var result = _ruleEngine.Evaluate(alert, snapshot, technical);
                         if (!result.Triggered) continue;
 
-                        db.Alerts.Attach(alert);
                         alert.LastTriggeredAtUtc = now;
                         alert.UpdatedAtUtc = now;
                         await dispatcher.DispatchAsync(alert, snapshot, result.Message, stoppingToken);

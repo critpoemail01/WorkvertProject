@@ -1,0 +1,233 @@
+@page
+@model Alivert.Pages.App.BillingModel
+@{
+    ViewData["Title"] = "Subscription";
+}
+
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">Subscription details</h1>
+            <p class="muted mb-0">Review your plan, payment options and alert capacity.</p>
+        </div>
+        <a class="btn btn-primary" href="#change-subscription">Upgrade plan</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Subscription details</div>
+        <div class="account-rows">
+            <div class="account-row">
+                <span>Subscription type</span>
+                <strong>@Model.SubscriptionType</strong>
+                <a href="#change-subscription">Upgrade</a>
+            </div>
+            <div class="account-row">
+                <span>Purchased on</span>
+                <strong>@Model.PurchasedOnUtc.ToLocalTime().ToString("MMMM d, yyyy")</strong>
+            </div>
+            <div class="account-row">
+                <span>Expires on</span>
+                <strong>@(Model.ExpiresOnUtc is null ? "-" : Model.ExpiresOnUtc.Value.ToLocalTime().ToString("MMMM d, yyyy"))</strong>
+            </div>
+            <div class="account-row">
+                <span>Days remaining</span>
+                <strong>@(Model.DaysRemaining is null ? "-" : Model.DaysRemaining)</strong>
+            </div>
+        </div>
+    </section>
+
+    <div class="row g-3 mt-3">
+        <div class="col-md-4">
+            <div class="surface metric-card">
+                <div class="small muted">Current capacity</div>
+                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.Capacity)</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="surface metric-card">
+                <div class="small muted">Active alerts</div>
+                <div class="display-6 fw-bold">@Model.ActiveAlerts</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="surface metric-card">
+                <div class="small muted">Remaining slots</div>
+                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.RemainingSlots)</div>
+            </div>
+        </div>
+    </div>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Payment details</div>
+        <p class="muted mb-4">Use hosted checkout from PayPal, Stripe, Coinbase Commerce or crypto. Alivert does not store raw card details.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentMethodModal">
+                Add payment method
+            </button>
+            <a class="btn btn-outline-secondary" href="#credit-packs">Buy credits</a>
+        </div>
+    </section>
+
+    <section class="account-section mt-4" id="change-subscription">
+        <div class="account-section-title">Change subscription</div>
+        <div class="subscription-choice-grid">
+            <div class="subscription-choice">
+                <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexible</div>
+                <h2 class="h3 fw-bold mb-1">Unlimited monthly</h2>
+                <div class="plan-price">@Model.UnlimitedMonthlyCurrency @Model.UnlimitedMonthlyAmount.ToString("0")<span class="fs-6 muted">/month</span></div>
+                <p class="muted mt-2">Unlimited alerts, all symbols and all timeframes with 30-day access.</p>
+                <ul class="muted">
+                    <li>No long-term commitment</li>
+                    <li>Advanced RSI and EMA-cross alerts</li>
+                    <li>Renews manually through checkout</li>
+                </ul>
+                <div class="d-grid gap-2 mt-3">
+                    @foreach (var provider in Model.PaymentProviders)
+                    {
+                        <form method="post" asp-page-handler="CreateUnlimited">
+                            <input type="hidden" name="plan" value="monthly" />
+                            <input type="hidden" name="provider" value="@provider" />
+                            <button type="submit" class="btn btn-outline-secondary w-100">Monthly with @provider</button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <div class="subscription-choice subscription-choice-highlight">
+                <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Best value</div>
+                <h2 class="h3 fw-bold mb-1">Unlimited annual</h2>
+                <div class="plan-price">@Model.UnlimitedAnnualCurrency @Model.UnlimitedAnnualAmount.ToString("0")<span class="fs-6 muted">/year</span></div>
+                <p class="muted mt-2">One year of unlimited alerts and a EUR 300 saving versus paying monthly.</p>
+                <ul class="muted">
+                    <li>Unlimited active alerts for 1 year</li>
+                    <li>Best option for active watchlists</li>
+                    <li>No alert counting or capacity checks</li>
+                </ul>
+                <div class="d-grid gap-2 mt-3">
+                    @foreach (var provider in Model.PaymentProviders)
+                    {
+                        <form method="post" asp-page-handler="CreateUnlimited">
+                            <input type="hidden" name="plan" value="annual" />
+                            <input type="hidden" name="provider" value="@provider" />
+                            <button type="submit" class="btn btn-primary w-100">Annual with @provider</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="account-section mt-4" id="credit-packs">
+        <div class="account-section-title">Credit packs</div>
+        <p class="muted mb-4">1 credit = 1 active alert slot. Packs are useful when you need a fixed watchlist without a subscription.</p>
+        <div class="row g-3">
+            @foreach (var pack in Model.Packs)
+            {
+                <div class="col-lg-4">
+                    <div class="credit-pack h-100">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-semibold">@pack.Credits credits</div>
+                                <div class="muted small">Adds @pack.Credits active alert slots</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">@pack.Currency @pack.Amount.ToString("0")</div>
+                                <div class="muted small">@pack.Currency @((pack.Amount / pack.Credits).ToString("0.00"))/credit</div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            @foreach (var provider in Model.PaymentProviders)
+                            {
+                                <form method="post" asp-page-handler="CreatePurchase">
+                                    <input type="hidden" name="packId" value="@pack.Id" />
+                                    <input type="hidden" name="provider" value="@provider" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with @provider</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Purchase history</div>
+        @if (!Model.Purchases.Any())
+        {
+            <div class="empty-state compact">
+                <i class="bi bi-receipt"></i>
+                <span>No purchases yet.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Provider</th>
+                            <th>Plan</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var purchase in Model.Purchases)
+                    {
+                        <tr>
+                            <td class="text-muted">@purchase.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@purchase.Provider</td>
+                            <td>@Model.GetPurchasePlanLabel(purchase)</td>
+                            <td>@purchase.Currency @purchase.Amount.ToString("0.00")</td>
+                            <td>
+                                <span class="badge @(purchase.Status == "Paid" ? "text-bg-success" : "text-bg-secondary")">@purchase.Status</span>
+                            </td>
+                            <td class="text-end">
+                                @if (Model.CanManuallyConfirm && purchase.Status != "Paid")
+                                {
+                                    <form method="post" asp-page-handler="MarkPaid" class="d-inline">
+                                        <input type="hidden" name="id" value="@purchase.Id" />
+                                        <button class="btn btn-sm btn-outline-secondary" type="submit">Mark paid</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+<div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content account-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3" id="paymentMethodModalLabel">Add payment method</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="muted">Card data should be collected by a PCI-compliant provider. Use one of the hosted checkout options below.</p>
+                <div class="payment-placeholder-grid">
+                    <input class="form-control" value="Card number - handled by Stripe checkout" disabled />
+                    <input class="form-control" value="Name on card - handled by provider" disabled />
+                    <input class="form-control" value="Billing address - handled by provider" disabled />
+                </div>
+                <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="#change-subscription" data-bs-dismiss="modal">Choose a plan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notification settings - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=QZkPp6djtDhs0gLVTIrdNW2wK07JUvVV8KMjHUv4FJg" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVojdlrGchHy9kdmIv0iDAxtY9ApewXtgJFjF1pCJbHZvfNsKKjnAZrRw--WDiuiQPe1rqo1iFMrLuDvA5WSNJPUT30CmQcxJ703RzOdapMqqSHmcURhSgq-rOTDfTNFQhAuwpfiuipHoALye8jcEPEUZ-qplRcT39A_d96K3joAZA" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link " href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link " href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link " href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link active" href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">userareaqa&#x2B;1778630794297@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">Notification settings</h1>
+            <p class="muted mb-0">Choose where Alivert sends alert notifications.</p>
+        </div>
+        <a class="btn btn-outline-secondary" href="/App/Alerts">Back to alerts</a>
+    </div>
+
+
+    <form method="post">
+        
+
+        <section class="account-section mt-4">
+            <div class="account-section-title">Notification delivery preferences</div>
+            <div class="settings-rows">
+                <label class="settings-row">
+                    <span>
+                        <strong>Email notifications</strong>
+                        <small>Email delivery is tracked until SMTP is connected.</small>
+                    </span>
+                    <span class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" checked="checked" data-val="true" data-val-required="The Email enabled field is required." id="Input_EmailEnabled" name="Input.EmailEnabled" value="true" />
+                    </span>
+                </label>
+                <div class="settings-row">
+                    <span>
+                        <strong>Webhook URL</strong>
+                        <small>Alivert posts a JSON payload when an alert triggers.</small>
+                    </span>
+                    <input class="form-control settings-control" placeholder="https://example.com/alivert-webhook" type="text" data-val="true" data-val-length="The field Webhook URL must be a string with a maximum length of 500." data-val-length-max="500" id="Input_WebhookUrl" maxlength="500" name="Input.WebhookUrl" value="" />
+                </div>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Input.WebhookUrl" data-valmsg-replace="true"></span>
+                <div class="settings-row">
+                    <span>
+                        <strong>Discord webhook</strong>
+                        <small>Optional Discord delivery destination.</small>
+                    </span>
+                    <input class="form-control settings-control" placeholder="https://discord.com/api/webhooks/..." type="text" data-val="true" data-val-length="The field Discord webhook URL must be a string with a maximum length of 500." data-val-length-max="500" id="Input_DiscordWebhookUrl" maxlength="500" name="Input.DiscordWebhookUrl" value="" />
+                </div>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Input.DiscordWebhookUrl" data-valmsg-replace="true"></span>
+                <div class="settings-row">
+                    <span>
+                        <strong>Telegram chat ID</strong>
+                        <small>Set Notifications:TelegramBotToken before Telegram can send.</small>
+                    </span>
+                    <input class="form-control settings-control" placeholder="123456789" type="text" data-val="true" data-val-length="The field Telegram chat ID must be a string with a maximum length of 80." data-val-length-max="80" id="Input_TelegramChatId" maxlength="80" name="Input.TelegramChatId" value="" />
+                </div>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Input.TelegramChatId" data-valmsg-replace="true"></span>
+            </div>
+        </section>
+
+        <section class="account-section mt-4">
+            <div class="account-section-title">Notification time zone settings</div>
+            <p class="muted mb-3">Alert timestamps are stored in UTC. Select the local time zone you want to see in notification messages when this option is connected.</p>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <select class="form-select settings-timezone" disabled>
+                    <option>UTC - default</option>
+                    <option>Europe/Lisbon</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </div>
+            <p class="small muted mt-3 mb-0">Time zone persistence can be enabled later without changing the notification delivery settings.</p>
+        </section>
+
+        <section class="account-section mt-4">
+            <div class="account-section-title">Set up push-style alerts</div>
+            <p class="muted mb-3">Telegram is the fastest channel once you add your chat ID and configure the server bot token.</p>
+            <button class="btn btn-outline-secondary" type="button" disabled>
+                <i class="bi bi-telegram me-1"></i> Alerts bot setup wizard
+            </button>
+        </section>
+    <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVojdlrGchHy9kdmIv0iDAxtY9ApewXtgJFjF1pCJbHZvfNsKKjnAZrRw--WDiuiQPe1rqo1iFMrLuDvA5WSNJPUT30CmQcxJ703RzOdapMqqSHmcURhSgq-rOTDfTNFQhAuwpfiuipHoALye8jcEPEUZ-qplRcT39A_d96K3joAZA" /><input name="Input.EmailEnabled" type="hidden" value="false" /></form>
+</div>
+
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+
+
+</body>
+</html>

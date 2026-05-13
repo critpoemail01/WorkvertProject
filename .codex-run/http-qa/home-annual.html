@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-time asset alerts - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=RSc0H1S39KEEjMhRxyJSxmTbP1muiLzz7_6CeJcSoGE" />
+    <meta name="csrf-token" content="CfDJ8JtZuisXaGpIlkCIMn_KhVp46dnEvoTWw-CTxvjpAbIEh87ZLL0YYuqvJVW7jBeBG7PuJGl6ggO-NT8mKp0XM2dPnG9Qru2JgonZ30B1EwW_bnYpYRgYF3LpnGB1_rWBHuZIgOF-rNkxkmXPbYoADik" />
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg alivert-nav">
+        <div class="container">
+            <a class="navbar-brand fw-semibold brand-lockup" href="/">
+                
+                <img class="brand-logo" src="/assets/brand/alivert_icon_transparent.png?v=PIu_hD9GFpxgWnkqmUTIzuUd7Awn9uyjPz5fD_4e6RE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="72" height="28" alt="Alivert" />
+
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/Pricing">Pricing</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/HowItWorks">How it works</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/About">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/News">News</a></li>
+
+                </ul>
+
+                
+<ul class="navbar-nav">
+    <li class="nav-item me-2">
+        <button type="button" class="btn btn-outline-light btn-sm px-3" data-auth-open="register">GET STARTED</button>
+    </li>
+    <li class="nav-item">
+        <button type="button" class="btn btn-outline-light btn-sm px-3" data-auth-open="login">SIGN IN</button>
+    </li>
+</ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="py-4">
+    
+<section class="hero-section">
+    <div class="container">
+        <div class="promo-strip mb-4">
+            <div>
+                <span class="promo-label">Launch promo</span>
+                <span class="promo-copy">Start with 5 free alert credits. Upgrade to Unlimited from EUR 50/month or EUR 300/year when you want every setup covered.</span>
+            </div>
+            <a class="promo-link" href="/Pricing">Compare plans <i class="bi bi-arrow-right-short"></i></a>
+        </div>
+
+        <div class="surface hero-card p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <div class="hero-kicker mb-3">
+                        <i class="bi bi-radar"></i>
+                        <span>Crypto and traditional markets</span>
+                    </div>
+
+                    <h1 class="display-5 fw-bold hero-title mb-3">Stop watching charts. Let Alivert catch the move.</h1>
+                    <p class="lead mb-4 muted">
+                        Build price, zone, RSI and EMA-cross alerts for Binance crypto pairs and Yahoo Finance symbols. Get notified only when the setup matters.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">
+                            Start free
+                        </button>
+                        <a class="btn btn-outline-secondary btn-lg" href="/Pricing">See plans</a>
+                    </div>
+
+                    <div class="hero-proof mt-4">
+                        <div>
+                            <strong>5</strong>
+                            <span>free credits</span>
+                        </div>
+                        <div>
+                            <strong>EUR 50</strong>
+                            <span>Unlimited/month</span>
+                        </div>
+                        <div>
+                            <strong>EUR 300</strong>
+                            <span>Unlimited/year</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="market-panel">
+                        <div class="market-panel-header">
+                            <span class="badge badge-soft">Live alert desk</span>
+                            <span class="market-dot"></span>
+                        </div>
+                        <div class="market-card active">
+                            <div>
+                                <div class="fw-semibold">BTCUSDT</div>
+                                <div class="small muted">RSI oversold, EMA 3/5 cross up</div>
+                            </div>
+                            <span class="signal signal-buy">Armed</span>
+                        </div>
+                        <div class="market-card">
+                            <div>
+                                <div class="fw-semibold">AAPL</div>
+                                <div class="small muted">Price inside zone +/- 1%</div>
+                            </div>
+                            <span class="signal">Watching</span>
+                        </div>
+                        <div class="market-card">
+                            <div>
+                                <div class="fw-semibold">ETHUSDT</div>
+                                <div class="small muted">Price above 2400</div>
+                            </div>
+                            <span class="signal">Monitoring</span>
+                        </div>
+                        <div class="market-panel-footer">
+                            <i class="bi bi-bell-fill"></i>
+                            <span>One clean notification. No chart staring.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="surface feature-card h-100">
+                    <div class="icon-pill mb-3"><i class="bi bi-sliders2-vertical"></i></div>
+                    <h5>Advanced rules</h5>
+                    <p class="mb-0 muted">Price zones, RSI thresholds, EMA cross confirmations, 24h moves and volume alerts.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="surface feature-card h-100">
+                    <div class="icon-pill mb-3"><i class="bi bi-globe2"></i></div>
+                    <h5>Two market sources</h5>
+                    <p class="mb-0 muted">Search Binance spot pairs for crypto and Yahoo Finance symbols for traditional assets.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="surface feature-card h-100">
+                    <div class="icon-pill mb-3"><i class="bi bi-wallet2"></i></div>
+                    <h5>Scale when ready</h5>
+                    <p class="mb-0 muted">Use credits for occasional setups or switch to Unlimited when every watchlist needs alerts.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="conversion-band mt-4">
+            <div>
+                <span class="tag mb-2">Best next step</span>
+                <h2 class="fw-bold mb-2">Try 5 alerts free, then choose how you grow.</h2>
+                <p class="mb-0 muted">Credit packs start at EUR 25. Unlimited is EUR 50/month or EUR 300/year for active traders who want every symbol and timeframe covered.</p>
+            </div>
+            <div class="conversion-actions">
+                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                <a class="btn btn-outline-secondary btn-lg" href="/Pricing">View pricing</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer class="footer">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <img class="brand-icon-sm" src="/assets/brand/alivert_icon_transparent.png?v=PIu_hD9GFpxgWnkqmUTIzuUd7Awn9uyjPz5fD_4e6RE" srcset="/assets/brand/alivert_icon_28.png 1x, ~/assets/brand/alivert_icon_56.png 2x" width="22" height="22" alt="Alivert" />
+                <span class="text-muted small">&copy; 2026 Alivert</span>
+            </div>
+            <div class="d-flex gap-3 small">
+                <a class="footer-link" href="/Pricing">Pricing</a>
+                <a class="footer-link" href="/HowItWorks">How it works</a>
+                <a class="footer-link" href="/About">About</a>
+                <a class="footer-link" href="/News">News</a>
+            </div>
+        </div>
+        <div class="text-muted small mt-3">
+            Monitoring tool. Not financial advice.
+        </div>
+    </div>
+</footer>
+
+<!-- Auth modal (login/register) -->
+<div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered auth-modal">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <div class="d-flex align-items-center gap-2">
+          <img class="brand-logo" src="/assets/brand/alivert_icon_transparent.png?v=PIu_hD9GFpxgWnkqmUTIzuUd7Awn9uyjPz5fD_4e6RE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="62" height="24" alt="Alivert" />
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body pt-2">
+        <ul class="nav nav-pills auth-tabs" id="authTabs" role="tablist">
+<li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-register" data-bs-toggle="pill" data-bs-target="#pane-register" type="button" role="tab">Get Started</button>
+          </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login" type="button" role="tab">Sign In</button>
+          </li>
+          
+</ul>
+
+        <div class="tab-content mt-3">
+          <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
+            <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+            <form id="loginForm" class="auth-form" method="post" autocomplete="on">
+              <input type="hidden" name="ReturnUrl" id="loginReturnUrl" />
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input name="Email" type="email" class="form-control" required />
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Password</label>
+                <input name="Password" type="password" class="form-control" required />
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-check">
+                  <input class="form-check-input" type="checkbox" name="RememberMe" />
+                  <span class="form-check-label">Remember me</span>
+                </label>
+                <a class="small" href="/Identity/Account/ForgotPassword">Forgot password?</a>
+              </div>
+              <button class="btn btn-primary w-100" type="submit">SIGN IN</button>
+              <a class="btn btn-outline-secondary w-100 mt-2 disabled" href="/auth/google" data-google-auth aria-disabled="aria-disabled">
+                <i class="bi bi-google me-1"></i> Continue with Google
+              </a>
+                  <div class="small text-muted mt-2">Google sign-in needs Authentication:Google credentials.</div>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVp46dnEvoTWw-CTxvjpAbIEh87ZLL0YYuqvJVW7jBeBG7PuJGl6ggO-NT8mKp0XM2dPnG9Qru2JgonZ30B1EwW_bnYpYRgYF3LpnGB1_rWBHuZIgOF-rNkxkmXPbYoADik" /></form>
+          </div>
+
+          <div class="tab-pane fade" id="pane-register" role="tabpanel">
+            <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
+            <form id="registerForm" class="auth-form" method="post" autocomplete="on">
+              <input type="hidden" name="ReturnUrl" id="registerReturnUrl" />
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input name="Email" type="email" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input name="Password" type="password" class="form-control" minlength="6" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Password confirmation</label>
+                <input name="ConfirmPassword" type="password" class="form-control" minlength="6" required />
+              </div>
+              <div class="small text-muted mb-3">
+                By creating an account, you agree to our terms and privacy policy.
+              </div>
+              <button class="btn btn-primary w-100" type="submit">CREATE ACCOUNT</button>
+              <a class="btn btn-outline-secondary w-100 mt-2 disabled" href="/auth/google" data-google-auth aria-disabled="aria-disabled">
+                <i class="bi bi-google me-1"></i> Continue with Google
+              </a>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVp46dnEvoTWw-CTxvjpAbIEh87ZLL0YYuqvJVW7jBeBG7PuJGl6ggO-NT8mKp0XM2dPnG9Qru2JgonZ30B1EwW_bnYpYRgYF3LpnGB1_rWBHuZIgOF-rNkxkmXPbYoADik" /></form>
+            <div class="text-muted small mt-3">
+              You start with <strong>5 free credits</strong>. 1 credit = 1 active alert.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/alivert-auth.js?v=AqdJ4Y3LybrKUmNOVeprWcM6A_iGhreFYT1nG9vDPQ0"></script>
+
+</body>
+</html>

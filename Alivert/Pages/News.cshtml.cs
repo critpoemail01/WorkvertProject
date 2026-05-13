@@ -11,12 +11,12 @@ public sealed class NewsModel : PageModel
         new Post(
             "Alivert Plus is live: credit packs for casual users",
             "Product",
-            "Buy 25/50/100 credits and keep using alerts without a subscription.",
+            "Buy credit packs and keep using alerts without a subscription.",
             DateTime.UtcNow.AddDays(-7)),
         new Post(
             "Noise control: cooldown + dedup to avoid spam",
             "Engineering",
-            "We improved the evaluator so repeated triggers don’t flood your inbox.",
+            "We improved the evaluator so repeated triggers do not flood your inbox.",
             DateTime.UtcNow.AddDays(-14)),
         new Post(
             "Roadmap: Telegram + Discord notifications",

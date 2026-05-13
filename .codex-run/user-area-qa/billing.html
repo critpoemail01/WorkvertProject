@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=QZkPp6djtDhs0gLVTIrdNW2wK07JUvVV8KMjHUv4FJg" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link " href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link " href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link active" href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link " href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">userareaqa&#x2B;1778630794297@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">Subscription details</h1>
+            <p class="muted mb-0">Review your plan, payment options and alert capacity.</p>
+        </div>
+        <a class="btn btn-primary" href="#change-subscription">Upgrade plan</a>
+    </div>
+
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Subscription details</div>
+        <div class="account-rows">
+            <div class="account-row">
+                <span>Subscription type</span>
+                <strong>Basic (Free)</strong>
+                <a href="#change-subscription">Upgrade</a>
+            </div>
+            <div class="account-row">
+                <span>Purchased on</span>
+                <strong>maio 13, 2026</strong>
+            </div>
+            <div class="account-row">
+                <span>Expires on</span>
+                <strong>-</strong>
+            </div>
+            <div class="account-row">
+                <span>Days remaining</span>
+                <strong>-</strong>
+            </div>
+        </div>
+    </section>
+
+    <div class="row g-3 mt-3">
+        <div class="col-md-4">
+            <div class="surface metric-card">
+                <div class="small muted">Current capacity</div>
+                <div class="display-6 fw-bold">5</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="surface metric-card">
+                <div class="small muted">Active alerts</div>
+                <div class="display-6 fw-bold">0</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="surface metric-card">
+                <div class="small muted">Remaining slots</div>
+                <div class="display-6 fw-bold">5</div>
+            </div>
+        </div>
+    </div>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Payment details</div>
+        <p class="muted mb-4">Use hosted checkout from PayPal, Stripe, Coinbase Commerce or crypto. Alivert does not store raw card details.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentMethodModal">
+                Add payment method
+            </button>
+            <a class="btn btn-outline-secondary" href="#credit-packs">Buy credits</a>
+        </div>
+    </section>
+
+    <section class="account-section mt-4" id="change-subscription">
+        <div class="account-section-title">Change subscription</div>
+        <div class="subscription-choice-grid">
+            <div class="subscription-choice">
+                <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexible</div>
+                <h2 class="h3 fw-bold mb-1">Unlimited monthly</h2>
+                <div class="plan-price">EUR 50<span class="fs-6 muted">/month</span></div>
+                <p class="muted mt-2">Unlimited alerts, all symbols and all timeframes with 30-day access.</p>
+                <ul class="muted">
+                    <li>No long-term commitment</li>
+                    <li>Advanced RSI and EMA-cross alerts</li>
+                    <li>Renews manually through checkout</li>
+                </ul>
+                <div class="d-grid gap-2 mt-3">
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="monthly" />
+                            <input type="hidden" name="provider" value="PayPal" />
+                            <button type="submit" class="btn btn-outline-secondary w-100">Monthly with PayPal</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="monthly" />
+                            <input type="hidden" name="provider" value="Stripe" />
+                            <button type="submit" class="btn btn-outline-secondary w-100">Monthly with Stripe</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="monthly" />
+                            <input type="hidden" name="provider" value="CoinbaseCommerce" />
+                            <button type="submit" class="btn btn-outline-secondary w-100">Monthly with CoinbaseCommerce</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="monthly" />
+                            <input type="hidden" name="provider" value="Crypto" />
+                            <button type="submit" class="btn btn-outline-secondary w-100">Monthly with Crypto</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                </div>
+            </div>
+
+            <div class="subscription-choice subscription-choice-highlight">
+                <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Best value</div>
+                <h2 class="h3 fw-bold mb-1">Unlimited annual</h2>
+                <div class="plan-price">EUR 300<span class="fs-6 muted">/year</span></div>
+                <p class="muted mt-2">One year of unlimited alerts and a EUR 300 saving versus paying monthly.</p>
+                <ul class="muted">
+                    <li>Unlimited active alerts for 1 year</li>
+                    <li>Best option for active watchlists</li>
+                    <li>No alert counting or capacity checks</li>
+                </ul>
+                <div class="d-grid gap-2 mt-3">
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="annual" />
+                            <input type="hidden" name="provider" value="PayPal" />
+                            <button type="submit" class="btn btn-primary w-100">Annual with PayPal</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="annual" />
+                            <input type="hidden" name="provider" value="Stripe" />
+                            <button type="submit" class="btn btn-primary w-100">Annual with Stripe</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="annual" />
+                            <input type="hidden" name="provider" value="CoinbaseCommerce" />
+                            <button type="submit" class="btn btn-primary w-100">Annual with CoinbaseCommerce</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        <form method="post" action="/App/Billing?handler=CreateUnlimited">
+                            <input type="hidden" name="plan" value="annual" />
+                            <input type="hidden" name="provider" value="Crypto" />
+                            <button type="submit" class="btn btn-primary w-100">Annual with Crypto</button>
+                        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="account-section mt-4" id="credit-packs">
+        <div class="account-section-title">Credit packs</div>
+        <p class="muted mb-4">1 credit = 1 active alert slot. Packs are useful when you need a fixed watchlist without a subscription.</p>
+        <div class="row g-3">
+                <div class="col-lg-4">
+                    <div class="credit-pack h-100">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-semibold">25 credits</div>
+                                <div class="muted small">Adds 25 active alert slots</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">EUR 25</div>
+                                <div class="muted small">EUR 1,00/credit</div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="starter" />
+                                    <input type="hidden" name="provider" value="PayPal" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with PayPal</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="starter" />
+                                    <input type="hidden" name="provider" value="Stripe" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with Stripe</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="starter" />
+                                    <input type="hidden" name="provider" value="CoinbaseCommerce" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with CoinbaseCommerce</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="starter" />
+                                    <input type="hidden" name="provider" value="Crypto" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with Crypto</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="credit-pack h-100">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-semibold">50 credits</div>
+                                <div class="muted small">Adds 50 active alert slots</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">EUR 35</div>
+                                <div class="muted small">EUR 0,70/credit</div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="growth" />
+                                    <input type="hidden" name="provider" value="PayPal" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with PayPal</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="growth" />
+                                    <input type="hidden" name="provider" value="Stripe" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with Stripe</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="growth" />
+                                    <input type="hidden" name="provider" value="CoinbaseCommerce" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with CoinbaseCommerce</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="growth" />
+                                    <input type="hidden" name="provider" value="Crypto" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with Crypto</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="credit-pack h-100">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-semibold">100 credits</div>
+                                <div class="muted small">Adds 100 active alert slots</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">EUR 50</div>
+                                <div class="muted small">EUR 0,50/credit</div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="pro" />
+                                    <input type="hidden" name="provider" value="PayPal" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with PayPal</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="pro" />
+                                    <input type="hidden" name="provider" value="Stripe" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with Stripe</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="pro" />
+                                    <input type="hidden" name="provider" value="CoinbaseCommerce" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with CoinbaseCommerce</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                                <form method="post" action="/App/Billing?handler=CreatePurchase">
+                                    <input type="hidden" name="packId" value="pro" />
+                                    <input type="hidden" name="provider" value="Crypto" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Pay with Crypto</button>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrgZdcwgIvjAw7L350E-RIiAzfOcCvkVGQFQxSQrK151tN82xY82CaJmIN302fljulrG0a-nP_eyYfP2fEPR0ZgEP8R1xnqzSHv6gg2atIQR0fi_kFmZBZIJQAM07W1M0UJNgQpz6Y77sKbnjvUm5ldX7DVCtxj5pi28vqqlVUFVQ" /></form>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </section>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Purchase history</div>
+            <p class="muted mb-0">No purchases yet.</p>
+    </section>
+</div>
+
+<div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content account-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3" id="paymentMethodModalLabel">Add payment method</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="muted">Card data should be collected by a PCI-compliant provider. Use one of the hosted checkout options below.</p>
+                <div class="payment-placeholder-grid">
+                    <input class="form-control" value="Card number - handled by Stripe checkout" disabled />
+                    <input class="form-control" value="Name on card - handled by provider" disabled />
+                    <input class="form-control" value="Billing address - handled by provider" disabled />
+                </div>
+                <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="#change-subscription" data-bs-dismiss="modal">Choose a plan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

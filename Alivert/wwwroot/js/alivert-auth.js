@@ -13,6 +13,7 @@
 
   const loginReturnUrl = document.getElementById('loginReturnUrl');
   const registerReturnUrl = document.getElementById('registerReturnUrl');
+  const googleLinks = document.querySelectorAll('[data-google-auth]');
 
   function csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -20,15 +21,17 @@
   }
 
   function currentReturnUrl() {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('login');
-    return url.pathname + url.search + url.hash;
+    return '/App/Dashboard';
   }
 
   function setReturnUrl(value) {
-    const v = value || currentReturnUrl();
+    const v = '/App/Dashboard';
     if (loginReturnUrl) loginReturnUrl.value = v;
     if (registerReturnUrl) registerReturnUrl.value = v;
+    googleLinks.forEach((link) => {
+      if (link.classList.contains('disabled')) return;
+      link.setAttribute('href', `/auth/google?returnUrl=${encodeURIComponent(v)}`);
+    });
   }
 
   function showError(el, message) {
@@ -70,6 +73,9 @@
   if (params.get('login') === '1') {
     setReturnUrl(params.get('returnUrl') || '/App/Dashboard');
     openModal('login');
+    if (params.get('externalError')) {
+      showError(loginError, params.get('externalError'));
+    }
   }
 
   async function postForm(url, form, errorEl) {

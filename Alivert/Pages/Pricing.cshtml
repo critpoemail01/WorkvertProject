@@ -6,98 +6,190 @@
 
 <section class="hero-section">
     <div class="container">
-        <div class="surface p-4 p-md-5">
-            <div class="row g-4 align-items-center">
-                <div class="col-lg-8">
+        <div class="promo-strip mb-4">
+            <div>
+                <span class="promo-label">Launch promo</span>
+                <span class="promo-copy">Unlimited alerts are EUR 50/month or EUR 300/year. Choose annual and save EUR 300 versus monthly.</span>
+            </div>
+            @if (User?.Identity?.IsAuthenticated == true)
+            {
+                <a class="promo-link" asp-page="/App/Billing">Open billing <i class="bi bi-arrow-right-short"></i></a>
+            }
+            else
+            {
+                <button type="button" class="promo-link promo-button" data-auth-open="register">Create account <i class="bi bi-arrow-right-short"></i></button>
+            }
+        </div>
+
+        <div class="page-hero pricing-hero">
+            <div class="page-hero-grid">
+                <div>
                     <div class="hero-kicker mb-3">
                         <i class="bi bi-credit-card-2-front-fill"></i>
-                        <span>Credit-based pricing</span>
+                        <span>Simple pricing for alert-heavy traders</span>
                     </div>
-                    <h1 class="display-6 fw-bold mb-2">Alivert pricing</h1>
-                    <p class="lead muted mb-0">1 credit = 1 active alert. You start with <strong>5 free</strong> on <strong>Alivert Free</strong>. With <strong>Alivert Plus</strong> you buy packs when you need more credits. With <strong>Alivert Pro</strong> you get unlimited alerts.</p>
+                    <h1 class="hero-title display-5 fw-bold mb-3">Start free, then scale only when alerting becomes valuable.</h1>
+                    <p class="lead muted mb-4">1 credit = 1 active alert. Buy packs from EUR 25, or choose Unlimited monthly or annual when your watchlist grows.</p>
+                    <div class="hero-actions">
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start with 5 free credits</button>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
+                    </div>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Get started</button>
+
+                <div class="proof-panel">
+                    <div class="proof-row">
+                        <i class="bi bi-gift"></i>
+                        <div>
+                            <strong>Free account first</strong>
+                            <span>Use 5 credits to validate the workflow before buying capacity.</span>
+                        </div>
+                    </div>
+                    <div class="proof-row">
+                        <i class="bi bi-wallet2"></i>
+                        <div>
+                            <strong>Credits for occasional setups</strong>
+                            <span>25, 50 and 100-credit packs keep pricing predictable.</span>
+                        </div>
+                    </div>
+                    <div class="proof-row">
+                        <i class="bi bi-stars"></i>
+                        <div>
+                            <strong>Annual is best value</strong>
+                            <span>EUR 300/year saves EUR 300 compared with monthly billing.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="row g-4 mt-4 pricing-grid">
-    <!-- Alivert Free -->
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <div class="surface plan">
-                    <div class="plan-title">Alivert Free</div>
-                    <div class="plan-price mt-2">€0</div>
-                    <div class="muted mt-2">Try it out and create your first alerts.</div>
+                    <div class="plan-title">Free</div>
+                    <div class="plan-price mt-2">EUR 0</div>
+                    <div class="muted mt-2">Validate the workflow before you pay.</div>
 
                     <ul class="mt-3 muted">
-                        <li>5 credits (5 active alerts)</li>
-                        <li>Basic history</li>
-                        <li>1 canal (Email)</li>
+                        <li>5 credits for 5 active alerts</li>
+                        <li>Crypto and traditional symbols</li>
+                        <li>Email alerts and history</li>
                     </ul>
 
-                    <button type="button" class="btn btn-outline-secondary w-100" data-auth-open="register">Create account</button>
+                    <div class="plan-footer">
+                        <button type="button" class="btn btn-outline-secondary w-100" data-auth-open="register">Create free account</button>
+                        <div class="plan-footer-note" aria-hidden="true"></div>
+                    </div>
                 </div>
             </div>
 
-    <!-- Alivert Plus (credit packs) -->
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <div class="surface plan">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="plan-title">Alivert Plus</div>
-                        <span class="plan-badge"><i class="bi bi-box-seam"></i> Packs</span>
+                        <div class="plan-title">Credit packs</div>
+                        <span class="plan-badge"><i class="bi bi-wallet2"></i> Flexible</span>
                     </div>
 
-                    <div class="muted mt-2">Buy credits when you need more. No subscription.</div>
-
-                    <div class="surface-solid p-3 mt-3">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" disabled>25 credits — €X</button>
-                            <button class="btn btn-primary" disabled>50 credits — €X</button>
-                            <button class="btn btn-primary" disabled>100 credits — €X</button>
-                        </div>
-                        <div class="small muted mt-2">(Checkout placeholder — liga Stripe depois.)</div>
-                    </div>
+                    <div class="plan-price mt-2">from EUR 25</div>
+                    <div class="muted mt-2">Add alert capacity only when you need it.</div>
 
                     <ul class="mt-3 muted">
-                        <li>Credits roll over</li>
-                        <li>Ideal for occasional use</li>
-                        <li>Pay only when you raise your limit</li>
+                        <li>25 credits for EUR 25</li>
+                        <li>50 credits for EUR 35</li>
+                        <li>100 credits for EUR 50</li>
+                        <li>PayPal, Stripe, Coinbase Commerce or crypto checkout</li>
                     </ul>
+
+                    <div class="plan-footer">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Buy credit packs</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Buy credit packs</button>
+                        }
+                        <div class="plan-footer-note" aria-hidden="true"></div>
+                    </div>
                 </div>
             </div>
 
-    <!-- Alivert Pro (ilimitado mensal) -->
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <div class="surface plan plan-highlight">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="plan-title">Alivert Pro</div>
-                        <span class="plan-badge"><i class="bi bi-stars"></i> Ilimitado</span>
+                        <div class="plan-title">Unlimited monthly</div>
+                        <span class="plan-badge"><i class="bi bi-arrow-repeat"></i> Flexible</span>
                     </div>
 
-                    <div class="plan-price mt-2">€X<span class="fs-6 muted">/month</span></div>
-                    <div class="muted mt-2">For those who want always-on alerts with no limits.</div>
+                    <div class="plan-price mt-2">EUR 50<span class="fs-6 muted">/month</span></div>
+                    <div class="muted mt-2">For active traders who want every market, timeframe and setup covered month to month.</div>
 
                     <ul class="mt-3 muted">
-                        <li>Unlimited credits (unlimited alerts)</li>
-                        <li>Advanced cooldowns</li>
-                        <li>Telegram/Discord/Webhooks (when you connect it)</li>
+                        <li>Unlimited active alerts</li>
+                        <li>Advanced RSI and EMA-cross strategies</li>
+                        <li>Crypto, PayPal, Stripe or Coinbase Commerce checkout</li>
                     </ul>
 
-                    <button type="button" class="btn btn-primary w-100" data-auth-open="register">Activate Pro</button>
+                    <div class="plan-footer">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscribe monthly</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscribe monthly</button>
+                        }
+                        <div class="plan-footer-note small muted text-center">Monthly access is activated after payment confirmation.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="surface plan plan-highlight">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="plan-title">Unlimited annual</div>
+                        <span class="plan-badge plan-badge-warm"><i class="bi bi-stars"></i> Best value</span>
+                    </div>
+
+                    <div class="plan-price mt-2">EUR 300<span class="fs-6 muted">/year</span></div>
+                    <div class="muted mt-2">Pay once for the year and save EUR 300 compared with monthly billing.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>Unlimited active alerts for 1 year</li>
+                        <li>All advanced RSI and EMA-cross strategies</li>
+                        <li>Best option for committed traders</li>
+                    </ul>
+
+                    <div class="plan-footer">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscribe annual</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscribe annual</button>
+                        }
+                        <div class="plan-footer-note small muted text-center">Annual access is activated after payment confirmation.</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="surface p-4 mt-4">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-8">
-                    <div class="fw-semibold">Precisas de ajuda a escolher?</div>
-                    <div class="muted">Free to try • Plus to raise your limit • Pro for unlimited alerts.</div>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <a class="btn btn-outline-secondary" asp-page="/HowItWorks">See how it works</a>
-                </div>
+        <div class="conversion-band mt-4">
+            <div>
+                <span class="tag mb-2">Not sure yet?</span>
+                <h2 class="h3 fw-bold mb-2">Start free. Upgrade only when alerts become part of your routine.</h2>
+                <p class="mb-0 muted">Most users begin with 5 free credits, then choose packs for occasional monitoring or annual Unlimited for the best long-term value.</p>
+            </div>
+            <div class="conversion-actions">
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+                    <a class="btn btn-primary btn-lg" asp-page="/App/Billing">Go to billing</a>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                }
             </div>
         </div>
     </div>

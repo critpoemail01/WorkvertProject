@@ -1,64 +1,286 @@
 @page
+@using Alivert.Models
 @model Alivert.Pages.App.Alerts.AlertsIndexModel
 @{
-    ViewData["Title"] = "Alerts";
+    ViewData["Title"] = "My alerts";
 }
 
-<div class="d-flex align-items-end justify-content-between flex-wrap gap-2">
-    <div>
-        <h1 class="fw-bold mb-0">Alerts</h1>
-        <p class="text-muted mb-0">Create and manage custom alerts by symbol and condition.</p>
+<div class="alerts-board">
+    <div class="alerts-toolbar">
+        <div>
+            <span class="tag mb-2">Alert control center</span>
+            <h1 class="fw-bold mb-0">My alerts</h1>
+            <p class="muted mb-0">Create, schedule and monitor every market condition from one workspace.</p>
+        </div>
+        <div class="alerts-actions">
+            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addAlertModal">
+                <i class="bi bi-bell-fill me-1"></i> Add alert
+            </button>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                <i class="bi bi-clock me-1"></i> Schedule
+            </button>
+            <a class="btn btn-outline-secondary btn-icon" asp-page="/App/Settings" title="Notification settings">
+                <i class="bi bi-power"></i>
+            </a>
+        </div>
     </div>
-    <a class="btn btn-primary" asp-page="/App/Alerts/Create">New alert</a>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    <div class="alerts-market-bar mt-4">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-chevron-down"></i>
+            <span class="alerts-coin"><i class="bi bi-currency-bitcoin"></i></span>
+            <strong>@(Model.AlertGroups.Any() ? GroupTitle(Model.AlertGroups[0].MarketType, Model.AlertGroups[0].Symbol) : "BINANCE : BTC / USDT")</strong>
+        </div>
+        <div class="alerts-market-tools">
+            <button class="btn-clean" type="button" data-bs-toggle="modal" data-bs-target="#addAlertModal" title="Add alert"><i class="bi bi-plus-square"></i></button>
+            <a class="btn-clean" asp-page="/App/Settings" title="Notification settings"><i class="bi bi-x-lg"></i></a>
+            <span class="alerts-toggle on"></span>
+        </div>
+    </div>
+
+    @if (Model.AlertGroups.Any())
+    {
+        <div class="alerts-groups mt-3">
+            @foreach (var group in Model.AlertGroups)
+            {
+                <section class="alerts-group">
+                    <div class="alerts-group-title">
+                        <span>@GroupTitle(group.MarketType, group.Symbol)</span>
+                        <span class="muted small">@group.Alerts.Count alert@(group.Alerts.Count == 1 ? "" : "s")</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>Alert type</th>
+                                    <th>Threshold</th>
+                                    <th>Timeframe</th>
+                                    <th>Channel</th>
+                                    <th>Status</th>
+                                    <th>Last trigger</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var alert in group.Alerts)
+                            {
+                                <tr>
+                                    <td>
+                                        <i class="bi @RuleIcon(alert.RuleType) me-2 @RuleClass(alert.RuleType)"></i>
+                                        @RuleLabel(alert)
+                                    </td>
+                                    <td>@alert.Threshold</td>
+                                    <td>@alert.Timeframe</td>
+                                    <td>@alert.Channel</td>
+                                    <td>
+                                        <span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "On" : "Off")</span>
+                                    </td>
+                                    <td class="text-muted">@(alert.LastTriggeredAtUtc is null ? "Never" : alert.LastTriggeredAtUtc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Edit</a>
+                                        <a class="btn btn-sm btn-outline-danger" asp-page="/App/Alerts/Delete" asp-route-id="@alert.Id">Delete</a>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            }
+        </div>
+    }
+
+    <div class="alerts-promo-grid mt-4">
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-lock"><i class="bi bi-lock-fill"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Unlock all features & timeframes</h2>
+                <p><strong>Annual value:</strong> Unlimited yearly is EUR 300 and covers every setup without counting credits.</p>
+                <a class="btn btn-primary" asp-page="/App/Billing">Upgrade to annual</a>
+            </div>
+        </article>
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-star"><i class="bi bi-stars"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Use presets for faster setup</h2>
+                <p>Start from RSI, EMA-cross, price zone and volume alert templates, then fine-tune on the create page.</p>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#addAlertModal">Open presets</button>
+            </div>
+        </article>
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-phone"><i class="bi bi-phone"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Route alerts to your devices</h2>
+                <p>Send notifications through email, Telegram, Discord or webhooks from one settings panel.</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Settings">Notification settings</a>
+            </div>
+        </article>
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-chart"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Advanced indicator alerts</h2>
+                <p>RSI thresholds and EMA cross confirmations work across crypto and traditional market symbols.</p>
+                <a class="btn btn-outline-secondary" asp-page="/HowItWorks">More info</a>
+            </div>
+        </article>
+    </div>
 </div>
 
-<div class="surface p-4 mt-4">
-        @if (!Model.Alerts.Any())
-        {
-            <p class="text-muted mb-0">No alerts yet. Click <strong>New alert</strong>.</p>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Rule</th>
-                            <th>Threshold</th>
-                            <th>Cooldown</th>
-                            <th>Channel</th>
-                            <th>Enabled</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var a in Model.Alerts)
-                    {
-                        <tr>
-                            <td><span class="badge badge-soft">@a.Symbol</span></td>
-                            <td>@a.RuleType</td>
-                            <td>@a.Threshold</td>
-                            <td>@a.CooldownMinutes min</td>
-                            <td>@a.Channel</td>
-                            <td>
-                                @if (a.IsEnabled)
-                                {
-                                    <span class="badge text-bg-success">On</span>
-                                }
-                                else
-                                {
-                                    <span class="badge text-bg-secondary">Off</span>
-                                }
-                            </td>
-                            <td class="text-end" style="white-space:nowrap">
-                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@a.Id">Edit</a>
-                                <a class="btn btn-sm btn-outline-danger" asp-page="/App/Alerts/Delete" asp-route-id="@a.Id">Delete</a>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
+<div class="modal fade" id="addAlertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal alerts-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3">Add new alert</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        }
+            <form method="get" asp-page="/App/Alerts/Create">
+                <div class="modal-body">
+                    <select class="form-select mb-3" name="marketType">
+                        @foreach (var market in Enum.GetValues<MarketType>())
+                        {
+                            <option value="@market">@market</option>
+                        }
+                    </select>
+                    <input class="form-control mb-3" name="symbol" value="BTCUSDT" placeholder="Pair or symbol" />
+                    <div class="segmented-control mb-3">
+                        <input type="radio" class="btn-check" name="mode" id="manualMode" checked />
+                        <label class="btn" for="manualMode">Manual</label>
+                        <input type="radio" class="btn-check" name="mode" id="presetMode" />
+                        <label class="btn" for="presetMode">Presets</label>
+                    </div>
+                    <select class="form-select mb-3" name="ruleType">
+                        @foreach (var rule in Enum.GetValues<AlertRuleType>())
+                        {
+                            <option value="@rule">@RuleDisplayName(rule)</option>
+                        }
+                    </select>
+                    <select class="form-select mb-3" name="timeframe">
+                        @foreach (var timeframe in Alivert.Pages.App.Alerts.AlertsIndexModel.Timeframes)
+                        {
+                            <option value="@timeframe" selected="@(timeframe == "4h")">@timeframe</option>
+                        }
+                    </select>
+                    <input class="form-control" name="threshold" value="100" placeholder="Threshold" />
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-bell-fill me-1"></i> Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal alerts-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3">Alerts schedule</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="Schedule">
+                <div class="modal-body">
+                    <p class="fw-semibold mb-3">Send me alerts between...</p>
+                    <div class="row g-3">
+                        <div class="col-5">
+                            <input class="form-control" type="time" name="startTime" value="@(Model.ScheduleSettings?.AlertWindowStart ?? "00:00")" />
+                        </div>
+                        <div class="col-2 d-flex align-items-center justify-content-center muted">and</div>
+                        <div class="col-5">
+                            <input class="form-control" type="time" name="endTime" value="@(Model.ScheduleSettings?.AlertWindowEnd ?? "23:59")" />
+                        </div>
+                    </div>
+                    <select class="form-select mt-3" name="timeZone">
+                        <option value="Europe/Lisbon" selected="@(Model.ScheduleSettings?.AlertTimeZone == "Europe/Lisbon" || string.IsNullOrWhiteSpace(Model.ScheduleSettings?.AlertTimeZone))">Europe/Lisbon</option>
+                        <option value="UTC" selected="@(Model.ScheduleSettings?.AlertTimeZone == "UTC")">UTC</option>
+                    </select>
+
+                    <p class="fw-semibold mt-4 mb-3">On these days...</p>
+                    <div class="schedule-days">
+                        @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
+                        {
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="@day" checked="@DayChecked(day)" />
+                                <span>@day</span>
+                            </label>
+                        }
+                    </div>
+                    <p class="small muted mt-4 mb-0">Alerts outside the selected days and times are recorded as skipped deliveries. Remove the schedule to return to 24/7 operation.</p>
+                </div>
+                <div class="modal-footer border-0 schedule-footer">
+                    <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i> Remove schedule</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise me-1"></i> Set schedule</button>
+                    <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GroupTitle(MarketType market, string symbol)
+    {
+        return market == MarketType.Crypto
+            ? $"BINANCE : {FormatCryptoPair(symbol)}"
+            : $"YAHOO : {symbol}";
+    }
+
+    private static string FormatCryptoPair(string symbol)
+    {
+        return symbol.EndsWith("USDT", StringComparison.OrdinalIgnoreCase)
+            ? $"{symbol[..^4]} / USDT"
+            : symbol;
+    }
+
+    private static string RuleLabel(Alert alert)
+    {
+        return alert.RuleType.RequiresTechnicalIndicators()
+            ? $"{RuleDisplayName(alert.RuleType)} - RSI {alert.RsiPeriod}, EMA {alert.FastEmaPeriod}/{alert.SlowEmaPeriod}"
+            : alert.RuleType.UsesPriceZone()
+                ? $"Price zone +/- {alert.ZonePercent}%"
+                : RuleDisplayName(alert.RuleType);
+    }
+
+    private static string RuleDisplayName(AlertRuleType rule)
+    {
+        return rule switch
+        {
+            AlertRuleType.PriceAbove => "Price above",
+            AlertRuleType.PriceBelow => "Price below",
+            AlertRuleType.PercentDrop24h => "24h percent drop",
+            AlertRuleType.PercentRise24h => "24h percent rise",
+            AlertRuleType.VolumeAbove24h => "24h volume above",
+            AlertRuleType.PriceZone => "Price zone",
+            AlertRuleType.RsiBelow => "RSI below",
+            AlertRuleType.RsiAbove => "RSI above",
+            AlertRuleType.RsiOversoldEmaCrossUp => "RSI oversold + EMA cross up",
+            AlertRuleType.RsiOverboughtEmaCrossDown => "RSI overbought + EMA cross down",
+            _ => rule.ToString()
+        };
+    }
+
+    private static string RuleIcon(AlertRuleType rule)
+    {
+        return rule is AlertRuleType.PriceBelow or AlertRuleType.PercentDrop24h or AlertRuleType.RsiOverboughtEmaCrossDown
+            ? "bi-chevron-down"
+            : "bi-chevron-up";
+    }
+
+    private static string RuleClass(AlertRuleType rule)
+    {
+        return rule is AlertRuleType.PriceBelow or AlertRuleType.PercentDrop24h or AlertRuleType.RsiOverboughtEmaCrossDown
+            ? "text-danger"
+            : "text-success";
+    }
+
+    private bool DayChecked(string day)
+    {
+        var days = Model.ScheduleSettings?.AlertWindowDays;
+        return string.IsNullOrWhiteSpace(days) || days.Split(',').Contains(day, StringComparer.OrdinalIgnoreCase);
+    }
+}

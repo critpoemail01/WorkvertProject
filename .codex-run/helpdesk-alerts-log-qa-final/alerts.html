@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My alerts - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=tVsVIa6Hr6HwP_Ja3fM256B-5IC5Ru0t-orYeOUHCgU" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVo7j5ic8HnCGL-B6RPn5lfIUpRDRkmob-WlEBck4zyriPPfJDQFjdFLcF4HlWBuK29KrUyESv4kcLdUJzl6CldrVAi_WAucoO0NvSWbfKNrXv_8lq58g6LJragjqOVNywdxxB65h4Q5b0iQxEPGGUkoxomfNl78zt1-7G4wBYcavg" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link active" href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+            <a class="app-nav-link " href="/App/Log">
+                <i class="bi bi-clock-history"></i>
+                <span>Log view</span>
+            </a>
+
+            <div class="app-nav-section">Help & support</div>
+            <a class="app-nav-link " href="/News">
+                <i class="bi bi-megaphone-fill"></i>
+                <span>News & updates</span>
+            </a>
+            <a class="app-nav-link " href="/HowItWorks">
+                <i class="bi bi-question-circle"></i>
+                <span>Knowledge base</span>
+            </a>
+            <a class="app-nav-link " href="/App/HelpDesk">
+                <i class="bi bi-chat-left-text-fill"></i>
+                <span>Help desk</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link " href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link " href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link " href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">qa-helpdesk-log-20260513013959@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<div class="alerts-board">
+    <div class="alerts-toolbar">
+        <h1 class="fw-bold mb-0">My alerts</h1>
+        <div class="alerts-actions">
+            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addAlertModal">
+                <i class="bi bi-bell-fill me-1"></i> Add alert
+            </button>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                <i class="bi bi-clock me-1"></i> Schedule
+            </button>
+            <a class="btn btn-outline-secondary btn-icon" title="Notification settings" href="/App/Settings">
+                <i class="bi bi-power"></i>
+            </a>
+        </div>
+    </div>
+
+
+    <div class="alerts-market-bar mt-4">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-chevron-down"></i>
+            <span class="alerts-coin"><i class="bi bi-currency-bitcoin"></i></span>
+            <strong>BINANCE : BTC / USDT</strong>
+        </div>
+        <div class="alerts-market-tools">
+            <button class="btn-clean" type="button" data-bs-toggle="modal" data-bs-target="#addAlertModal" title="Add alert"><i class="bi bi-plus-square"></i></button>
+            <a class="btn-clean" title="Notification settings" href="/App/Settings"><i class="bi bi-x-lg"></i></a>
+            <span class="alerts-toggle on"></span>
+        </div>
+    </div>
+
+
+    <div class="alerts-promo-grid mt-4">
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-lock"><i class="bi bi-lock-fill"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Unlock all features & timeframes</h2>
+                <p><strong>Annual value:</strong> Unlimited yearly is EUR 300 and covers every setup without counting credits.</p>
+                <a class="btn btn-primary" href="/App/Billing">Upgrade to annual</a>
+            </div>
+        </article>
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-star"><i class="bi bi-stars"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Use presets for faster setup</h2>
+                <p>Start from RSI, EMA-cross, price zone and volume alert templates, then fine-tune on the create page.</p>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#addAlertModal">Open presets</button>
+            </div>
+        </article>
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-phone"><i class="bi bi-phone"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Route alerts to your devices</h2>
+                <p>Send notifications through email, Telegram, Discord or webhooks from one settings panel.</p>
+                <a class="btn btn-outline-secondary" href="/App/Settings">Notification settings</a>
+            </div>
+        </article>
+        <article class="alerts-promo-card">
+            <div class="alerts-promo-visual visual-chart"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="alerts-promo-body">
+                <h2>Advanced indicator alerts</h2>
+                <p>RSI thresholds and EMA cross confirmations work across crypto and traditional market symbols.</p>
+                <a class="btn btn-outline-secondary" href="/HowItWorks">More info</a>
+            </div>
+        </article>
+    </div>
+</div>
+
+<div class="modal fade" id="addAlertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal alerts-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3">Add new alert</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="get" action="/App/Alerts/Create">
+                <div class="modal-body">
+                    <select class="form-select mb-3" name="marketType">
+                            <option value="Crypto">Crypto</option>
+                            <option value="Traditional">Traditional</option>
+                    </select>
+                    <input class="form-control mb-3" name="symbol" value="BTCUSDT" placeholder="Pair or symbol" />
+                    <div class="segmented-control mb-3">
+                        <input type="radio" class="btn-check" name="mode" id="manualMode" checked />
+                        <label class="btn" for="manualMode">Manual</label>
+                        <input type="radio" class="btn-check" name="mode" id="presetMode" />
+                        <label class="btn" for="presetMode">Presets</label>
+                    </div>
+                    <select class="form-select mb-3" name="ruleType">
+                            <option value="PriceAbove">Price above</option>
+                            <option value="PriceBelow">Price below</option>
+                            <option value="PercentDrop24h">24h percent drop</option>
+                            <option value="PercentRise24h">24h percent rise</option>
+                            <option value="VolumeAbove24h">24h volume above</option>
+                            <option value="PriceZone">Price zone</option>
+                            <option value="RsiBelow">RSI below</option>
+                            <option value="RsiAbove">RSI above</option>
+                            <option value="RsiOversoldEmaCrossUp">RSI oversold &#x2B; EMA cross up</option>
+                            <option value="RsiOverboughtEmaCrossDown">RSI overbought &#x2B; EMA cross down</option>
+                    </select>
+                    <select class="form-select mb-3" name="timeframe">
+                            <option value="5m">5m</option>
+                            <option value="15m">15m</option>
+                            <option value="1h">1h</option>
+                            <option value="4h" selected="selected">4h</option>
+                            <option value="1d">1d</option>
+                            <option value="1wk">1wk</option>
+                            <option value="1mo">1mo</option>
+                    </select>
+                    <input class="form-control" name="threshold" value="100" placeholder="Threshold" />
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-bell-fill me-1"></i> Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal alerts-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3">Alerts schedule</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/App/Alerts?handler=Schedule">
+                <div class="modal-body">
+                    <p class="fw-semibold mb-3">Send me alerts between...</p>
+                    <div class="row g-3">
+                        <div class="col-5">
+                            <input class="form-control" type="time" name="startTime" value="00:00" />
+                        </div>
+                        <div class="col-2 d-flex align-items-center justify-content-center muted">and</div>
+                        <div class="col-5">
+                            <input class="form-control" type="time" name="endTime" value="23:59" />
+                        </div>
+                    </div>
+                    <select class="form-select mt-3" name="timeZone">
+                        <option value="Europe/Lisbon" selected="selected">Europe/Lisbon</option>
+                        <option value="UTC">UTC</option>
+                    </select>
+
+                    <p class="fw-semibold mt-4 mb-3">On these days...</p>
+                    <div class="schedule-days">
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Mon" checked="checked" />
+                                <span>Mon</span>
+                            </label>
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Tue" checked="checked" />
+                                <span>Tue</span>
+                            </label>
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Wed" checked="checked" />
+                                <span>Wed</span>
+                            </label>
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Thu" checked="checked" />
+                                <span>Thu</span>
+                            </label>
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Fri" checked="checked" />
+                                <span>Fri</span>
+                            </label>
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Sat" checked="checked" />
+                                <span>Sat</span>
+                            </label>
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="Sun" checked="checked" />
+                                <span>Sun</span>
+                            </label>
+                    </div>
+                    <p class="small muted mt-4 mb-0">Alerts outside the selected days and times are recorded as skipped deliveries. Remove the schedule to return to 24/7 operation.</p>
+                </div>
+                <div class="modal-footer border-0 schedule-footer">
+                    <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i> Remove schedule</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise me-1"></i> Set schedule</button>
+                    <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVo7j5ic8HnCGL-B6RPn5lfIUpRDRkmob-WlEBck4zyriPPfJDQFjdFLcF4HlWBuK29KrUyESv4kcLdUJzl6CldrVAi_WAucoO0NvSWbfKNrXv_8lq58g6LJragjqOVNywdxxB65h4Q5b0iQxEPGGUkoxomfNl78zt1-7G4wBYcavg" /></form>
+        </div>
+    </div>
+</div>
+
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+

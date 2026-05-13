@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New alert - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=LrkOMMXpw0PB62NCFz2P34-gcoscEiZI0Iec3fG-9X0" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrh6FRcZo3VYIhJ_hKLe9A74L0Ld9Nx3NL2ontsHxPPsexMuHsYCs8_WxWjtiQM643ZrQ9Xic3iN3XG8gXAbaTAXrYPBu2W_0-Rv2nHGhFuJ75gtadZb-SIm2h4aADygSZH77kQ5Q-Ij5aHaowQg_3_QF2BgkZRze30YjkXQUui6w" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link active" href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+
+            <div class="app-nav-section">Help & support</div>
+            <a class="app-nav-link " href="/News">
+                <i class="bi bi-megaphone-fill"></i>
+                <span>News & updates</span>
+            </a>
+            <a class="app-nav-link " href="/HowItWorks">
+                <i class="bi bi-question-circle"></i>
+                <span>Knowledge base</span>
+            </a>
+            <a class="app-nav-link " href="/App/HelpDesk">
+                <i class="bi bi-chat-left-text-fill"></i>
+                <span>Help desk</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link " href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link " href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link " href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">qa-helpdesk-alerts-20260513012655@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<h1 class="fw-bold">New alert</h1>
+<p class="text-muted">Set a symbol and condition to trigger.</p>
+
+    <div class="alert alert-info">
+        Credits: you can have up to <strong>5</strong> active alerts. You currently have <strong>0</strong>.
+        Remaining: <strong>5</strong>.
+        <a class="ms-1" href="/Pricing">View packs</a>
+    </div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <form method="post" class="surface p-4">
+                
+
+                <div class="mb-3">
+                    <label class="form-label" for="Input_MarketType">Market</label>
+                    <select class="form-select" data-symbol-market data-val="true" data-val-required="The Market field is required." id="Input_MarketType" name="Input.MarketType"><option selected="selected">Crypto</option>
+<option>Traditional</option>
+</select>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.MarketType" data-valmsg-replace="true"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Input_Symbol">Symbol</label>
+                    <input class="form-control" placeholder="BTCUSDT / AAPL / ^VIX / GC=F" list="symbolSuggestions" data-symbol-input type="text" data-val="true" data-val-length="The field Symbol must be a string with a maximum length of 32." data-val-length-max="32" data-val-regex="Symbol may contain letters, digits, dot, caret, equals, underscore, dash only." data-val-regex-pattern="^[A-Za-z0-9.^=_-]{1,32}$" data-val-required="The Symbol field is required." id="Input_Symbol" maxlength="32" name="Input.Symbol" value="ETHUSDT" />
+                    <datalist id="symbolSuggestions"></datalist>
+                    <div class="form-text">Crypto symbols are validated against Binance. Traditional symbols are validated against Yahoo Finance.</div>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Symbol" data-valmsg-replace="true"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Input_RuleType">Rule</label>
+                    <select class="form-select" data-val="true" data-val-required="The Rule field is required." id="Input_RuleType" name="Input.RuleType"><option>PriceAbove</option>
+<option>PriceBelow</option>
+<option>PercentDrop24h</option>
+<option>PercentRise24h</option>
+<option>VolumeAbove24h</option>
+<option>PriceZone</option>
+<option selected="selected">RsiBelow</option>
+<option>RsiAbove</option>
+<option>RsiOversoldEmaCrossUp</option>
+<option>RsiOverboughtEmaCrossDown</option>
+</select>
+                    <div class="form-text">RSI/EMA rules use RSI(14) and EMA 3/5 by default, matching the service presets.</div>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.RuleType" data-valmsg-replace="true"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Input_Timeframe">Timeframe</label>
+                    <select class="form-select" data-val="true" data-val-length="The field Timeframe must be a string with a maximum length of 8." data-val-length-max="8" data-val-required="The Timeframe field is required." id="Input_Timeframe" name="Input.Timeframe"><option>5m</option>
+<option>15m</option>
+<option selected="selected">1h</option>
+<option>4h</option>
+<option>1d</option>
+<option>1wk</option>
+<option>1mo</option>
+</select>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Timeframe" data-valmsg-replace="true"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Input_Threshold">Threshold</label>
+                    <input class="form-control" type="text" data-val="true" data-val-number="The field Threshold must be a number." data-val-required="The Threshold field is required." id="Input_Threshold" name="Input.Threshold" value="30,00" />
+                    <div class="form-text">Price level, price-zone center, volume, percent change, or RSI level such as 30/70.</div>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Threshold" data-valmsg-replace="true"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="Input_ZonePercent">Zone percent</label>
+                        <input class="form-control" type="text" data-val="true" data-val-number="The field Zone percent must be a number." data-val-range="The field Zone percent must be between 0,01 and 100." data-val-range-max="100" data-val-range-min="0.01" data-val-required="The Zone percent field is required." id="Input_ZonePercent" name="Input.ZonePercent" value="1,00" />
+                        <div class="form-text">Used by PriceZone as +/- percent around threshold.</div>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Input.ZonePercent" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Input_RsiPeriod">RSI period</label>
+                        <input class="form-control" type="number" data-val="true" data-val-range="The field RSI period must be between 2 and 100." data-val-range-max="100" data-val-range-min="2" data-val-required="The RSI period field is required." id="Input_RsiPeriod" name="Input.RsiPeriod" value="14" /><input name="__Invariant" type="hidden" value="Input.RsiPeriod" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Input.RsiPeriod" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Input_FastEmaPeriod">Fast EMA</label>
+                        <input class="form-control" type="number" data-val="true" data-val-range="The field Fast EMA must be between 1 and 200." data-val-range-max="200" data-val-range-min="1" data-val-required="The Fast EMA field is required." id="Input_FastEmaPeriod" name="Input.FastEmaPeriod" value="3" /><input name="__Invariant" type="hidden" value="Input.FastEmaPeriod" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Input.FastEmaPeriod" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="Input_SlowEmaPeriod">Slow EMA</label>
+                        <input class="form-control" type="number" data-val="true" data-val-range="The field Slow EMA must be between 2 and 250." data-val-range-max="250" data-val-range-min="2" data-val-required="The Slow EMA field is required." id="Input_SlowEmaPeriod" name="Input.SlowEmaPeriod" value="5" /><input name="__Invariant" type="hidden" value="Input.SlowEmaPeriod" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Input.SlowEmaPeriod" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label class="form-label" for="Input_CooldownMinutes">Cooldown (min)</label>
+                    <input class="form-control" type="number" data-val="true" data-val-range="The field Cooldown (min) must be between 1 and 1440." data-val-range-max="1440" data-val-range-min="1" data-val-required="The Cooldown (min) field is required." id="Input_CooldownMinutes" name="Input.CooldownMinutes" value="240" /><input name="__Invariant" type="hidden" value="Input.CooldownMinutes" />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.CooldownMinutes" data-valmsg-replace="true"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Input_Channel">Channel</label>
+                    <select class="form-select" data-val="true" data-val-length="The field Channel must be a string with a maximum length of 32." data-val-length-max="32" data-val-required="The Channel field is required." id="Input_Channel" name="Input.Channel">
+                        <option selected="selected">Email</option>
+                        <option>Telegram</option>
+                        <option>Discord</option>
+                        <option>Webhook</option>
+                    </select>
+                    <div class="form-text"><a href="/App/Settings">Configure notification destinations</a>.</div>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" checked="checked" data-val="true" data-val-required="The Enabled field is required." id="Input_IsEnabled" name="Input.IsEnabled" value="true" />
+                    <label class="form-check-label" for="Input_IsEnabled">Enabled</label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                    <a class="btn btn-outline-secondary" href="/App/Alerts">Cancel</a>
+                </div>
+        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVrh6FRcZo3VYIhJ_hKLe9A74L0Ld9Nx3NL2ontsHxPPsexMuHsYCs8_WxWjtiQM643ZrQ9Xic3iN3XG8gXAbaTAXrYPBu2W_0-Rv2nHGhFuJ75gtadZb-SIm2h4aADygSZH77kQ5Q-Ij5aHaowQg_3_QF2BgkZRze30YjkXQUui6w" /><input name="Input.IsEnabled" type="hidden" value="false" /></form>
+    </div>
+</div>
+
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+
+    <script src="/js/alivert-symbols.js?v=bbGxclGVE7Qh3uroLfGeVw8Qr8NXQtz-PJHZoAHhzCs"></script>
+
+</body>
+</html>
+

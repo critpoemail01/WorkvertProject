@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="en-US" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log view - Alivert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/alivert_favicon_32.png?v=rtVCpQURTRNGYAZAzfjcNa4DVK8ZW9BkJfDT5kHEZUA" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/brand/alivert_icon_512.png?v=sExMBlQQwhX7x45_W7Q8i3OSN-WcrqIXSp0MoUheU_8" />
+    <link rel="stylesheet" href="/css/site.css?v=tVsVIa6Hr6HwP_Ja3fM256B-5IC5Ru0t-orYeOUHCgU" />
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/">
+            <img class="side-brand-logo" src="/assets/brand/alivert_logo_clean_transparent.png?v=TaW9yjeB2NWT1OZi4j6K9VxzBwYktfoqtC7sjQDUHVE" srcset="/assets/brand/alivert_logo_clean_transparent.png 1x, ~/assets/brand/alivert_logo_clean_transparent_2x.png 2x" width="82" height="32" alt="Alivert" />
+        </a>
+
+        <nav class="app-nav mt-4" aria-label="App navigation">
+            <div class="app-nav-section">Main menu</div>
+            <a class="app-nav-link" href="/">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to website</span>
+            </a>
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="app-nav-link app-nav-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign out</span>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JtZuisXaGpIlkCIMn_KhVoNCXVVNbDR0mCqsxyH1rRsHiY3-q75cci-NpOnEfuwypW3Kw9PD8aOcv6P1sXLnwjxqRD5jD15nAvAGy8-7-qfJk9tN1tFIizWM-8XTFFJp03pKK_7A3INILVEs03ws_iOoIxjVTZeIo6Xrh7sPyzCKn2urTWiORhEHDU-ytVHbQ" /></form>
+
+            <div class="app-nav-section">Markets</div>
+            <a class="app-nav-link " href="/App/Dashboard">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="app-nav-link " href="/App/Alerts">
+                <i class="bi bi-bell-fill"></i>
+                <span>My alerts</span>
+            </a>
+            <a class="app-nav-link active" href="/App/Log">
+                <i class="bi bi-clock-history"></i>
+                <span>Log view</span>
+            </a>
+
+            <div class="app-nav-section">Help & support</div>
+            <a class="app-nav-link " href="/News">
+                <i class="bi bi-megaphone-fill"></i>
+                <span>News & updates</span>
+            </a>
+            <a class="app-nav-link " href="/HowItWorks">
+                <i class="bi bi-question-circle"></i>
+                <span>Knowledge base</span>
+            </a>
+            <a class="app-nav-link " href="/App/HelpDesk">
+                <i class="bi bi-chat-left-text-fill"></i>
+                <span>Help desk</span>
+            </a>
+
+            <div class="app-nav-section">Account & settings</div>
+            <a class="app-nav-link " href="/App/Account">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
+            <a class="app-nav-link " href="/App/Billing">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Subscription</span>
+            </a>
+            <a class="app-nav-link " href="/App/Settings">
+                <i class="bi bi-broadcast-pin"></i>
+                <span>Notification settings</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer mt-auto">
+            <div class="small text-muted">qa-helpdesk-log-20260513013959@example.com</div>
+            <a class="btn btn-sm btn-primary w-100 mt-2" href="/App/Billing">Upgrade plan</a>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft"><i class="bi bi-lightning-charge-fill me-1"></i>Background alerts active</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/App/Account"><i class="bi bi-person-circle me-1"></i>My account</a>
+                <a class="btn btn-sm btn-primary" href="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+<div class="log-view">
+    <div class="d-flex align-items-end justify-content-between flex-wrap gap-3">
+        <div>
+            <h1>Log view</h1>
+            <p class="muted mb-0">Review alert deliveries, skipped windows and failed notification attempts.</p>
+        </div>
+        <form method="get" class="log-alert-picker">
+            <select class="form-select" name="alertId" onchange="this.form.submit()">
+                <option value="">All alerts</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="log-layout">
+        <section class="log-main-panel">
+            <div class="log-context-bar">
+                <span>All alerts</span>
+            </div>
+
+            <div class="log-table-wrap">
+                    <div class="empty-state">
+                        <i class="bi bi-journal-text"></i>
+                        <h2>No log entries yet</h2>
+                        <p>Create or trigger alerts to see delivery attempts and schedule skips here.</p>
+                    </div>
+            </div>
+        </section>
+
+        <aside class="log-side-panel">
+            <div class="timeframe-tabs">
+                <a class="active" href="/App/Log">All</a>
+                    <a class="" href="/App/Log?timeframe=5m">5m</a>
+                    <a class="" href="/App/Log?timeframe=15m">15m</a>
+                    <a class="" href="/App/Log?timeframe=1h">1h</a>
+                    <a class="" href="/App/Log?timeframe=4h">4h</a>
+                    <a class="" href="/App/Log?timeframe=1d">1d</a>
+                    <a class="" href="/App/Log?timeframe=1wk">1wk</a>
+                    <a class="" href="/App/Log?timeframe=1mo">1mo</a>
+            </div>
+
+            <div class="rule-filter-list">
+                    <div class="rule-filter-row disabled">
+                        <span class="rule-dot"></span>
+                        <span>No alert rules yet</span>
+                        <i class="bi bi-lock"></i>
+                    </div>
+            </div>
+
+            <div class="log-upgrade-card">
+                <span>Premium only</span>
+                <a href="/App/Billing">Upgrade</a>
+                <p>Unlimited keeps every alert active without managing credit capacity.</p>
+            </div>
+        </aside>
+    </div>
+</div>
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+

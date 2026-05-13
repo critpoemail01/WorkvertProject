@@ -4,5 +4,5 @@ namespace Alivert.Services;
 
 public interface IAlertRuleEngine
 {
-    RuleResult Evaluate(Alert alert, MarketSnapshot snapshot);
+    RuleResult Evaluate(Alert alert, MarketSnapshot snapshot, TechnicalIndicatorSnapshot? technical = null);
 }

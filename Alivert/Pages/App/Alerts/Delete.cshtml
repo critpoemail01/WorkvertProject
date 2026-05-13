@@ -4,23 +4,44 @@
     ViewData["Title"] = "Delete alert";
 }
 
-<h1 class="fw-bold">Delete alert</h1>
-<p class="text-muted">This action cannot be undone.</p>
+<div class="account-page">
+    <section class="app-page-hero app-page-hero-danger">
+        <div>
+            <span class="tag mb-3">Alert management</span>
+            <h1 class="hero-title fw-bold mb-2">Delete alert</h1>
+            <p class="lead muted mb-0">This action cannot be undone.</p>
+        </div>
+        <div class="app-page-hero-actions">
+            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Back to alerts</a>
+        </div>
+    </section>
 
-<div class="surface p-4">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Symbol</dt>
-            <dd class="col-sm-9">@Model.Symbol</dd>
+    <section class="surface app-panel danger-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Alert summary</h2>
+                <p>Review the rule before deleting it from your active setup.</p>
+            </div>
+        </div>
 
-            <dt class="col-sm-3">Rule</dt>
-            <dd class="col-sm-9">@Model.RuleType</dd>
+        <div class="account-rows">
+            <div class="account-row">
+                <span>Symbol</span>
+                <strong>@Model.Symbol</strong>
+            </div>
+            <div class="account-row">
+                <span>Rule</span>
+                <strong>@Model.RuleType</strong>
+            </div>
+            <div class="account-row">
+                <span>Threshold</span>
+                <strong>@Model.Threshold</strong>
+            </div>
+        </div>
 
-            <dt class="col-sm-3">Threshold</dt>
-            <dd class="col-sm-9">@Model.Threshold</dd>
-        </dl>
-
-        <form method="post" class="mt-4 d-flex gap-2">
-            <button class="btn btn-danger" type="submit">Delete</button>
+        <form method="post" class="alert-form-actions mt-4">
+            <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Delete alert</button>
             <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Cancel</a>
         </form>
+    </section>
 </div>
