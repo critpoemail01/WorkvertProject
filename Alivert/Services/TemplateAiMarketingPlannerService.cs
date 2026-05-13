@@ -55,15 +55,15 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
 
                 posts.Add(new MarketingPostSuggestion
                 {
-                    Platform = profile.Name,
+                    Platform = Clip(profile.Name, 40),
                     ScheduledForUtc = scheduledAt,
                     DayNumber = dayIndex,
-                    Title = $"{request.ProductName}: {TitleForAngle(angle)}",
-                    Hook = HookFor(profile, request, angle),
-                    Caption = CaptionFor(profile, request, angle),
-                    CreativeBrief = CreativeBriefFor(profile, request, angle),
-                    Hashtags = profile.Hashtags,
-                    CallToAction = CallToActionFor(request),
+                    Title = Clip($"{request.ProductName}: {TitleForAngle(angle)}", 140),
+                    Hook = Clip(HookFor(profile, request, angle), 300),
+                    Caption = Clip(CaptionFor(profile, request, angle), 1600),
+                    CreativeBrief = Clip(CreativeBriefFor(profile, request, angle), 900),
+                    Hashtags = Clip(profile.Hashtags, 300),
+                    CallToAction = Clip(CallToActionFor(request), 180),
                     Status = "Draft",
                     EstimatedReach = reach,
                     EstimatedInteractions = interactions,
@@ -128,10 +128,10 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
             {
                 ScheduledForUtc = date.ToDateTime(new TimeOnly(9, 30), DateTimeKind.Utc),
                 DayNumber = offsets[i] + 1,
-                Subject = SubjectFor(request, theme.Item1),
-                PreviewText = theme.Item2,
-                Body = EmailBodyFor(request, theme.Item1),
-                AudienceSegment = string.IsNullOrWhiteSpace(request.EmailAudience) ? "Suggested outbound audience" : "Provided potential-client list",
+                Subject = Clip(SubjectFor(request, theme.Item1), 160),
+                PreviewText = Clip(theme.Item2, 220),
+                Body = Clip(EmailBodyFor(request, theme.Item1), 4000),
+                AudienceSegment = Clip(string.IsNullOrWhiteSpace(request.EmailAudience) ? "Suggested outbound audience" : "Provided potential-client list", 160),
                 Status = "Draft",
                 EstimatedReach = reach,
                 EstimatedInteractions = Math.Max(1, (int)Math.Round(reach * 0.18m)),
@@ -158,11 +158,11 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         {
             leads.Add(new MarketingLeadSuggestion
             {
-                CompanyProfile = $"{industries[i]} company with visible online acquisition needs",
-                Industry = industries[i],
-                ContactRole = roles[i % roles.Length],
-                EmailSearchHint = $"Search '{industries[i]} {roles[i % roles.Length]} email' or LinkedIn company pages",
-                Reason = $"{request.ProductName} can be positioned around '{request.ValueProposition}' for this segment.",
+                CompanyProfile = Clip($"{industries[i]} company with visible online acquisition needs", 160),
+                Industry = Clip(industries[i], 120),
+                ContactRole = Clip(roles[i % roles.Length], 120),
+                EmailSearchHint = Clip($"Search '{industries[i]} {roles[i % roles.Length]} email' or LinkedIn company pages", 180),
+                Reason = Clip($"{request.ProductName} can be positioned around '{request.ValueProposition}' for this segment.", 500),
                 Status = "Suggested"
             });
         }
@@ -288,6 +288,14 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         return audience
             .Split(new[] { '\r', '\n', ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Count(contact => !string.IsNullOrWhiteSpace(contact));
+    }
+
+    private static string Clip(string value, int maxLength)
+    {
+        if (value.Length <= maxLength)
+            return value;
+
+        return value[..Math.Max(0, maxLength - 3)].TrimEnd() + "...";
     }
 
     private sealed record PlatformProfile(
