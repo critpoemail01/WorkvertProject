@@ -1,9 +1,13 @@
+using Alivert.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Alivert.Migrations
 {
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260513190000_MarketingCampaignSourceLength")]
     public partial class MarketingCampaignSourceLength : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

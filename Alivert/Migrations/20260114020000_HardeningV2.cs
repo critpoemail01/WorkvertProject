@@ -1,10 +1,14 @@
 using System;
+using Alivert.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Alivert.Migrations
 {
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260114020000_HardeningV2")]
     public partial class HardeningV2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
