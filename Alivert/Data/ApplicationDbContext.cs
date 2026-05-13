@@ -14,6 +14,10 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<AlertDeliveryLog> AlertDeliveryLogs => Set<AlertDeliveryLog>();
     public DbSet<CreditPurchase> CreditPurchases => Set<CreditPurchase>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
+    public DbSet<MarketingPlan> MarketingPlans => Set<MarketingPlan>();
+    public DbSet<MarketingPostSuggestion> MarketingPostSuggestions => Set<MarketingPostSuggestion>();
+    public DbSet<MarketingEmailSuggestion> MarketingEmailSuggestions => Set<MarketingEmailSuggestion>();
+    public DbSet<MarketingLeadSuggestion> MarketingLeadSuggestions => Set<MarketingLeadSuggestion>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
     public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
     public DbSet<UserNotificationSettings> UserNotificationSettings => Set<UserNotificationSettings>();
@@ -94,6 +98,39 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                     transaction.CreatedAtUtc = now;
                 }
             }
+            else if (entry.Entity is MarketingPlan marketingPlan)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (marketingPlan.CreatedAtUtc == default) marketingPlan.CreatedAtUtc = now;
+                    marketingPlan.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    marketingPlan.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is MarketingPostSuggestion postSuggestion)
+            {
+                if (entry.State == EntityState.Added && postSuggestion.CreatedAtUtc == default)
+                {
+                    postSuggestion.CreatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is MarketingEmailSuggestion emailSuggestion)
+            {
+                if (entry.State == EntityState.Added && emailSuggestion.CreatedAtUtc == default)
+                {
+                    emailSuggestion.CreatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is MarketingLeadSuggestion leadSuggestion)
+            {
+                if (entry.State == EntityState.Added && leadSuggestion.CreatedAtUtc == default)
+                {
+                    leadSuggestion.CreatedAtUtc = now;
+                }
+            }
             else if (entry.Entity is SupportTicket ticket)
             {
                 if (entry.State == EntityState.Added)
@@ -162,6 +199,45 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasIndex(x => x.Reference)
             .IsUnique()
             .HasFilter("[Reference] IS NOT NULL");
+
+        builder.Entity<MarketingPlan>()
+            .HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+
+        builder.Entity<MarketingPlan>()
+            .HasIndex(x => new { x.UserId, x.Status });
+
+        builder.Entity<MarketingPostSuggestion>()
+            .HasIndex(x => new { x.MarketingPlanId, x.ScheduledForUtc });
+
+        builder.Entity<MarketingPostSuggestion>()
+            .HasIndex(x => new { x.Status, x.ScheduledForUtc });
+
+        builder.Entity<MarketingPostSuggestion>()
+            .HasOne(x => x.MarketingPlan)
+            .WithMany(x => x.Posts)
+            .HasForeignKey(x => x.MarketingPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MarketingEmailSuggestion>()
+            .HasIndex(x => new { x.MarketingPlanId, x.ScheduledForUtc });
+
+        builder.Entity<MarketingEmailSuggestion>()
+            .HasIndex(x => new { x.Status, x.ScheduledForUtc });
+
+        builder.Entity<MarketingEmailSuggestion>()
+            .HasOne(x => x.MarketingPlan)
+            .WithMany(x => x.Emails)
+            .HasForeignKey(x => x.MarketingPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MarketingLeadSuggestion>()
+            .HasIndex(x => new { x.MarketingPlanId, x.Industry });
+
+        builder.Entity<MarketingLeadSuggestion>()
+            .HasOne(x => x.MarketingPlan)
+            .WithMany(x => x.Leads)
+            .HasForeignKey(x => x.MarketingPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<AlertTrigger>()
             .HasIndex(t => new { t.AlertId, t.TriggeredAtUtc });

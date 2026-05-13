@@ -1,0 +1,227 @@
+@page "{id:int}"
+@model Alivert.Pages.App.Planner.DetailsModel
+@{
+    ViewData["Title"] = "AI plan";
+}
+
+<section class="app-page-hero ai-planner-hero">
+    <div>
+        <span class="tag mb-3">AI plan</span>
+        <h1 class="hero-title fw-bold mb-2">@Model.Plan.ProductName</h1>
+        <p class="lead muted mb-0">@Model.Plan.TargetAudience</p>
+    </div>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index"><i class="bi bi-arrow-left me-1"></i>Planner</a>
+        <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
+            <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all</button>
+        </form>
+    </div>
+</section>
+
+<section class="surface dashboard-plan-card mt-4">
+    <div class="dashboard-plan-main">
+        <span class="app-stat-icon dashboard-plan-icon"><i class="bi bi-stars"></i></span>
+        <div>
+            <div class="app-stat-label">Plan status</div>
+            <h2>@Model.Plan.Status</h2>
+            <p>@Model.Plan.StartDate.ToString("MMM d, yyyy") - @Model.Plan.EndDate.ToString("MMM d, yyyy") · @Model.Plan.Platforms.Replace(",", ", ") · @FrequencyLabel(Model.Plan.Frequency)</p>
+        </div>
+    </div>
+    <div class="planner-metric-strip">
+        <div><strong>@Model.Metrics.Drafts</strong><span>draft</span></div>
+        <div><strong>@Model.Metrics.Approved</strong><span>approved</span></div>
+        <div><strong>@Model.Metrics.Scheduled</strong><span>scheduled</span></div>
+        <div><strong>@Model.Metrics.Published</strong><span>live/sent</span></div>
+    </div>
+    <div class="dashboard-plan-actions">
+        <form method="post" asp-page-handler="ScheduleApproved" asp-route-id="@Model.Plan.Id">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-calendar-check me-1"></i>Schedule approved</button>
+        </form>
+        <form method="post" asp-page-handler="PublishDue" asp-route-id="@Model.Plan.Id">
+            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-send-check me-1"></i>Publish due now</button>
+        </form>
+    </div>
+</section>
+
+<div class="dashboard-stat-grid mt-4">
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-broadcast"></i></span>
+        <div>
+            <div class="app-stat-label">Reached by this plan</div>
+            <div class="app-stat-value">@Model.Metrics.Reach</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-chat-dots"></i></span>
+        <div>
+            <div class="app-stat-label">Interactions</div>
+            <div class="app-stat-value">@Model.Metrics.Interactions</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-bag-check"></i></span>
+        <div>
+            <div class="app-stat-label">Subscriptions/purchases</div>
+            <div class="app-stat-value">@Model.Metrics.Conversions</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-envelope-paper"></i></span>
+        <div>
+            <div class="app-stat-label">Email templates</div>
+            <div class="app-stat-value">@Model.Plan.Emails.Count</div>
+        </div>
+    </div>
+</div>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Suggested social calendar</h2>
+            <p>Every item is platform-specific and stays in draft until approved.</p>
+        </div>
+    </div>
+
+    <div class="planner-calendar">
+        @foreach (var day in Model.Plan.Posts.GroupBy(x => x.ScheduledForUtc.Date))
+        {
+            <article class="planner-day">
+                <div class="planner-day-head">
+                    <strong>@day.Key.ToString("ddd, MMM d")</strong>
+                    <span>@day.Count() post@(day.Count() == 1 ? "" : "s")</span>
+                </div>
+                <div class="planner-post-grid">
+                    @foreach (var post in day)
+                    {
+                        <div class="planner-post-card">
+                            <div class="planner-post-head">
+                                <span class="planner-platform">@PlatformIcon(post.Platform) @post.Platform</span>
+                                <span class="badge @StatusClass(post.Status)">@post.Status</span>
+                            </div>
+                            <h3>@post.Title</h3>
+                            <p class="planner-hook">@post.Hook</p>
+                            <p>@post.Caption</p>
+                            <small>@post.CreativeBrief</small>
+                            <div class="planner-tags">@post.Hashtags</div>
+                            <div class="planner-card-footer">
+                                <span>@post.EstimatedReach reach · @post.EstimatedInteractions interactions · @post.EstimatedConversions conversions</span>
+                                @if (post.Status == "Draft")
+                                {
+                                    <form method="post" asp-page-handler="ApprovePost" asp-route-id="@Model.Plan.Id">
+                                        <input type="hidden" name="postId" value="@post.Id" />
+                                        <button class="btn btn-sm btn-outline-secondary" type="submit">Approve</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
+<div class="planner-two-col mt-4">
+    <section class="surface app-panel">
+        <div class="app-panel-header">
+            <div>
+                <h2>Email sequence</h2>
+                <p>Templates for different days in the campaign.</p>
+            </div>
+        </div>
+
+        <div class="planner-email-list">
+            @foreach (var email in Model.Plan.Emails)
+            {
+                <article class="planner-email-card">
+                    <div class="planner-post-head">
+                        <span>Day @email.DayNumber · @email.ScheduledForUtc.ToLocalTime().ToString("MMM d, HH:mm")</span>
+                        <span class="badge @StatusClass(email.Status)">@email.Status</span>
+                    </div>
+                    <h3>@email.Subject</h3>
+                    <p class="muted">@email.PreviewText</p>
+                    <pre>@email.Body</pre>
+                    <div class="planner-card-footer">
+                        <span>@email.EstimatedReach reach · @email.EstimatedInteractions interactions · @email.EstimatedConversions conversions</span>
+                        @if (email.Status == "Draft")
+                        {
+                            <form method="post" asp-page-handler="ApproveEmail" asp-route-id="@Model.Plan.Id">
+                                <input type="hidden" name="emailId" value="@email.Id" />
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">Approve</button>
+                            </form>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="surface app-panel">
+        <div class="app-panel-header">
+            <div>
+                <h2>Lead suggestions</h2>
+                <p>Company profiles, areas and roles to search for outbound email lists.</p>
+            </div>
+        </div>
+
+        <div class="planner-lead-list">
+            @foreach (var lead in Model.Plan.Leads)
+            {
+                <article class="planner-lead-card">
+                    <div class="planner-post-head">
+                        <span>@lead.Industry</span>
+                        <span class="badge @StatusClass(lead.Status)">@lead.Status</span>
+                    </div>
+                    <h3>@lead.CompanyProfile</h3>
+                    <p><strong>Role:</strong> @lead.ContactRole</p>
+                    <p><strong>Email search:</strong> @lead.EmailSearchHint</p>
+                    <p class="muted">@lead.Reason</p>
+                    @if (lead.Status == "Suggested")
+                    {
+                        <form method="post" asp-page-handler="ApproveLead" asp-route-id="@Model.Plan.Id">
+                            <input type="hidden" name="leadId" value="@lead.Id" />
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">Accept target</button>
+                        </form>
+                    }
+                </article>
+            }
+        </div>
+    </section>
+</div>
+
+@functions {
+    private static string FrequencyLabel(string frequency)
+    {
+        return frequency switch
+        {
+            "Weekdays" => "weekdays",
+            "ThreePerWeek" => "3 times per week",
+            "Weekly" => "weekly",
+            _ => "daily"
+        };
+    }
+
+    private static string StatusClass(string status)
+    {
+        return status switch
+        {
+            "Published" or "Sent" => "text-bg-success",
+            "Scheduled" => "text-bg-info",
+            "Approved" or "Accepted" => "text-bg-primary",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    private static string PlatformIcon(string platform)
+    {
+        return platform switch
+        {
+            "TikTok" => "TT",
+            "Instagram" => "IG",
+            "Facebook" => "f",
+            "LinkedIn" => "in",
+            "YouTube Shorts" => "YT",
+            _ => "#"
+        };
+    }
+}

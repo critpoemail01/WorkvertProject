@@ -30,6 +30,9 @@ public class DashboardModel : PageModel
     public int UsersReached { get; private set; }
     public int UsersInteracted { get; private set; }
     public int UsersConverted { get; private set; }
+    public int AiPlans { get; private set; }
+    public int ScheduledAiItems { get; private set; }
+    public int PublishedAiItems { get; private set; }
     public string ConversionRateLabel { get; private set; } = "0.0%";
     public bool IsUnlimitedPlan { get; private set; }
     public string PlanName { get; private set; } = "Basic (Free)";
@@ -42,9 +45,11 @@ public class DashboardModel : PageModel
 
     public List<TriggerRow> LatestTriggers { get; private set; } = new();
     public List<DeliveryRow> LatestDeliveries { get; private set; } = new();
+    public List<AiPlanRow> LatestAiPlans { get; private set; } = new();
 
     public record TriggerRow(DateTime TriggeredAtUtc, string Symbol, string Message);
     public record DeliveryRow(DateTime CreatedAtUtc, string Symbol, string Channel, string Status, string? ErrorMessage);
+    public record AiPlanRow(int Id, string ProductName, string Status, int Posts, int Emails, DateTime CreatedAtUtc);
 
     public async Task OnGetAsync()
     {
@@ -90,9 +95,39 @@ public class DashboardModel : PageModel
             .ToListAsync();
         var directAudienceContacts = audienceLists.Sum(CountAudienceContacts);
 
-        UsersReached = (ActiveAlerts * 2500) + (successfulDeliveriesLast7Days * 350) + (TriggersLast7Days * 150) + directAudienceContacts;
+        AiPlans = await _db.MarketingPlans
+            .AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .CountAsync();
+
+        ScheduledAiItems =
+            await _db.MarketingPostSuggestions.AsNoTracking().CountAsync(x => x.MarketingPlan!.UserId == userId && x.Status == "Scheduled") +
+            await _db.MarketingEmailSuggestions.AsNoTracking().CountAsync(x => x.MarketingPlan!.UserId == userId && x.Status == "Scheduled");
+
+        PublishedAiItems =
+            await _db.MarketingPostSuggestions.AsNoTracking().CountAsync(x => x.MarketingPlan!.UserId == userId && x.Status == "Published") +
+            await _db.MarketingEmailSuggestions.AsNoTracking().CountAsync(x => x.MarketingPlan!.UserId == userId && x.Status == "Sent");
+
+        var aiPostMetrics = await _db.MarketingPostSuggestions
+            .AsNoTracking()
+            .Where(x => x.MarketingPlan!.UserId == userId && x.Status == "Published")
+            .Select(x => new { x.EstimatedReach, x.EstimatedInteractions, x.EstimatedConversions })
+            .ToListAsync();
+
+        var aiEmailMetrics = await _db.MarketingEmailSuggestions
+            .AsNoTracking()
+            .Where(x => x.MarketingPlan!.UserId == userId && x.Status == "Sent")
+            .Select(x => new { x.EstimatedReach, x.EstimatedInteractions, x.EstimatedConversions })
+            .ToListAsync();
+
+        var aiReach = aiPostMetrics.Sum(x => x.EstimatedReach) + aiEmailMetrics.Sum(x => x.EstimatedReach);
+        var aiInteractions = aiPostMetrics.Sum(x => x.EstimatedInteractions) + aiEmailMetrics.Sum(x => x.EstimatedInteractions);
+        var aiConversions = aiPostMetrics.Sum(x => x.EstimatedConversions) + aiEmailMetrics.Sum(x => x.EstimatedConversions);
+
+        UsersReached = (ActiveAlerts * 2500) + (successfulDeliveriesLast7Days * 350) + (TriggersLast7Days * 150) + directAudienceContacts + aiReach;
         UsersInteracted = UsersReached == 0 ? 0 : Math.Max(1, (int)Math.Round(UsersReached * 0.12m));
-        UsersConverted = UsersInteracted == 0 ? 0 : Math.Max(0, (int)Math.Round(UsersInteracted * 0.18m));
+        UsersInteracted += aiInteractions;
+        UsersConverted = UsersInteracted == 0 ? 0 : Math.Max(0, (int)Math.Round(UsersInteracted * 0.18m)) + aiConversions;
         ConversionRateLabel = UsersReached == 0
             ? "0.0%"
             : $"{(decimal)UsersConverted / UsersReached:P1}";
@@ -111,6 +146,14 @@ public class DashboardModel : PageModel
             .OrderByDescending(t => t.CreatedAtUtc)
             .Take(10)
             .Select(t => new DeliveryRow(t.CreatedAtUtc, t.Symbol, t.Channel, t.Status, t.ErrorMessage))
+            .ToListAsync();
+
+        LatestAiPlans = await _db.MarketingPlans
+            .AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .Take(6)
+            .Select(x => new AiPlanRow(x.Id, x.ProductName, x.Status, x.Posts.Count, x.Emails.Count, x.CreatedAtUtc))
             .ToListAsync();
     }
 

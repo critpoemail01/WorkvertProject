@@ -91,6 +91,7 @@ builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
 builder.Services.AddSingleton<ITechnicalIndicatorService, TechnicalIndicatorService>();
 builder.Services.AddSingleton<ISymbolCatalogService, SymbolCatalogService>();
 builder.Services.AddSingleton<IAlertRuleEngine, AlertRuleEngine>();
+builder.Services.AddSingleton<IAiMarketingPlannerService, TemplateAiMarketingPlannerService>();
 builder.Services.AddScoped<IAlertDispatcher, AlertDispatcher>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 
@@ -98,6 +99,7 @@ builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 if (!EF.IsDesignTime)
 {
     builder.Services.AddHostedService<AlertEvaluatorWorker>();
+    builder.Services.AddHostedService<MarketingPublishingWorker>();
 }
 
 var app = builder.Build();

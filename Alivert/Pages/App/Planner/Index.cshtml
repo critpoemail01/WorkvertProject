@@ -1,0 +1,201 @@
+@page
+@model Alivert.Pages.App.Planner.IndexModel
+@{
+    ViewData["Title"] = "AI campaign planner";
+}
+
+<section class="app-page-hero ai-planner-hero">
+    <div>
+        <span class="tag mb-3">AI campaign planner</span>
+        <h1 class="hero-title fw-bold mb-2">Generate a month of posts, emails and lead ideas.</h1>
+        <p class="lead muted mb-0">Give Promovert the product, audience and goal. It drafts daily platform-specific content, email sequences and prospecting targets for approval.</p>
+    </div>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard"><i class="bi bi-bar-chart me-1"></i>Dashboard</a>
+    </div>
+</section>
+
+<div class="planner-layout mt-4">
+    <form method="post" asp-page-handler="Generate" class="surface app-panel planner-form">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="app-panel-header">
+            <div>
+                <h2>Campaign intelligence</h2>
+                <p>These inputs become the LLM brief for every post, video script, email and lead suggestion.</p>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Input.ProductName" class="form-label"></label>
+                <input asp-for="Input.ProductName" class="form-control" placeholder="Promovert, Acme CRM, AI invoicing..." />
+                <span asp-validation-for="Input.ProductName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.ProductUrl" class="form-label"></label>
+                <input asp-for="Input.ProductUrl" class="form-control" placeholder="https://app.example.com" />
+                <span asp-validation-for="Input.ProductUrl" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Input.CompanyOrIdea" class="form-label"></label>
+                <textarea asp-for="Input.CompanyOrIdea" class="form-control" rows="3" placeholder="What the company/app does, business model and current stage"></textarea>
+                <span asp-validation-for="Input.CompanyOrIdea" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.TargetAudience" class="form-label"></label>
+                <textarea asp-for="Input.TargetAudience" class="form-control" rows="4" placeholder="Founders, local clinics, B2B SaaS teams, ecommerce managers..."></textarea>
+                <span asp-validation-for="Input.TargetAudience" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.ValueProposition" class="form-label"></label>
+                <textarea asp-for="Input.ValueProposition" class="form-control" rows="4" placeholder="The main result, pain solved and why people should care"></textarea>
+                <span asp-validation-for="Input.ValueProposition" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.CampaignGoal" class="form-label"></label>
+                <input asp-for="Input.CampaignGoal" class="form-control" placeholder="subscriptions, demos, purchases..." />
+                <span asp-validation-for="Input.CampaignGoal" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.Tone" class="form-label"></label>
+                <input asp-for="Input.Tone" class="form-control" placeholder="direct, premium, educational..." />
+                <span asp-validation-for="Input.Tone" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.StartDate" class="form-label"></label>
+                <input asp-for="Input.StartDate" class="form-control" type="date" />
+                <span asp-validation-for="Input.StartDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.DurationDays" class="form-label"></label>
+                <select asp-for="Input.DurationDays" class="form-select">
+                    <option value="7">1 week</option>
+                    <option value="14">2 weeks</option>
+                    <option value="30">1 month</option>
+                    <option value="60">2 months</option>
+                    <option value="90">3 months</option>
+                </select>
+                <span asp-validation-for="Input.DurationDays" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.Frequency" class="form-label"></label>
+                <select asp-for="Input.Frequency" class="form-select">
+                    <option value="Daily">Every day</option>
+                    <option value="Weekdays">Weekdays</option>
+                    <option value="ThreePerWeek">3 times per week</option>
+                    <option value="Weekly">Weekly</option>
+                </select>
+                <span asp-validation-for="Input.Frequency" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Networks</label>
+                <div class="planner-platforms">
+                    @foreach (var platform in Model.PlatformOptions)
+                    {
+                        <label>
+                            <input type="checkbox" name="Input.Platforms" value="@platform" checked="@Model.Input.Platforms.Contains(platform)" />
+                            <span>@platform</span>
+                        </label>
+                    }
+                </div>
+                <span asp-validation-for="Input.Platforms" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Input.EmailAudience" class="form-label"></label>
+                <textarea asp-for="Input.EmailAudience" class="form-control" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;marketing@empresa.pt"></textarea>
+                <div class="form-text">One email per line. Promovert generates a multi-day sequence and estimates reach, replies/interactions and conversions.</div>
+                <span asp-validation-for="Input.EmailAudience" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="alert-form-actions mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-stars me-1"></i>Generate AI plan</button>
+            <span class="muted">Suggestions stay in draft until you approve them.</span>
+        </div>
+    </form>
+
+    <aside class="surface app-panel planner-side">
+        <span class="tag">What gets generated</span>
+        <div class="planner-feature">
+            <i class="bi bi-calendar2-week"></i>
+            <div>
+                <strong>Publishing calendar</strong>
+                <span>Posts and video scripts for each selected network across the selected period.</span>
+            </div>
+        </div>
+        <div class="planner-feature">
+            <i class="bi bi-check2-square"></i>
+            <div>
+                <strong>Approval workflow</strong>
+                <span>Review drafts, approve all, schedule approved content and publish due items.</span>
+            </div>
+        </div>
+        <div class="planner-feature">
+            <i class="bi bi-envelope-paper"></i>
+            <div>
+                <strong>Email sequence</strong>
+                <span>Multiple templates for different days, personalized with first-name placeholders.</span>
+            </div>
+        </div>
+        <div class="planner-feature">
+            <i class="bi bi-building-add"></i>
+            <div>
+                <strong>Lead ideas</strong>
+                <span>Suggested industries, roles and search prompts for prospecting.</span>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Recent AI plans</h2>
+            <p>Open a plan to approve, schedule or inspect suggested content.</p>
+        </div>
+    </div>
+
+    @if (!Model.RecentPlans.Any())
+    {
+        <div class="empty-state compact">
+            <i class="bi bi-stars"></i>
+            <span>No AI plans yet.</span>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Period</th>
+                        <th>Platforms</th>
+                        <th>Output</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var plan in Model.RecentPlans)
+                {
+                    <tr>
+                        <td>@plan.ProductName</td>
+                        <td>@plan.StartDate.ToString("MMM d") - @plan.EndDate.ToString("MMM d")</td>
+                        <td>@plan.Platforms.Replace(",", ", ")</td>
+                        <td>@plan.Posts posts / @plan.Emails emails</td>
+                        <td><span class="badge text-bg-secondary">@plan.Status</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Open</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
