@@ -120,7 +120,7 @@ public class SettingsModel : PageModel
         settings.AlertTimeZone = TimeZoneCatalog.Normalize(Input.AlertTimeZone);
 
         await _db.SaveChangesAsync();
-        StatusMessage = "Notification settings saved.";
+        StatusMessage = "Marketing channel settings saved.";
         return RedirectToPage();
     }
 

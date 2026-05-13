@@ -96,7 +96,7 @@ public class AlertDispatcherTests
         Assert.Equal("Slack", delivery.Channel);
         Assert.Equal("Slack webhook", delivery.Destination);
         Assert.Equal("https://hooks.slack.test/services/T000/B000/secret", request?.RequestUri?.ToString());
-        Assert.Contains("Alivert alert", requestBody);
+        Assert.Contains("Promovert campaign", requestBody);
         Assert.Contains("BTCUSDT", requestBody);
     }
 

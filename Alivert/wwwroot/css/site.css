@@ -1,15 +1,15 @@
 :root {
-  --alivert-bg: #050912;
-  --alivert-surface: rgba(15, 23, 42, 0.76);
-  --alivert-surface-solid: #0d1626;
-  --alivert-surface-2: #111d31;
+  --alivert-bg: #101112;
+  --alivert-surface: rgba(24, 29, 35, 0.82);
+  --alivert-surface-solid: #171c22;
+  --alivert-surface-2: #20262d;
   --alivert-border: rgba(255, 255, 255, 0.10);
   --alivert-text: rgba(255, 255, 255, 0.90);
   --alivert-text-muted: rgba(225, 235, 245, 0.66);
-  --alivert-accent: #2dd4bf;
-  --alivert-accent-2: #38bdf8;
-  --alivert-positive: #4ade80;
-  --alivert-warm: #fbbf24;
+  --alivert-accent: #14b8a6;
+  --alivert-accent-2: #f97316;
+  --alivert-positive: #84cc16;
+  --alivert-warm: #f59e0b;
   --alivert-rose: #fb7185;
   --alivert-radius: 14px;
   --alivert-radius-sm: 10px;
@@ -23,9 +23,8 @@ html, body {
 body {
   color: var(--alivert-text);
   background:
-      radial-gradient(900px 520px at 8% 0%, rgba(45, 212, 191, 0.18), transparent 60%),
-      radial-gradient(780px 520px at 92% 8%, rgba(56, 189, 248, 0.16), transparent 62%),
-      linear-gradient(180deg, rgba(15, 23, 42, 0.72), transparent 48%),
+      linear-gradient(135deg, rgba(20, 184, 166, 0.12), transparent 30%, rgba(249, 115, 22, 0.10) 68%, transparent 100%),
+      linear-gradient(180deg, rgba(17, 20, 24, 0.98), rgba(16, 17, 18, 0.98) 54%, rgba(18, 24, 20, 0.98)),
       var(--alivert-bg);
   min-height: 100vh;
 }
@@ -3402,7 +3401,7 @@ a { text-decoration: none; }
     overflow: hidden;
   }
   .alivert-nav .navbar-collapse::before {
-    content: "Menu open · Market alerts platform";
+    content: "Menu open - Promovert campaign workspace";
     display: flex;
     align-items: center;
     min-height: 34px;

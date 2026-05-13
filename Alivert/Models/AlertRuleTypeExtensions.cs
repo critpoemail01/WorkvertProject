@@ -42,18 +42,18 @@ public static class AlertRuleTypeExtensions
     {
         return ruleType switch
         {
-            AlertRuleType.PriceAbove => "Price above",
-            AlertRuleType.PriceBelow => "Price below",
-            AlertRuleType.PercentDrop24h => "24h percent drop",
-            AlertRuleType.PercentRise24h => "24h percent rise",
-            AlertRuleType.VolumeAbove24h => "24h volume above",
-            AlertRuleType.PriceZone => "Price zone",
-            AlertRuleType.RsiBelow => "RSI below",
-            AlertRuleType.RsiAbove => "RSI above",
-            AlertRuleType.RsiOversoldEmaCrossUp => "RSI oversold then EMA cross up",
-            AlertRuleType.RsiOverboughtEmaCrossDown => "RSI overbought then EMA cross down",
-            AlertRuleType.EmaCrossUp => "EMA cross up",
-            AlertRuleType.EmaCrossDown => "EMA cross down",
+            AlertRuleType.PriceAbove => "TikTok short video",
+            AlertRuleType.PriceBelow => "Instagram post/reel",
+            AlertRuleType.PercentDrop24h => "Facebook campaign",
+            AlertRuleType.PercentRise24h => "LinkedIn post",
+            AlertRuleType.VolumeAbove24h => "Personalized email",
+            AlertRuleType.PriceZone => "SMS promotion",
+            AlertRuleType.RsiBelow => "Retargeting audience",
+            AlertRuleType.RsiAbove => "Launch announcement",
+            AlertRuleType.RsiOversoldEmaCrossUp => "Influencer brief",
+            AlertRuleType.RsiOverboughtEmaCrossDown => "Lead nurture sequence",
+            AlertRuleType.EmaCrossUp => "Multi-channel push",
+            AlertRuleType.EmaCrossDown => "Win-back campaign",
             _ => ruleType.ToString()
         };
     }

@@ -69,7 +69,7 @@ builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection
 builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection("Payments"));
 builder.Services.AddHttpClient("market-data", client =>
 {
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; Alivert/1.0; +https://alivert.local)");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; Promovert/1.0; +https://promovert.local)");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 });
 builder.Services.AddHttpClient("notifications");
@@ -85,7 +85,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 
-// Market data + rules + notifications (MVP: fake market + DB triggers)
+// Campaign activity + delivery workflow (MVP: existing trigger engine + DB activity records)
 builder.Services.AddSingleton<FakeMarketDataService>();
 builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
 builder.Services.AddSingleton<ITechnicalIndicatorService, TechnicalIndicatorService>();

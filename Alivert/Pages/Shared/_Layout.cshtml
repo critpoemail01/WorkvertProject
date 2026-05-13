@@ -24,7 +24,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Alivert</title>
+    <title>@ViewData["Title"] - Promovert</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -40,13 +40,13 @@
 <header>
     <nav class="navbar navbar-expand-lg alivert-nav">
         <div class="container">
-            <a class="navbar-brand brand-lockup" asp-page="/Index" aria-label="Alivert home">
+            <a class="navbar-brand brand-lockup" asp-page="/Index" aria-label="Promovert home">
                 <span class="brand-mark">
                     <img src="~/assets/brand/alivert_brand_mark.svg" width="42" height="42" asp-append-version="true" alt="" />
                 </span>
                 <span class="brand-wordmark">
-                    <span class="brand-title">Alivert<sup>TM</sup></span>
-                    <span class="brand-subtitle">Market Alert Engine</span>
+                    <span class="brand-title">Promovert<sup>TM</sup></span>
+                    <span class="brand-subtitle">Online Campaign Engine</span>
                 </span>
             </a>
             <button class="navbar-toggler alivert-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Open navigation menu">
@@ -82,18 +82,18 @@
     <div class="container">
         <div class="footer-main">
             <div class="footer-brand-panel">
-                <a class="brand-lockup footer-brand" asp-page="/Index" aria-label="Alivert home">
+                <a class="brand-lockup footer-brand" asp-page="/Index" aria-label="Promovert home">
                     <span class="brand-mark footer-brand-mark">
                         <img src="~/assets/brand/alivert_brand_mark.svg" width="48" height="48" asp-append-version="true" alt="" />
                     </span>
                     <span class="brand-wordmark">
-                        <span class="brand-title">Alivert<sup>TM</sup></span>
-                        <span class="brand-subtitle">Market Alert Engine</span>
+                        <span class="brand-title">Promovert<sup>TM</sup></span>
+                        <span class="brand-subtitle">Online Campaign Engine</span>
                     </span>
                 </a>
-                <p>Crypto and traditional market alerts with price zones, RSI and EMA cross confirmations.</p>
+                <p>Campaign creation, social content, personalized outreach and conversion tracking for online applications.</p>
                 <div class="footer-badges">
-                    <span><i class="bi bi-lightning-charge-fill"></i> Real-time alert flow</span>
+                    <span><i class="bi bi-lightning-charge-fill"></i> Campaign workflow</span>
                     <span><i class="bi bi-shield-check"></i> Secure account area</span>
                 </div>
             </div>
@@ -109,14 +109,14 @@
                     <h2>Platform</h2>
                     <a class="footer-link" asp-page="/About">About</a>
                     <a class="footer-link" asp-page="/App/HelpDesk">Help desk</a>
-                    <a class="footer-link" asp-page="/App/Settings">Notifications</a>
+                    <a class="footer-link" asp-page="/App/Settings">Marketing channels</a>
                 </div>
                 <div>
                     <h2>Account</h2>
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
                         <a class="footer-link" asp-page="/App/Dashboard">Dashboard</a>
-                        <a class="footer-link" asp-page="/App/Alerts/Index">My alerts</a>
+                        <a class="footer-link" asp-page="/App/Alerts/Index">Campaigns</a>
                         <a class="footer-link" asp-page="/App/Billing">Subscription</a>
                     }
                     else
@@ -130,8 +130,8 @@
         </div>
 
         <div class="footer-bottom">
-            <span>&copy; @DateTime.Now.Year Alivert. All rights reserved.</span>
-            <span>Monitoring tool. Not financial advice.</span>
+            <span>&copy; @DateTime.Now.Year Promovert. All rights reserved.</span>
+            <span>Marketing workspace for campaign planning and measurement.</span>
         </div>
     </div>
 </footer>
@@ -151,8 +151,8 @@
               <img src="~/assets/brand/alivert_brand_mark.svg" width="36" height="36" asp-append-version="true" alt="" />
             </span>
             <span class="brand-wordmark">
-              <span class="brand-title">Alivert<sup>TM</sup></span>
-              <span class="brand-subtitle">Market Alert Engine</span>
+              <span class="brand-title">Promovert<sup>TM</sup></span>
+              <span class="brand-subtitle">Online Campaign Engine</span>
             </span>
             <span class="auth-security-badge">Secure access</span>
           </div>
@@ -174,7 +174,7 @@
             <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
               <div class="auth-copy">
                 <h2>Welcome back</h2>
-                <p>Sign in to manage alerts, billing and delivery settings.</p>
+                <p>Sign in to manage campaigns, billing and marketing channels.</p>
               </div>
 
               <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
@@ -221,7 +221,7 @@
             <div class="tab-pane fade" id="pane-register" role="tabpanel">
               <div class="auth-copy">
                 <h2>Create your account</h2>
-                <p>Start with free credits and upgrade when your alert setup grows.</p>
+                <p>Start with free credits and upgrade when your campaign workflow grows.</p>
               </div>
 
               <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
@@ -266,15 +266,15 @@
         <aside class="auth-aside">
           <div class="auth-aside-badge">
             <i class="bi bi-lightning-charge-fill"></i>
-            Live market alerts
+            Growth campaigns
           </div>
-          <h3>Turn price movement into fast decisions.</h3>
-          <p>Monitor crypto and traditional markets with RSI, EMA cross and price-zone alerts from one dashboard.</p>
+          <h3>Turn any product idea into a measurable acquisition workflow.</h3>
+          <p>Create posts, videos, emails and SMS campaigns, then track reach, engagement and conversions from one dashboard.</p>
 
           <div class="auth-metric-grid">
             <div>
               <span>5</span>
-              <small>free credits</small>
+              <small>free campaigns</small>
             </div>
             <div>
               <span>EUR 50</span>
@@ -283,8 +283,8 @@
           </div>
 
           <div class="auth-aside-list">
-            <div><i class="bi bi-check2"></i> Binance and Yahoo Finance symbols</div>
-            <div><i class="bi bi-check2"></i> Email, Telegram, Discord and webhook delivery</div>
+            <div><i class="bi bi-check2"></i> URL, company or business idea input</div>
+            <div><i class="bi bi-check2"></i> TikTok, Instagram, Facebook, LinkedIn, email and SMS</div>
             <div><i class="bi bi-check2"></i> Annual unlimited plan for EUR 300</div>
           </div>
         </div>

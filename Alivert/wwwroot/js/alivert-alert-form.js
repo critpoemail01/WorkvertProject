@@ -1,72 +1,72 @@
 (() => {
   const configs = {
     PriceAbove: {
-      fields: ['threshold'],
-      label: 'Price level',
-      help: 'Triggers when the latest market price is at or above this value.',
-      summary: 'Price alert: choose the price level that should trigger the notification.'
+      fields: ['threshold', 'ema'],
+      label: 'Target reach',
+      help: 'Estimated users to reach with TikTok short-form content.',
+      summary: 'TikTok campaign: generate hooks, short scripts and a fast call to action for discovery.'
     },
     PriceBelow: {
-      fields: ['threshold'],
-      label: 'Price level',
-      help: 'Triggers when the latest market price is at or below this value.',
-      summary: 'Price alert: choose the price level that should trigger the notification.'
+      fields: ['threshold', 'ema'],
+      label: 'Target engagement',
+      help: 'Expected profile visits, saves, replies or link taps from Instagram content.',
+      summary: 'Instagram campaign: prepare posts, reels and captions built for interaction.'
     },
     PercentDrop24h: {
-      fields: ['threshold'],
-      label: '24h drop percent',
-      help: 'Use a negative value such as -3 for a 3% drop.',
-      summary: 'Percent alert: compares the current 24h percentage change with your limit.'
+      fields: ['threshold', 'zone'],
+      label: 'Target reach',
+      help: 'Expected users reached by Facebook ads or organic posts.',
+      summary: 'Facebook campaign: package the offer, audience angle and follow-up message.'
     },
     PercentRise24h: {
-      fields: ['threshold'],
-      label: '24h rise percent',
-      help: 'Use a positive value such as 3 for a 3% rise.',
-      summary: 'Percent alert: compares the current 24h percentage change with your limit.'
+      fields: ['threshold', 'rsi'],
+      label: 'Target leads',
+      help: 'Expected professional leads or demo requests from LinkedIn.',
+      summary: 'LinkedIn campaign: write credible B2B posts, founder updates and outreach angles.'
     },
     VolumeAbove24h: {
-      fields: ['threshold'],
-      label: '24h volume threshold',
-      help: 'Triggers when the reported 24h volume is at or above this value.',
-      summary: 'Volume alert: watches 24h volume and fires when liquidity expands above your threshold.'
+      fields: ['threshold', 'rsi', 'ema'],
+      label: 'Target recipients',
+      help: 'Number of potential clients in the personalized email list.',
+      summary: 'Email campaign: create segmented copy, subject lines and follow-up steps.'
     },
     PriceZone: {
       fields: ['threshold', 'zone'],
-      label: 'Price zone center',
-      help: 'The center price for the zone. Zone percent creates a band around this value.',
-      summary: 'Price zone alert: fires when price enters the threshold band defined by zone percent.'
+      label: 'Target recipients',
+      help: 'Number of contacts to receive the SMS promotion.',
+      summary: 'SMS campaign: keep the offer short, urgent and easy to act on.'
     },
     RsiBelow: {
       fields: ['threshold', 'rsi'],
-      label: 'RSI below limit',
-      help: 'Triggers when RSI is at or below this value, usually 30 for oversold setups.',
-      summary: 'RSI alert: uses the RSI period and limit to detect oversold conditions.'
+      label: 'Retargeting audience',
+      help: 'Users to retarget after visiting, clicking or starting checkout.',
+      summary: 'Retargeting campaign: bring warm users back with a clear reason to return.'
     },
     RsiAbove: {
-      fields: ['threshold', 'rsi'],
-      label: 'RSI above limit',
-      help: 'Triggers when RSI is at or above this value, usually 70 for overbought setups.',
-      summary: 'RSI alert: uses the RSI period and limit to detect overbought conditions.'
+      fields: ['threshold', 'ema'],
+      label: 'Launch reach',
+      help: 'Expected users to reach during the launch announcement.',
+      summary: 'Launch campaign: coordinate social, email and direct messages around one release.'
     },
     EmaCrossUp: {
       fields: ['ema'],
-      summary: 'EMA alert: fires when the fast EMA crosses above the slow EMA.'
+      summary: 'Multi-channel push: prepare coordinated posts, emails and SMS touches.'
     },
     EmaCrossDown: {
       fields: ['ema'],
-      summary: 'EMA alert: fires when the fast EMA crosses below the slow EMA.'
+      summary: 'Win-back campaign: re-engage users who tried the product but did not convert.'
     },
     RsiOversoldEmaCrossUp: {
       fields: ['threshold', 'rsi', 'ema'],
-      label: 'Oversold RSI arm level',
-      help: 'Arms when RSI is at or below this level, then waits for fast EMA to cross above slow EMA.',
-      summary: 'RSI + EMA alert: first arms on oversold RSI, then triggers on bullish EMA confirmation.'
+      label: 'Influencer audience',
+      help: 'Expected audience size for creator, partner or affiliate content.',
+      summary: 'Influencer brief: define the hook, talking points and conversion path.'
     },
     RsiOverboughtEmaCrossDown: {
       fields: ['threshold', 'rsi', 'ema'],
-      label: 'Overbought RSI arm level',
-      help: 'Arms when RSI is at or above this level, then waits for fast EMA to cross below slow EMA.',
-      summary: 'RSI + EMA alert: first arms on overbought RSI, then triggers on bearish EMA confirmation.'
+      label: 'Nurture list size',
+      help: 'Potential clients to enter a lead nurture sequence.',
+      summary: 'Lead nurture sequence: turn interested users into subscribers or buyers.'
     }
   };
 

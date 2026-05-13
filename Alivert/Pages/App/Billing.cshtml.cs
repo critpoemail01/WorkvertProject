@@ -231,7 +231,7 @@ public class BillingModel : PageModel
 
         StatusMessage = purchase.Credits > 0
             ? $"{purchase.Credits} credits added for {CreditPackAccessDays} days."
-            : $"Unlimited alerts activated for {GetPurchaseUnlimitedPlan(purchase).DurationLabel}.";
+            : $"Unlimited campaigns activated for {GetPurchaseUnlimitedPlan(purchase).DurationLabel}.";
         return RedirectToPage();
     }
 

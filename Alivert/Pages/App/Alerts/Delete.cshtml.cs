@@ -21,7 +21,7 @@ public class DeleteAlertModel : PageModel
     }
 
     public string Symbol { get; private set; } = string.Empty;
-    public AlertRuleType RuleType { get; private set; }
+    public string RuleType { get; private set; } = string.Empty;
     public decimal Threshold { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(int id)
@@ -31,7 +31,7 @@ public class DeleteAlertModel : PageModel
         if (alert is null) return NotFound();
 
         Symbol = alert.Symbol;
-        RuleType = alert.RuleType;
+        RuleType = alert.RuleType.DisplayName();
         Threshold = alert.Threshold;
         return Page();
     }
@@ -42,7 +42,7 @@ public class DeleteAlertModel : PageModel
         var alert = await _db.Alerts.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
         if (alert is null) return NotFound();
 
-        // Optional: delete triggers too
+        // Optional: delete activity history too.
         var triggers = await _db.AlertTriggers.Where(t => t.AlertId == id).ToListAsync();
         _db.AlertTriggers.RemoveRange(triggers);
 

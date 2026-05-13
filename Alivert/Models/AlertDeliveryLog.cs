@@ -14,7 +14,7 @@ public class AlertDeliveryLog
     [Required, StringLength(450)]
     public string UserId { get; set; } = string.Empty;
 
-    [Required, StringLength(24)]
+    [Required, StringLength(180)]
     public string Symbol { get; set; } = string.Empty;
 
     [Required, StringLength(32)]

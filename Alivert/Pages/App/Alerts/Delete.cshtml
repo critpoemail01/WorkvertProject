@@ -1,46 +1,46 @@
 @page "{id:int}"
 @model Alivert.Pages.App.Alerts.DeleteAlertModel
 @{
-    ViewData["Title"] = "Delete alert";
+    ViewData["Title"] = "Delete campaign";
 }
 
 <div class="account-page">
     <section class="app-page-hero app-page-hero-danger">
         <div>
-            <span class="tag mb-3">Alert management</span>
-            <h1 class="hero-title fw-bold mb-2">Delete alert</h1>
+            <span class="tag mb-3">Campaign management</span>
+            <h1 class="hero-title fw-bold mb-2">Delete campaign</h1>
             <p class="lead muted mb-0">This action cannot be undone.</p>
         </div>
         <div class="app-page-hero-actions">
-            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Back to alerts</a>
+            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Back to campaigns</a>
         </div>
     </section>
 
     <section class="surface app-panel danger-panel mt-4">
         <div class="app-panel-header">
             <div>
-                <h2>Alert summary</h2>
-                <p>Review the rule before deleting it from your active setup.</p>
+                <h2>Campaign summary</h2>
+                <p>Review the campaign before deleting it from your active setup.</p>
             </div>
         </div>
 
         <div class="account-rows">
             <div class="account-row">
-                <span>Symbol</span>
+                <span>Source</span>
                 <strong>@Model.Symbol</strong>
             </div>
             <div class="account-row">
-                <span>Rule</span>
+                <span>Asset</span>
                 <strong>@Model.RuleType</strong>
             </div>
             <div class="account-row">
-                <span>Threshold</span>
+                <span>Goal</span>
                 <strong>@Model.Threshold</strong>
             </div>
         </div>
 
         <form method="post" class="alert-form-actions mt-4">
-            <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Delete alert</button>
+            <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Delete campaign</button>
             <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Cancel</a>
         </form>
     </section>

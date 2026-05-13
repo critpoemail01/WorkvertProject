@@ -11,7 +11,7 @@ public class AlertTrigger
 
     public DateTime TriggeredAtUtc { get; set; } = DateTime.UtcNow;
 
-    [Required, StringLength(240)]
+    [Required, StringLength(500)]
     public string Message { get; set; } = string.Empty;
 
     // For debugging/audit (MVP)

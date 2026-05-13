@@ -1,19 +1,19 @@
 @page
 @model Alivert.Pages.App.LogModel
 @{
-    ViewData["Title"] = "Log view";
+    ViewData["Title"] = "Activity log";
 }
 
 <div class="log-view">
     <section class="app-page-hero">
         <div>
-            <span class="tag mb-3">Alert history</span>
-            <h1 class="hero-title fw-bold mb-2">Log view</h1>
-            <p class="lead muted mb-0">Review alert deliveries, skipped windows and failed notification attempts.</p>
+            <span class="tag mb-3">Campaign history</span>
+            <h1 class="hero-title fw-bold mb-2">Activity log</h1>
+            <p class="lead muted mb-0">Review campaign deliveries, skipped windows and failed channel attempts.</p>
         </div>
         <form method="get" class="log-alert-picker app-page-hero-actions">
             <select class="form-select" name="alertId" onchange="this.form.submit()">
-                <option value="">All alerts</option>
+                <option value="">All campaigns</option>
                 @foreach (var option in Model.AlertOptions)
                 {
                     <option value="@option.Id" selected="@(Model.AlertId == option.Id)">@option.Label</option>
@@ -46,7 +46,7 @@
                         <div class="log-empty-copy">
                             <span class="tag">Waiting for activity</span>
                             <h2>No log entries yet</h2>
-                            <p>Delivery attempts, failed notifications and schedule skips will appear here after your alerts are evaluated by the background worker.</p>
+                            <p>Delivery attempts, failed channel updates and schedule skips will appear here after your campaigns produce activity.</p>
                         </div>
                         <div class="log-empty-highlights" aria-label="Log entry types">
                             <span><i class="bi bi-check2-circle"></i> Sent</span>
@@ -54,8 +54,8 @@
                             <span><i class="bi bi-exclamation-triangle"></i> Failed</span>
                         </div>
                         <div class="log-empty-actions">
-                            <a class="btn btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New alert</a>
-                            <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i> Delivery settings</a>
+                            <a class="btn btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
+                            <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i> Channel settings</a>
                             @if (Model.AlertId is not null || Model.SelectedTimeframe != "all")
                             {
                                 <a class="btn btn-outline-secondary" asp-page="/App/Log"><i class="bi bi-arrow-counterclockwise me-1"></i> Clear filters</a>
@@ -68,8 +68,8 @@
                     <table class="table log-table align-middle">
                         <thead>
                             <tr>
-                                <th>Alert type</th>
-                                <th>Market</th>
+                                <th>Campaign asset</th>
+                                <th>Source</th>
                                 <th>Channel</th>
                                 <th>Status</th>
                                 <th class="text-end">Date</th>
@@ -92,8 +92,8 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span>@row.MarketType</span>
-                                    <small>@Alivert.Pages.App.LogModel.FormatSymbol(row.Symbol) &middot; @row.Timeframe</small>
+                                    <span>@Alivert.Pages.App.LogModel.SourceTypeLabel(row.MarketType)</span>
+                                    <small>@Alivert.Pages.App.LogModel.FormatSymbol(row.Symbol) &middot; @Alivert.Pages.App.LogModel.CadenceLabel(row.Timeframe)</small>
                                 </td>
                                 <td>@row.Channel</td>
                                 <td>
@@ -113,7 +113,7 @@
                 <div class="timeframe-filter-head">
                     <div>
                         <span>Timeframe</span>
-                        <small>Filter by alert interval</small>
+                        <small>Filter by campaign cadence</small>
                     </div>
                     @if (Model.SelectedTimeframe != "all")
                     {
@@ -123,7 +123,7 @@
                 <div class="timeframe-tabs" aria-label="Timeframe filter">
                     <a class="@(Model.SelectedTimeframe == "all" ? "active" : "")" href="@Model.AllTimeframesUrl()" aria-current="@(Model.SelectedTimeframe == "all" ? "page" : null)">
                         <span class="timeframe-label">All</span>
-                        <small>Every interval</small>
+                        <small>Every cadence</small>
                     </a>
                     @foreach (var timeframe in Model.Timeframes)
                     {
@@ -140,7 +140,7 @@
                 {
                     <div class="rule-filter-row disabled">
                         <span class="rule-dot"></span>
-                        <span>No alert rules yet</span>
+                        <span>No campaigns yet</span>
                         <i class="bi bi-lock"></i>
                     </div>
                 }
@@ -162,7 +162,7 @@
                 <div class="log-upgrade-card plan-included">
                     <span><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
                     <a asp-page="/App/Billing">Manage plan</a>
-                    <p>@Model.PlanCapacityLabel. All alert rules, timeframes and log history are included on this account.</p>
+                    <p>@Model.PlanCapacityLabel. All campaign assets, cadences and log history are included on this account.</p>
                 </div>
             }
             else
@@ -170,7 +170,7 @@
                 <div class="log-upgrade-card">
                     <span>Premium only</span>
                     <a asp-page="/App/Billing">Upgrade</a>
-                    <p>@Model.PlanCapacityLabel. Unlimited keeps every alert active without managing credit capacity.</p>
+                    <p>@Model.PlanCapacityLabel. Unlimited keeps every campaign active without managing credit capacity.</p>
                 </div>
             }
         </aside>
@@ -180,16 +180,6 @@
 @functions {
     private static string TimeframeLabel(string timeframe)
     {
-        return timeframe switch
-        {
-            "5m" => "5 min",
-            "15m" => "15 min",
-            "1h" => "1 hour",
-            "4h" => "4 hours",
-            "1d" => "1 day",
-            "1wk" => "1 week",
-            "1mo" => "1 month",
-            _ => timeframe
-        };
+        return Alivert.Pages.App.LogModel.CadenceLabel(timeframe);
     }
 }

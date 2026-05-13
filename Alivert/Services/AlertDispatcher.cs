@@ -80,6 +80,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
                 "TEAMS" => await DeliverTeamsAsync(log, settings?.TeamsWebhookUrl, message, ct),
                 "TELEGRAM" => await DeliverTelegramAsync(log, settings?.TelegramChatId, message, ct),
                 "EMAIL" => await DeliverEmailAsync(log, alert, snapshot, message, settings, ct),
+                "TIKTOK" or "INSTAGRAM" or "FACEBOOK" or "LINKEDIN" or "SMS" => DeliverCampaignQueue(log, alert, channel),
                 _ => Skip(log, $"Unsupported channel '{channel}'.")
             };
         }
@@ -89,7 +90,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Notification delivery failed for alert {AlertId}.", alert.Id);
+            _logger.LogWarning(ex, "Campaign delivery failed for campaign {CampaignId}.", alert.Id);
             log.Status = "Failed";
             log.ErrorMessage = Truncate(ex.Message, 500);
             return log;
@@ -109,11 +110,12 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         var payload = new
         {
-            type = "alivert.alert_triggered",
-            alertId = alert.Id,
-            alert.Symbol,
-            ruleType = alert.RuleType.ToString(),
-            alert.Threshold,
+            type = "promovert.campaign_activity",
+            campaignId = alert.Id,
+            source = alert.Symbol,
+            campaignAsset = alert.RuleType.DisplayName(),
+            goal = alert.Threshold,
+            audienceContacts = CountAudienceContacts(alert.AudienceList),
             snapshot.Price,
             snapshot.PercentChange24h,
             snapshot.Volume24h,
@@ -135,7 +137,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         var payload = new
         {
-            content = Truncate($"**Alivert alert**\n{message}", 1900),
+            content = Truncate($"**Promovert campaign**\n{message}", 1900),
             allowed_mentions = new { parse = Array.Empty<string>() }
         };
 
@@ -153,7 +155,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         var payload = new
         {
-            text = Truncate($"Alivert alert\n{message}", 2900)
+            text = Truncate($"Promovert campaign\n{message}", 2900)
         };
 
         return await PostJsonAsync(log, uri, payload, "Slack webhook", ct);
@@ -172,9 +174,9 @@ public sealed class AlertDispatcher : IAlertDispatcher
         {
             ["@type"] = "MessageCard",
             ["@context"] = "https://schema.org/extensions",
-            ["summary"] = "Alivert alert",
+            ["summary"] = "Promovert campaign",
             ["themeColor"] = "22c55e",
-            ["title"] = "Alivert alert",
+            ["title"] = "Promovert campaign",
             ["text"] = Truncate(message, 2900)
         };
 
@@ -198,7 +200,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         var payload = new
         {
             chat_id = chatId.Trim(),
-            text = Truncate($"Alivert alert\n{message}", 3900),
+            text = Truncate($"Promovert campaign\n{message}", 3900),
             disable_web_page_preview = true
         };
 
@@ -214,29 +216,26 @@ public sealed class AlertDispatcher : IAlertDispatcher
         CancellationToken ct)
     {
         if (settings?.EmailEnabled == false)
-            return Skip(log, "Email notifications are disabled.");
+            return Skip(log, "Email outreach is disabled.");
 
         var emailOptions = _options.CurrentValue.Email;
         if (!EmailTransportConfigured(emailOptions))
             return Skip(log, "Email transport is not configured yet.");
 
-        var recipient = await _db.Users
-            .AsNoTracking()
-            .Where(user => user.Id == alert.UserId)
-            .Select(user => user.Email)
-            .FirstOrDefaultAsync(ct);
-
-        if (string.IsNullOrWhiteSpace(recipient))
-            return Skip(log, "User email address is not configured.");
-
-        using var mail = new MailMessage
+        var recipients = ParseAudienceEmailRecipients(alert.AudienceList).ToList();
+        if (recipients.Count == 0)
         {
-            From = new MailAddress(emailOptions.FromEmail!.Trim(), string.IsNullOrWhiteSpace(emailOptions.FromName) ? "Alivert" : emailOptions.FromName.Trim()),
-            Subject = Truncate($"Alivert alert - {alert.Symbol}", 120),
-            Body = BuildEmailBody(alert, snapshot, message),
-            IsBodyHtml = false
-        };
-        mail.To.Add(recipient.Trim());
+            var accountEmail = await _db.Users
+                .AsNoTracking()
+                .Where(user => user.Id == alert.UserId)
+                .Select(user => user.Email)
+                .FirstOrDefaultAsync(ct);
+
+            if (string.IsNullOrWhiteSpace(accountEmail))
+                return Skip(log, "User email address is not configured.");
+
+            recipients.Add(new MailAddress(accountEmail.Trim()));
+        }
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(_options.CurrentValue.RequestTimeoutSeconds, 1, 30)));
@@ -249,10 +248,22 @@ public sealed class AlertDispatcher : IAlertDispatcher
                 emailOptions.Password)
         };
 
-        await client.SendMailAsync(mail, timeout.Token);
+        foreach (var recipient in recipients)
+        {
+            using var mail = new MailMessage
+            {
+                From = new MailAddress(emailOptions.FromEmail!.Trim(), string.IsNullOrWhiteSpace(emailOptions.FromName) ? "Promovert" : emailOptions.FromName.Trim()),
+                Subject = Truncate($"Promovert campaign - {alert.Symbol}", 120),
+                Body = BuildEmailBody(alert, snapshot, message, RecipientName(recipient)),
+                IsBodyHtml = false
+            };
+            mail.To.Add(recipient);
+
+            await client.SendMailAsync(mail, timeout.Token);
+        }
 
         log.Status = "Sent";
-        log.Destination = recipient.Trim();
+        log.Destination = recipients.Count == 1 ? recipients[0].Address : $"{recipients.Count} potential clients";
         return log;
     }
 
@@ -310,7 +321,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         var dayToken = localNow.DayOfWeek.ToString()[..3];
         var allowedDays = ParseDays(settings.AlertWindowDays);
         if (allowedDays.Count > 0 && !allowedDays.Contains(dayToken, StringComparer.OrdinalIgnoreCase))
-            return "Outside alert schedule day.";
+            return "Outside campaign delivery day.";
 
         if (!TimeSpan.TryParse(settings.AlertWindowStart, out var start) ||
             !TimeSpan.TryParse(settings.AlertWindowEnd, out var end))
@@ -321,7 +332,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
             ? now >= start && now <= end
             : now >= start || now <= end;
 
-        return insideWindow ? null : "Outside alert schedule time window.";
+        return insideWindow ? null : "Outside campaign delivery time window.";
     }
 
     private static HashSet<string> ParseDays(string? days)
@@ -356,21 +367,87 @@ public sealed class AlertDispatcher : IAlertDispatcher
             options.SmtpPort > 0;
     }
 
-    private static string BuildEmailBody(Alert alert, MarketSnapshot snapshot, string message)
+    private static AlertDeliveryLog DeliverCampaignQueue(AlertDeliveryLog log, Alert alert, string channel)
     {
-        return string.Join(Environment.NewLine, new[]
+        log.Status = "Sent";
+        var audienceContacts = CountAudienceContacts(alert.AudienceList);
+        log.Destination = channel.Equals("SMS", StringComparison.OrdinalIgnoreCase) && audienceContacts > 0
+            ? $"{channel} campaign queue ({audienceContacts} contacts)"
+            : $"{channel} campaign queue";
+        return log;
+    }
+
+    private static IReadOnlyList<MailAddress> ParseAudienceEmailRecipients(string? audienceList)
+    {
+        var recipients = new List<MailAddress>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var contact in SplitAudienceList(audienceList))
         {
-            "Alivert alert",
+            if (!contact.Contains('@'))
+                continue;
+
+            try
+            {
+                var recipient = new MailAddress(contact);
+                if (seen.Add(recipient.Address))
+                    recipients.Add(recipient);
+            }
+            catch (FormatException)
+            {
+                // Ignore phone numbers or malformed entries when preparing email outreach.
+            }
+        }
+
+        return recipients;
+    }
+
+    private static int CountAudienceContacts(string? audienceList)
+    {
+        return SplitAudienceList(audienceList).Count();
+    }
+
+    private static IEnumerable<string> SplitAudienceList(string? audienceList)
+    {
+        return string.IsNullOrWhiteSpace(audienceList)
+            ? Array.Empty<string>()
+            : audienceList
+                .Split(new[] { '\r', '\n', ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(contact => !string.IsNullOrWhiteSpace(contact));
+    }
+
+    private static string? RecipientName(MailAddress recipient)
+    {
+        var displayName = recipient.DisplayName.Trim();
+        return string.IsNullOrWhiteSpace(displayName) || displayName.Equals(recipient.Address, StringComparison.OrdinalIgnoreCase)
+            ? null
+            : displayName;
+    }
+
+    private static string BuildEmailBody(Alert alert, MarketSnapshot snapshot, string message, string? recipientName)
+    {
+        var lines = new List<string>();
+        if (!string.IsNullOrWhiteSpace(recipientName))
+        {
+            lines.Add($"Hi {recipientName},");
+            lines.Add("");
+        }
+
+        lines.AddRange(new[]
+        {
+            "Promovert campaign",
             "",
             message,
             "",
-            $"Symbol: {alert.Symbol}",
-            $"Rule: {alert.RuleType}",
-            $"Timeframe: {alert.Timeframe}",
-            $"Price: {snapshot.Price:0.########}",
-            $"24h change: {snapshot.PercentChange24h:0.####}%",
+            $"Source: {alert.Symbol}",
+            $"Campaign asset: {alert.RuleType.DisplayName()}",
+            $"Cadence: {alert.Timeframe}",
+            $"Goal: {alert.Threshold:0.##}",
+            $"Estimated reach signal: {snapshot.Price:0.########}",
             $"Checked at UTC: {snapshot.AsOfUtc:yyyy-MM-dd HH:mm:ss}"
         });
+
+        return string.Join(Environment.NewLine, lines);
     }
 
     private static string Truncate(string value, int maxLength)

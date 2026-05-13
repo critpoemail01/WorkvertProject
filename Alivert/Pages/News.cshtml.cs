@@ -9,19 +9,19 @@ public sealed class NewsModel : PageModel
     public List<Post> Posts { get; } = new()
     {
         new Post(
-            "Alivert Plus is live: credit packs for casual users",
+            "Promovert Plus is live: credit packs for campaign launches",
             "Product",
-            "Buy credit packs and keep using alerts without a subscription.",
+            "Buy credit packs and keep running campaigns without a subscription.",
             DateTime.UtcNow.AddDays(-7)),
         new Post(
-            "Noise control: cooldown + dedup to avoid spam",
+            "Campaign control: cadence and delivery windows",
             "Engineering",
-            "We improved the evaluator so repeated triggers do not flood your inbox.",
+            "We improved scheduling so outreach stays inside the delivery window you choose.",
             DateTime.UtcNow.AddDays(-14)),
         new Post(
-            "Roadmap: Telegram + Discord notifications",
+            "Roadmap: social publishing and SMS delivery",
             "Roadmap",
-            "Next channels are coming. Same alerts, more places to receive them.",
+            "Next channels are coming. Same campaign workflow, more places to distribute it.",
             DateTime.UtcNow.AddDays(-30)),
     };
 

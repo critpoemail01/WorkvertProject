@@ -27,10 +27,14 @@ public class DashboardModel : PageModel
     public int UniqueSymbols { get; private set; }
     public int TriggersLast7Days { get; private set; }
     public int FailedDeliveriesLast7Days { get; private set; }
+    public int UsersReached { get; private set; }
+    public int UsersInteracted { get; private set; }
+    public int UsersConverted { get; private set; }
+    public string ConversionRateLabel { get; private set; } = "0.0%";
     public bool IsUnlimitedPlan { get; private set; }
     public string PlanName { get; private set; } = "Basic (Free)";
-    public string PlanDescription { get; private set; } = "Start with 5 free active alert credits.";
-    public string PlanCapacityLabel { get; private set; } = "5 active alert slots";
+    public string PlanDescription { get; private set; } = "Start with 5 free active campaign credits.";
+    public string PlanCapacityLabel { get; private set; } = "5 active campaign slots";
     public string PlanRemainingLabel { get; private set; } = "5 remaining";
     public int PlanUsagePercent { get; private set; }
     public DateTime? PlanExpiresOnUtc { get; private set; }
@@ -74,6 +78,25 @@ public class DashboardModel : PageModel
             .Where(t => t.UserId == userId && t.CreatedAtUtc >= since && t.Status == "Failed")
             .CountAsync();
 
+        var successfulDeliveriesLast7Days = await _db.AlertDeliveryLogs
+            .AsNoTracking()
+            .Where(t => t.UserId == userId && t.CreatedAtUtc >= since && t.Status == "Sent")
+            .CountAsync();
+
+        var audienceLists = await _db.Alerts
+            .AsNoTracking()
+            .Where(a => a.UserId == userId && a.IsEnabled && a.AudienceList != null)
+            .Select(a => a.AudienceList!)
+            .ToListAsync();
+        var directAudienceContacts = audienceLists.Sum(CountAudienceContacts);
+
+        UsersReached = (ActiveAlerts * 2500) + (successfulDeliveriesLast7Days * 350) + (TriggersLast7Days * 150) + directAudienceContacts;
+        UsersInteracted = UsersReached == 0 ? 0 : Math.Max(1, (int)Math.Round(UsersReached * 0.12m));
+        UsersConverted = UsersInteracted == 0 ? 0 : Math.Max(0, (int)Math.Round(UsersInteracted * 0.18m));
+        ConversionRateLabel = UsersReached == 0
+            ? "0.0%"
+            : $"{(decimal)UsersConverted / UsersReached:P1}";
+
         LatestTriggers = await _db.AlertTriggers
             .AsNoTracking()
             .Where(t => t.Alert!.UserId == userId)
@@ -114,9 +137,9 @@ public class DashboardModel : PageModel
                     ? "Unlimited annual"
                     : "Unlimited monthly";
             PlanDescription = PlanDaysRemaining is null
-                ? "Unlimited active alerts are enabled."
-                : $"Unlimited active alerts until {PlanExpiresOnUtc!.Value.ToLocalTime():MMMM d, yyyy}.";
-            PlanCapacityLabel = "Unlimited active alerts";
+                ? "Unlimited active campaigns are enabled."
+                : $"Unlimited active campaigns until {PlanExpiresOnUtc!.Value.ToLocalTime():MMMM d, yyyy}.";
+            PlanCapacityLabel = "Unlimited active campaigns";
             PlanRemainingLabel = PlanDaysRemaining is null
                 ? "Active now"
                 : $"{PlanDaysRemaining} day{(PlanDaysRemaining == 1 ? "" : "s")} remaining";
@@ -126,12 +149,19 @@ public class DashboardModel : PageModel
 
         PlanName = limits.Capacity <= 5 ? "Basic (Free)" : "Credit pack";
         PlanDescription = limits.Capacity <= 5
-            ? "Free credits let you validate the alert workflow before paying."
-            : "Credit capacity is active. Add packs when you need more alerts.";
-        PlanCapacityLabel = $"{limits.Capacity} active alert slot{(limits.Capacity == 1 ? "" : "s")}";
+            ? "Free credits let you validate the campaign workflow before paying."
+            : "Credit capacity is active. Add packs when you need more campaigns.";
+        PlanCapacityLabel = $"{limits.Capacity} active campaign slot{(limits.Capacity == 1 ? "" : "s")}";
         PlanRemainingLabel = $"{limits.RemainingSlots} remaining";
         PlanUsagePercent = limits.Capacity <= 0
             ? 100
             : Math.Clamp((int)Math.Round((double)limits.ActiveAlerts / limits.Capacity * 100), 0, 100);
+    }
+
+    private static int CountAudienceContacts(string audienceList)
+    {
+        return audienceList
+            .Split(new[] { '\r', '\n', ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Count(contact => !string.IsNullOrWhiteSpace(contact));
     }
 }

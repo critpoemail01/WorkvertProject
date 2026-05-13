@@ -30,6 +30,10 @@ namespace Alivert.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AudienceList")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
                     b.Property<string>("Channel")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -79,8 +83,8 @@ namespace Alivert.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
 
                     b.Property<decimal>("Threshold")
                         .HasPrecision(18, 4)
@@ -153,8 +157,8 @@ namespace Alivert.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasMaxLength(24)
-                        .HasColumnType("nvarchar(24)");
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -187,8 +191,8 @@ namespace Alivert.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(240)
-                        .HasColumnType("nvarchar(240)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SnapshotJson")
                         .HasMaxLength(4000)

@@ -9,8 +9,8 @@ public class Alert
     [Required]
     public string UserId { get; set; } = string.Empty;
 
-    [Required, StringLength(32), RegularExpression(@"^[A-Za-z0-9.^=_-]{1,32}$", ErrorMessage = "Symbol may contain letters, digits, dot, caret, equals, underscore, dash only.")]
-    public string Symbol { get; set; } = "BTCUSDT";
+    [Required, StringLength(180, ErrorMessage = "Source must be 180 characters or fewer.")]
+    public string Symbol { get; set; } = "https://example.com";
 
     [Required]
     public MarketType MarketType { get; set; } = MarketType.Crypto;
@@ -18,12 +18,12 @@ public class Alert
     [Required]
     public AlertRuleType RuleType { get; set; }
 
-    // Example: 180.50 for PriceAbove/Below; -3 for PercentDrop24h; 30/70 for RSI rules.
+    // Reused by Promovert as the campaign goal metric: reach, clicks, leads or conversions.
     [Required]
     public decimal Threshold { get; set; }
 
     [Required, StringLength(8)]
-    public string Timeframe { get; set; } = "4h";
+    public string Timeframe { get; set; } = "1wk";
 
     [Range(0.01, 100)]
     public decimal ZonePercent { get; set; } = 1.0m;
@@ -54,6 +54,9 @@ public class Alert
 
     [StringLength(32)]
     public string Channel { get; set; } = "Email";
+
+    [StringLength(4000)]
+    public string? AudienceList { get; set; }
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 

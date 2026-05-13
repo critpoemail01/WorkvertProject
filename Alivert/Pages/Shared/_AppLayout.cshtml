@@ -11,7 +11,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Alivert</title>
+    <title>@ViewData["Title"] - Promovert</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -26,13 +26,13 @@
 <body>
 <div class="app-shell">
     <aside class="app-sidebar">
-        <a class="app-brand brand-lockup app-brand-lockup" asp-page="/Index" aria-label="Alivert home">
+        <a class="app-brand brand-lockup app-brand-lockup" asp-page="/Index" aria-label="Promovert home">
             <span class="brand-mark">
                 <img src="~/assets/brand/alivert_brand_mark.svg" width="44" height="44" asp-append-version="true" alt="" />
             </span>
             <span class="brand-wordmark">
-                <span class="brand-title">Alivert<sup>TM</sup></span>
-                <span class="brand-subtitle">Market Alert Engine</span>
+                <span class="brand-title">Promovert<sup>TM</sup></span>
+                <span class="brand-subtitle">Online Campaign Engine</span>
             </span>
         </a>
 
@@ -49,18 +49,18 @@
                 </button>
             </form>
 
-            <div class="app-nav-section">Markets</div>
+            <div class="app-nav-section">Marketing</div>
             <a class="app-nav-link @(isActive("/App/Dashboard") ? "active" : "")" asp-page="/App/Dashboard">
                 <i class="bi bi-bar-chart-fill"></i>
                 <span>Dashboard</span>
             </a>
             <a class="app-nav-link @(isActivePrefix("/App/Alerts") ? "active" : "")" asp-page="/App/Alerts/Index">
                 <i class="bi bi-bell-fill"></i>
-                <span>My alerts</span>
+                <span>Campaigns</span>
             </a>
             <a class="app-nav-link @(isActive("/App/Log") ? "active" : "")" asp-page="/App/Log">
                 <i class="bi bi-clock-history"></i>
-                <span>Log view</span>
+                <span>Activity log</span>
             </a>
 
             <div class="app-nav-section">Account & settings</div>
@@ -74,7 +74,7 @@
             </a>
             <a class="app-nav-link @(isActive("/App/Settings") ? "active" : "")" asp-page="/App/Settings">
                 <i class="bi bi-broadcast-pin"></i>
-                <span>Notification settings</span>
+                <span>Marketing channels</span>
             </a>
             <a class="app-nav-link @(isActive("/App/HelpDesk") ? "active" : "")" asp-page="/App/HelpDesk">
                 <i class="bi bi-chat-left-text-fill"></i>
@@ -91,12 +91,12 @@
     <div class="app-main">
         <header class="app-topbar">
             <div class="app-topbar-status">
-                <span class="app-status-badge"><i class="bi bi-lightning-charge-fill"></i>Background alerts active</span>
+                <span class="app-status-badge"><i class="bi bi-lightning-charge-fill"></i>Campaign workspace active</span>
                 @await Component.InvokeAsync("AppPlanBadge")
             </div>
             <div class="app-topbar-actions">
                 <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Account/Index"><i class="bi bi-person-circle me-1"></i>My account</a>
-                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New alert</a>
+                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
             </div>
         </header>
 

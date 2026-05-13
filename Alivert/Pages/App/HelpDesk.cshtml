@@ -9,7 +9,7 @@
         <div>
             <span class="tag mb-2">Account & settings</span>
             <h1 class="fw-bold mb-0">Help desk</h1>
-            <p class="muted mb-0">Open a support ticket when something is broken or you need help with alerts, billing or notifications.</p>
+            <p class="muted mb-0">Open a support ticket when something is broken or you need help with campaigns, billing or marketing channels.</p>
         </div>
     </div>
 
@@ -43,7 +43,7 @@
                 <div class="col-12">
                     <label asp-for="Input.Message" class="form-label"></label>
                     <textarea asp-for="Input.Message" class="form-control helpdesk-message" placeholder="Describe what happened, where it happened, and what you expected instead." maxlength="4000" required></textarea>
-                    <div class="form-text">Include the page, alert symbol, payment provider or notification channel when relevant.</div>
+                    <div class="form-text">Include the page, campaign source, payment provider or marketing channel when relevant.</div>
                     <span asp-validation-for="Input.Message" class="text-danger"></span>
                 </div>
             </div>

@@ -12,7 +12,7 @@ namespace Alivert.Pages.App;
 [Authorize]
 public class LogModel : PageModel
 {
-    private static readonly string[] SupportedTimeframes = ["5m", "15m", "1h", "4h", "1d", "1wk", "1mo"];
+    private static readonly string[] SupportedTimeframes = ["1d", "3d", "1wk", "2wk", "1mo"];
 
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
@@ -35,10 +35,10 @@ public class LogModel : PageModel
     public List<AlertOption> AlertOptions { get; private set; } = new();
     public List<LogRow> Rows { get; private set; } = new();
     public List<RuleFilterRow> RuleFilters { get; private set; } = new();
-    public string SelectedAlertName { get; private set; } = "All alerts";
+    public string SelectedAlertName { get; private set; } = "All campaigns";
     public string SelectedTimeframe { get; private set; } = "all";
     public bool IsUnlimitedPlan { get; private set; }
-    public string PlanCapacityLabel { get; private set; } = "5 active alert slots";
+    public string PlanCapacityLabel { get; private set; } = "5 active campaign slots";
 
     public record AlertOption(int Id, string Label);
     public record LogRow(
@@ -59,8 +59,8 @@ public class LogModel : PageModel
         var limits = await _accounts.GetLimitsAsync(userId);
         IsUnlimitedPlan = limits.IsUnlimited;
         PlanCapacityLabel = limits.IsUnlimited
-            ? "Unlimited active alerts"
-            : $"{limits.ActiveAlerts}/{limits.Capacity} active alert slots used";
+            ? "Unlimited active campaigns"
+            : $"{limits.ActiveAlerts}/{limits.Capacity} active campaign slots used";
 
         var alerts = await _db.Alerts
             .AsNoTracking()
@@ -71,7 +71,7 @@ public class LogModel : PageModel
             .ToListAsync();
 
         AlertOptions = alerts
-            .Select(a => new AlertOption(a.Id, $"{a.MarketType}: {FormatSymbol(a.Symbol)} - {FormatRule(a.RuleType)}"))
+            .Select(a => new AlertOption(a.Id, $"{SourceTypeLabel(a.MarketType)}: {FormatSymbol(a.Symbol)} - {FormatRule(a.RuleType)}"))
             .ToList();
 
         if (AlertId is not null && alerts.All(a => a.Id != AlertId.Value))
@@ -81,8 +81,8 @@ public class LogModel : PageModel
             AlertId = alerts[0].Id;
 
         SelectedAlertName = AlertId is null
-            ? "All alerts"
-            : AlertOptions.FirstOrDefault(x => x.Id == AlertId.Value)?.Label ?? "Selected alert";
+            ? "All campaigns"
+            : AlertOptions.FirstOrDefault(x => x.Id == AlertId.Value)?.Label ?? "Selected campaign";
 
         SelectedTimeframe = NormalizeTimeframe(Timeframe);
 
@@ -138,26 +138,36 @@ public class LogModel : PageModel
     {
         return ruleType switch
         {
-            AlertRuleType.PriceAbove => "Price above",
-            AlertRuleType.PriceBelow => "Price below",
-            AlertRuleType.PriceZone => "Price zone",
-            AlertRuleType.PercentDrop24h => "24h drop",
-            AlertRuleType.PercentRise24h => "24h rise",
-            AlertRuleType.VolumeAbove24h => "24h volume above",
-            AlertRuleType.RsiBelow => "RSI below",
-            AlertRuleType.RsiAbove => "RSI above",
-            AlertRuleType.RsiOversoldEmaCrossUp => "RSI oversold + EMA cross up",
-            AlertRuleType.RsiOverboughtEmaCrossDown => "RSI overbought + EMA cross down",
-            _ => ruleType.ToString()
+            _ => ruleType.DisplayName()
         };
     }
 
     public static string FormatSymbol(string symbol)
     {
-        if (symbol.EndsWith("USDT", StringComparison.OrdinalIgnoreCase) && symbol.Length > 4)
-            return $"{symbol[..^4]} / USDT";
-
         return symbol;
+    }
+
+    public static string SourceTypeLabel(MarketType marketType)
+    {
+        return marketType switch
+        {
+            MarketType.Crypto => "Application URL",
+            MarketType.Traditional => "Company or idea",
+            _ => "Campaign source"
+        };
+    }
+
+    public static string CadenceLabel(string timeframe)
+    {
+        return timeframe switch
+        {
+            "1d" => "Daily",
+            "3d" => "Every 3 days",
+            "1wk" => "Weekly",
+            "2wk" => "Biweekly",
+            "1mo" => "Monthly",
+            _ => timeframe
+        };
     }
 
     private static string NormalizeTimeframe(string? timeframe)

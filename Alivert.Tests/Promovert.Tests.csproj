@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alivert\Alivert.csproj" />
+    <ProjectReference Include="..\Alivert\Promovert.csproj" />
   </ItemGroup>
 
 </Project>

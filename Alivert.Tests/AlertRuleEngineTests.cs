@@ -68,7 +68,7 @@ public class AlertRuleEngineTests
 
         Assert.True(result.Triggered);
         Assert.True(alert.PriceZoneWasInside);
-        Assert.Contains("entered zone", result.Message);
+        Assert.Contains("entered target band", result.Message);
     }
 
     [Fact]

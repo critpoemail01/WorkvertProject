@@ -30,8 +30,8 @@ public class AlertsIndexModel : PageModel
     public string SelectedScheduleTimeZone { get; private set; } = TimeZoneCatalog.DefaultTimeZoneId;
     public bool IsUnlimitedPlan { get; private set; }
     public bool IsAnnualUnlimitedPlan { get; private set; }
-    public string PlanPromoTitle { get; private set; } = "Unlock all features & timeframes";
-    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 300 and covers every setup without counting credits.";
+    public string PlanPromoTitle { get; private set; } = "Unlock unlimited campaigns";
+    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 300 and covers every campaign, channel and cadence without counting credits.";
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -55,7 +55,7 @@ public class AlertsIndexModel : PageModel
             var limits = await _accounts.GetLimitsAsync(userId);
             if (!limits.IsUnlimited && limits.RemainingSlots <= 0)
             {
-                StatusMessage = "No credits available. Disable another alert or upgrade your plan before turning this alert on.";
+                StatusMessage = "No credits available. Pause another campaign or upgrade your plan before activating this campaign.";
                 return RedirectToPage();
             }
         }
@@ -66,7 +66,7 @@ public class AlertsIndexModel : PageModel
         alert.UpdatedAtUtc = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        StatusMessage = alert.IsEnabled ? "Alert turned on." : "Alert turned off.";
+        StatusMessage = alert.IsEnabled ? "Campaign activated." : "Campaign paused.";
         return RedirectToPage();
     }
 
@@ -77,7 +77,7 @@ public class AlertsIndexModel : PageModel
         if (alert is null) return NotFound();
 
         await DeleteAlertsAsync([alert]);
-        StatusMessage = "Alert deleted.";
+        StatusMessage = "Campaign deleted.";
         return RedirectToPage();
     }
 
@@ -94,7 +94,7 @@ public class AlertsIndexModel : PageModel
             var alertsToEnable = alerts.Count(a => !a.IsEnabled);
             if (!limits.IsUnlimited && alertsToEnable > limits.RemainingSlots)
             {
-                StatusMessage = $"No credits available. This group needs {alertsToEnable} slot(s), but only {limits.RemainingSlots} remain.";
+                StatusMessage = $"No credits available. This source needs {alertsToEnable} slot(s), but only {limits.RemainingSlots} remain.";
                 return RedirectToPage();
             }
         }
@@ -108,7 +108,7 @@ public class AlertsIndexModel : PageModel
         }
 
         await _db.SaveChangesAsync();
-        StatusMessage = shouldEnable ? "Alert group turned on." : "Alert group turned off.";
+        StatusMessage = shouldEnable ? "Campaign source activated." : "Campaign source paused.";
         return RedirectToPage();
     }
 
@@ -119,7 +119,7 @@ public class AlertsIndexModel : PageModel
         if (alerts.Count == 0) return NotFound();
 
         await DeleteAlertsAsync(alerts);
-        StatusMessage = "Alert group deleted.";
+        StatusMessage = "Campaign source deleted.";
         return RedirectToPage();
     }
 
@@ -129,7 +129,7 @@ public class AlertsIndexModel : PageModel
 
         if (!TimeSpan.TryParse(startTime, out _) || !TimeSpan.TryParse(endTime, out _))
         {
-            StatusMessage = "Use valid start and end times for the schedule.";
+            StatusMessage = "Use valid start and end times for the delivery window.";
             return RedirectToPage();
         }
 
@@ -147,7 +147,7 @@ public class AlertsIndexModel : PageModel
         settings.AlertWindowDays = NormalizeDays(days);
         await _db.SaveChangesAsync();
 
-        StatusMessage = "Alert schedule saved. Notifications outside this window will be skipped.";
+        StatusMessage = "Delivery window saved. Campaign activity outside this window will be skipped.";
         return RedirectToPage();
     }
 
@@ -164,7 +164,7 @@ public class AlertsIndexModel : PageModel
             await _db.SaveChangesAsync();
         }
 
-        StatusMessage = "24/7 alert delivery restored.";
+        StatusMessage = "24/7 campaign delivery restored.";
         return RedirectToPage();
     }
 
@@ -244,7 +244,7 @@ public class AlertsIndexModel : PageModel
 
     private async Task<List<Alert>> LoadOwnedGroupAsync(string userId, MarketType marketType, string symbol)
     {
-        var normalizedSymbol = (symbol ?? string.Empty).Trim().ToUpperInvariant();
+        var normalizedSymbol = (symbol ?? string.Empty).Trim();
         return await _db.Alerts
             .Where(a => a.UserId == userId && a.MarketType == marketType && a.Symbol == normalizedSymbol)
             .ToListAsync();
@@ -285,15 +285,15 @@ public class AlertsIndexModel : PageModel
         {
             PlanPromoTitle = "Annual unlimited active";
             PlanPromoText = account?.UnlimitedUntilUtc is null
-                ? "Every alert type, preset and timeframe is already included in your annual account."
-                : $"Every alert type, preset and timeframe is included until {account.UnlimitedUntilUtc.Value.ToLocalTime():MMM d, yyyy}.";
+                ? "Every campaign type, channel and cadence is already included in your annual account."
+                : $"Every campaign type, channel and cadence is included until {account.UnlimitedUntilUtc.Value.ToLocalTime():MMM d, yyyy}.";
             return;
         }
 
         if (IsUnlimitedPlan)
         {
             PlanPromoTitle = "Switch to annual and save";
-            PlanPromoText = "You already have unlimited alerts. Annual billing is EUR 300/year and saves EUR 300 versus paying monthly.";
+            PlanPromoText = "You already have unlimited campaigns. Annual billing is EUR 300/year and saves EUR 300 versus paying monthly.";
         }
     }
 }

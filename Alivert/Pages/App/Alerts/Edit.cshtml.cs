@@ -18,10 +18,11 @@ public class EditAlertModel : PageModel
     private static readonly HashSet<string> SupportedChannels = new(StringComparer.OrdinalIgnoreCase)
     {
         "Email",
-        "Telegram",
-        "Discord",
-        "Slack",
-        "Teams",
+        "TikTok",
+        "Instagram",
+        "Facebook",
+        "LinkedIn",
+        "SMS",
         "Webhook"
     };
 
@@ -29,14 +30,12 @@ public class EditAlertModel : PageModel
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserAccountService _accounts;
-    private readonly ISymbolCatalogService _symbols;
 
-    public EditAlertModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts, ISymbolCatalogService symbols)
+    public EditAlertModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts)
     {
         _db = db;
         _userManager = userManager;
         _accounts = accounts;
-        _symbols = symbols;
     }
 
     [BindProperty]
@@ -50,52 +49,56 @@ public class EditAlertModel : PageModel
     {
         public int Id { get; set; }
 
-        [Display(Name = "Symbol")]
-        [Required, StringLength(32), RegularExpression(@"^[A-Za-z0-9.^=_-]{1,32}$", ErrorMessage = "Symbol may contain letters, digits, dot, caret, equals, underscore, dash only.")]
-        public string Symbol { get; set; } = "BTCUSDT";
+        [Display(Name = "URL, company or business idea")]
+        [Required, StringLength(180, ErrorMessage = "Use 180 characters or fewer.")]
+        public string Symbol { get; set; } = "https://example.com";
 
-        [Display(Name = "Market")]
+        [Display(Name = "Source type")]
         [Required]
         public MarketType MarketType { get; set; } = MarketType.Crypto;
 
-        [Display(Name = "Alert type")]
+        [Display(Name = "Campaign asset")]
         [Required]
         public AlertRuleType RuleType { get; set; } = AlertRuleType.PriceAbove;
 
-        [Display(Name = "Threshold")]
+        [Display(Name = "Goal")]
         [Required]
         public decimal Threshold { get; set; }
 
-        [Display(Name = "Timeframe")]
+        [Display(Name = "Cadence")]
         [Required, StringLength(8)]
-        public string Timeframe { get; set; } = "4h";
+        public string Timeframe { get; set; } = "1wk";
 
-        [Display(Name = "Zone percent")]
+        [Display(Name = "Offer strength")]
         [Range(0.01, 100)]
         public decimal ZonePercent { get; set; } = 1.0m;
 
-        [Display(Name = "RSI period")]
+        [Display(Name = "Audience segment")]
         [Range(2, 100)]
         public int RsiPeriod { get; set; } = 14;
 
-        [Display(Name = "Fast EMA")]
+        [Display(Name = "Creative variants")]
         [Range(1, 200)]
         public int FastEmaPeriod { get; set; } = 3;
 
-        [Display(Name = "Slow EMA")]
+        [Display(Name = "Follow-up steps")]
         [Range(2, 250)]
         public int SlowEmaPeriod { get; set; } = 5;
 
-        [Display(Name = "Cooldown (min)")]
+        [Display(Name = "Follow-up delay (min)")]
         [Range(1, 1440)]
         public int CooldownMinutes { get; set; } = 240;
 
-        [Display(Name = "Enabled")]
+        [Display(Name = "Active")]
         public bool IsEnabled { get; set; } = true;
 
-        [Display(Name = "Channel")]
+        [Display(Name = "Primary channel")]
         [StringLength(32)]
         public string Channel { get; set; } = "Email";
+
+        [Display(Name = "Potential client list")]
+        [StringLength(4000, ErrorMessage = "Use 4000 characters or fewer.")]
+        public string? AudienceList { get; set; }
     }
 
     public async Task<IActionResult> OnGetAsync(int id)
@@ -120,7 +123,8 @@ public class EditAlertModel : PageModel
             SlowEmaPeriod = alert.SlowEmaPeriod,
             CooldownMinutes = alert.CooldownMinutes,
             IsEnabled = alert.IsEnabled,
-            Channel = alert.Channel
+            Channel = alert.Channel,
+            AudienceList = alert.AudienceList
         };
 
         return Page();
@@ -140,21 +144,14 @@ public class EditAlertModel : PageModel
         if (alert is null) return NotFound();
 
         var wasEnabled = alert.IsEnabled;
-        var symbol = (Input.Symbol ?? "").Trim().ToUpperInvariant();
+        var symbol = NormalizeSource(Input.Symbol);
         var timeframe = NormalizeTimeframe(Input.Timeframe);
-
-        if (!await _symbols.IsValidSymbolAsync(Input.MarketType, symbol, HttpContext.RequestAborted))
-        {
-            ModelState.AddModelError("Input.Symbol", Input.MarketType == MarketType.Crypto
-                ? "Choose a valid Binance spot symbol."
-                : "Choose a symbol available on Yahoo Finance.");
-            return Page();
-        }
+        var audienceList = CleanAudienceList(Input.AudienceList);
 
         var channel = (Input.Channel ?? "Email").Trim();
         if (!SupportedChannels.Contains(channel))
         {
-            ModelState.AddModelError("Input.Channel", "Unsupported channel. Allowed: Email, Telegram, Discord, Slack, Teams, Webhook.");
+            ModelState.AddModelError("Input.Channel", "Unsupported channel. Allowed: Email, TikTok, Instagram, Facebook, LinkedIn, SMS, Webhook.");
             return Page();
         }
 
@@ -169,20 +166,21 @@ public class EditAlertModel : PageModel
             a.ZonePercent == Input.ZonePercent &&
             a.RsiPeriod == Input.RsiPeriod &&
             a.FastEmaPeriod == Input.FastEmaPeriod &&
-            a.SlowEmaPeriod == Input.SlowEmaPeriod);
+            a.SlowEmaPeriod == Input.SlowEmaPeriod &&
+            a.AudienceList == audienceList);
         if (duplicateExists)
         {
-            ModelState.AddModelError(string.Empty, "An identical alert already exists.");
+            ModelState.AddModelError(string.Empty, "An identical campaign already exists.");
             return Page();
         }
 
-        // Enabling an alert consumes a slot on the Free plan.
+        // Enabling a campaign consumes a slot on the Free plan.
         if (!wasEnabled && Input.IsEnabled)
         {
             var limits = await _accounts.GetLimitsAsync(userId);
             if (!limits.IsUnlimited && limits.RemainingSlots <= 0)
             {
-                ModelState.AddModelError(string.Empty, "No credits available. Disable an existing alert or upgrade your plan.");
+                ModelState.AddModelError(string.Empty, "No credits available. Pause an existing campaign or upgrade your plan.");
                 return Page();
             }
         }
@@ -199,6 +197,7 @@ public class EditAlertModel : PageModel
         alert.CooldownMinutes = Input.CooldownMinutes;
         alert.IsEnabled = Input.IsEnabled;
         alert.Channel = channel;
+        alert.AudienceList = audienceList;
         alert.IndicatorArmed = false;
         alert.LastIndicatorValue = null;
 
@@ -214,34 +213,33 @@ public class EditAlertModel : PageModel
             Enum.GetValues<AlertRuleType>().Select(rule => new { Value = rule.ToString(), Text = rule.DisplayName() }),
             "Value",
             "Text");
-        TimeframeOptions = new SelectList(new[] { "5m", "15m", "1h", "4h", "1d", "1wk", "1mo" });
-        MarketTypeOptions = new SelectList(Enum.GetValues<MarketType>());
+        TimeframeOptions = new SelectList(new[]
+        {
+            new { Value = "1d", Text = "Daily" },
+            new { Value = "3d", Text = "Every 3 days" },
+            new { Value = "1wk", Text = "Weekly" },
+            new { Value = "2wk", Text = "Biweekly" },
+            new { Value = "1mo", Text = "Monthly" }
+        }, "Value", "Text");
+        MarketTypeOptions = new SelectList(new[]
+        {
+            new { Value = MarketType.Crypto.ToString(), Text = "Application URL" },
+            new { Value = MarketType.Traditional.ToString(), Text = "Company or idea" }
+        }, "Value", "Text");
     }
 
     private void ValidateRuleSpecificInputs()
     {
         NormalizeRuleInputs();
 
-        if (Input.RuleType.UsesRsi() && (Input.Threshold < 0 || Input.Threshold > 100))
-            ModelState.AddModelError("Input.Threshold", "RSI threshold must be between 0 and 100.");
+        if (string.IsNullOrWhiteSpace(Input.Symbol))
+            ModelState.AddModelError("Input.Symbol", "Add the application URL, company name or business idea.");
 
         if (Input.RuleType.UsesEma() && Input.FastEmaPeriod >= Input.SlowEmaPeriod)
-            ModelState.AddModelError("Input.SlowEmaPeriod", "Slow EMA must be greater than fast EMA.");
+            ModelState.AddModelError("Input.SlowEmaPeriod", "Follow-up steps must be greater than creative variants.");
 
-        if (Input.RuleType is AlertRuleType.PriceAbove or AlertRuleType.PriceBelow && Input.Threshold <= 0)
-            ModelState.AddModelError("Input.Threshold", "Price level must be greater than zero.");
-
-        if (Input.RuleType.UsesPriceZone() && Input.Threshold <= 0)
-            ModelState.AddModelError("Input.Threshold", "Price zone center must be greater than zero.");
-
-        if (Input.RuleType == AlertRuleType.VolumeAbove24h && Input.Threshold <= 0)
-            ModelState.AddModelError("Input.Threshold", "Volume threshold must be greater than zero.");
-
-        if (Input.RuleType == AlertRuleType.PercentDrop24h && Input.Threshold >= 0)
-            ModelState.AddModelError("Input.Threshold", "Use a negative value for a 24h percent drop, for example -3.");
-
-        if (Input.RuleType == AlertRuleType.PercentRise24h && Input.Threshold <= 0)
-            ModelState.AddModelError("Input.Threshold", "Use a positive value for a 24h percent rise, for example 3.");
+        if (Input.Threshold < 0)
+            ModelState.AddModelError("Input.Threshold", "Campaign goal must be zero or greater.");
     }
 
     private void NormalizeRuleInputs()
@@ -268,14 +266,22 @@ public class EditAlertModel : PageModel
     {
         return timeframe?.Trim().ToLowerInvariant() switch
         {
-            "5m" => "5m",
-            "15m" => "15m",
-            "1h" => "1h",
-            "4h" => "4h",
             "1d" => "1d",
+            "3d" => "3d",
             "1wk" or "1w" => "1wk",
+            "2wk" or "2w" => "2wk",
             "1mo" => "1mo",
-            _ => "4h"
+            _ => "1wk"
         };
+    }
+
+    private static string NormalizeSource(string? source)
+    {
+        return (source ?? string.Empty).Trim();
+    }
+
+    private static string? CleanAudienceList(string? audienceList)
+    {
+        return string.IsNullOrWhiteSpace(audienceList) ? null : audienceList.Trim();
     }
 }

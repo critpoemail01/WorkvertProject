@@ -2,7 +2,7 @@
 @using Alivert.Models
 @model Alivert.Pages.App.Alerts.AlertsIndexModel
 @{
-    ViewData["Title"] = "My alerts";
+    ViewData["Title"] = "Campaigns";
     var primaryGroup = Model.AlertGroups.FirstOrDefault();
     var primaryAlert = primaryGroup?.Alerts.OrderByDescending(a => a.IsEnabled).ThenBy(a => a.Id).FirstOrDefault();
     var primaryGroupIsEnabled = primaryGroup?.Alerts.Any(a => a.IsEnabled) == true;
@@ -11,19 +11,19 @@
 <div class="alerts-board">
     <div class="alerts-toolbar">
         <div>
-            <span class="tag mb-2">Alert control center</span>
-            <h1 class="fw-bold mb-0">My alerts</h1>
-            <p class="muted mb-0">Create, schedule and monitor every market condition from one workspace.</p>
+            <span class="tag mb-2">Campaign center</span>
+            <h1 class="fw-bold mb-0">Campaigns</h1>
+            <p class="muted mb-0">Create, organize and measure campaigns for applications, companies and business ideas.</p>
         </div>
         <div class="alerts-actions">
             <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create">
-                <i class="bi bi-plus-lg me-1"></i> New alert
+                <i class="bi bi-plus-lg me-1"></i> New campaign
             </a>
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
-                <i class="bi bi-clock me-1"></i> Schedule
+                <i class="bi bi-clock me-1"></i> Delivery window
             </button>
-            <a class="btn btn-outline-secondary btn-icon" asp-page="/App/Settings" title="Notification settings">
-                <i class="bi bi-power"></i>
+            <a class="btn btn-outline-secondary btn-icon" asp-page="/App/Settings" title="Marketing channels">
+                <i class="bi bi-broadcast-pin"></i>
             </a>
         </div>
     </div>
@@ -38,26 +38,29 @@
         var primaryHistoryId = GroupHistoryId(primaryGroup.MarketType, primaryGroup.Symbol);
         <div class="alerts-market-bar mt-4">
             <div class="d-flex align-items-center gap-2">
-                <button class="alerts-history-trigger collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@primaryHistoryId" aria-expanded="false" aria-controls="@primaryHistoryId" title="Show trigger history" aria-label="Show trigger history">
+                <button class="alerts-history-trigger collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@primaryHistoryId" aria-expanded="false" aria-controls="@primaryHistoryId" title="Show activity history" aria-label="Show activity history">
                     <i class="bi bi-chevron-down"></i>
                 </button>
-                <span class="alerts-coin"><i class="bi bi-currency-bitcoin"></i></span>
-                <strong>@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)</strong>
+                <span class="alerts-coin"><i class="bi bi-megaphone-fill"></i></span>
+                <div>
+                    <strong>@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)</strong>
+                    <div class="small muted">@SourceKind(primaryGroup.MarketType)</div>
+                </div>
             </div>
             <div class="alerts-market-tools">
                 @if (primaryAlert is not null)
                 {
-                    <a class="btn-clean" asp-page="/App/Alerts/Edit" asp-route-id="@primaryAlert.Id" title="Edit alert" aria-label="Edit alert"><i class="bi bi-pencil-square"></i></a>
+                    <a class="btn-clean" asp-page="/App/Alerts/Edit" asp-route-id="@primaryAlert.Id" title="Edit campaign" aria-label="Edit campaign"><i class="bi bi-pencil-square"></i></a>
                 }
-                <form class="alerts-inline-form" method="post" asp-page-handler="DeleteGroup" onsubmit="return confirm('Delete all alerts in this group?');">
+                <form class="alerts-inline-form" method="post" asp-page-handler="DeleteGroup" onsubmit="return confirm('Delete every campaign for this source?');">
                     <input type="hidden" name="marketType" value="@primaryGroup.MarketType" />
                     <input type="hidden" name="symbol" value="@primaryGroup.Symbol" />
-                    <button class="btn-clean danger" type="submit" title="Delete this alert group" aria-label="Delete this alert group"><i class="bi bi-x-lg"></i></button>
+                    <button class="btn-clean danger" type="submit" title="Delete source" aria-label="Delete source"><i class="bi bi-x-lg"></i></button>
                 </form>
                 <form class="alerts-inline-form" method="post" asp-page-handler="ToggleGroup">
                     <input type="hidden" name="marketType" value="@primaryGroup.MarketType" />
                     <input type="hidden" name="symbol" value="@primaryGroup.Symbol" />
-                    <button class="alerts-toggle @(primaryGroupIsEnabled ? "on" : "off")" type="submit" title="@(primaryGroupIsEnabled ? "Turn this alert group off" : "Turn this alert group on")" aria-label="@(primaryGroupIsEnabled ? "Turn this alert group off" : "Turn this alert group on")"></button>
+                    <button class="alerts-toggle @(primaryGroupIsEnabled ? "on" : "off")" type="submit" title="@(primaryGroupIsEnabled ? "Pause campaigns" : "Activate campaigns")" aria-label="@(primaryGroupIsEnabled ? "Pause campaigns" : "Activate campaigns")"></button>
                 </form>
             </div>
         </div>
@@ -65,7 +68,7 @@
             <section class="alerts-trigger-history">
                 <div class="alerts-trigger-history-head">
                     <div>
-                        <span>Trigger history</span>
+                        <span>Activity history</span>
                         <strong>@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)</strong>
                     </div>
                     <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Open full log</a>
@@ -82,7 +85,7 @@
                                 <div class="alerts-trigger-copy">
                                     <strong>@RuleDisplayName(trigger.RuleType)</strong>
                                     <span>@trigger.Message</span>
-                                    <small>@trigger.Timeframe &middot; threshold @trigger.Threshold</small>
+                                    <small>@CadenceLabel(trigger.Timeframe) &middot; goal @trigger.Threshold</small>
                                 </div>
                                 <time datetime="@trigger.TriggeredAtUtc.ToString("O")">@trigger.TriggeredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</time>
                             </div>
@@ -92,8 +95,8 @@
                 else
                 {
                     <div class="alerts-trigger-empty">
-                        <i class="bi bi-bell"></i>
-                        <span>No triggers recorded for this alert group yet.</span>
+                        <i class="bi bi-megaphone"></i>
+                        <span>No activity recorded for this source yet.</span>
                     </div>
                 }
             </section>
@@ -107,20 +110,23 @@
             {
                 <section class="alerts-group">
                     <div class="alerts-group-title">
-                        <span>@GroupTitle(group.MarketType, group.Symbol)</span>
+                        <div>
+                            <span>@GroupTitle(group.MarketType, group.Symbol)</span>
+                            <div class="small muted">@SourceKind(group.MarketType)</div>
+                        </div>
                         <div class="alerts-group-title-actions">
-                            <span class="muted small">@group.Alerts.Count alert@(group.Alerts.Count == 1 ? "" : "s")</span>
+                            <span class="muted small">@group.Alerts.Count campaign@(group.Alerts.Count == 1 ? "" : "s")</span>
                             <form class="alerts-inline-form" method="post" asp-page-handler="ToggleGroup">
                                 <input type="hidden" name="marketType" value="@group.MarketType" />
                                 <input type="hidden" name="symbol" value="@group.Symbol" />
                                 <button class="btn btn-sm btn-outline-secondary" type="submit">
-                                    @(group.Alerts.Any(a => a.IsEnabled) ? "Turn off group" : "Turn on group")
+                                    @(group.Alerts.Any(a => a.IsEnabled) ? "Pause source" : "Activate source")
                                 </button>
                             </form>
-                            <form class="alerts-inline-form" method="post" asp-page-handler="DeleteGroup" onsubmit="return confirm('Delete all alerts in this group?');">
+                            <form class="alerts-inline-form" method="post" asp-page-handler="DeleteGroup" onsubmit="return confirm('Delete every campaign for this source?');">
                                 <input type="hidden" name="marketType" value="@group.MarketType" />
                                 <input type="hidden" name="symbol" value="@group.Symbol" />
-                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete group</button>
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                             </form>
                         </div>
                     </div>
@@ -128,12 +134,12 @@
                         <table class="table table-sm align-middle alerts-table">
                             <thead>
                                 <tr>
-                                    <th>Alert type</th>
-                                    <th>Threshold</th>
-                                    <th>Timeframe</th>
+                                    <th>Asset</th>
+                                    <th>Goal</th>
+                                    <th>Cadence</th>
                                     <th>Channel</th>
                                     <th>Status</th>
-                                    <th>Last trigger</th>
+                                    <th>Last activity</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -146,10 +152,10 @@
                                         @RuleLabel(alert)
                                     </td>
                                     <td>@alert.Threshold</td>
-                                    <td>@alert.Timeframe</td>
+                                    <td>@CadenceLabel(alert.Timeframe)</td>
                                     <td>@alert.Channel</td>
                                     <td>
-                                        <span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "On" : "Off")</span>
+                                        <span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "Active" : "Paused")</span>
                                     </td>
                                     <td class="text-muted">@(alert.LastTriggeredAtUtc is null ? "Never" : alert.LastTriggeredAtUtc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
                                     <td class="text-end">
@@ -157,9 +163,9 @@
                                             <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Edit</a>
                                             <form class="alerts-inline-form" method="post" asp-page-handler="ToggleAlert">
                                                 <input type="hidden" name="id" value="@alert.Id" />
-                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Turn off" : "Turn on")</button>
+                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pause" : "Activate")</button>
                                             </form>
-                                            <form class="alerts-inline-form" method="post" asp-page-handler="DeleteAlert" onsubmit="return confirm('Delete this alert?');">
+                                            <form class="alerts-inline-form" method="post" asp-page-handler="DeleteAlert" onsubmit="return confirm('Delete this campaign?');">
                                                 <input type="hidden" name="id" value="@alert.Id" />
                                                 <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                                             </form>
@@ -180,45 +186,32 @@
             <div class="alerts-promo-visual @(Model.IsAnnualUnlimitedPlan ? "visual-star" : "visual-lock")"><i class="bi @(Model.IsAnnualUnlimitedPlan ? "bi-check2-circle" : "bi-lock-fill")"></i></div>
             <div class="alerts-promo-body">
                 <h2>@Model.PlanPromoTitle</h2>
-                @if (Model.IsAnnualUnlimitedPlan)
-                {
-                    <p>@Model.PlanPromoText</p>
-                    <a class="btn btn-outline-secondary" asp-page="/App/Billing">Subscription details</a>
-                }
-                else if (Model.IsUnlimitedPlan)
-                {
-                    <p>@Model.PlanPromoText</p>
-                    <a class="btn btn-primary" asp-page="/App/Billing">Switch to annual</a>
-                }
-                else
-                {
-                    <p><strong>Annual value:</strong> @Model.PlanPromoText</p>
-                    <a class="btn btn-primary" asp-page="/App/Billing">Upgrade to annual</a>
-                }
+                <p>@Model.PlanPromoText</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Billing">View plan</a>
             </div>
         </article>
         <article class="alerts-promo-card">
-            <div class="alerts-promo-visual visual-star"><i class="bi bi-sliders"></i></div>
+            <div class="alerts-promo-visual visual-star"><i class="bi bi-camera-video"></i></div>
             <div class="alerts-promo-body">
-                <h2>One alert builder</h2>
-                <p>Create every alert from the same form: choose the market, symbol, rule type, timeframe and only the fields required for that strategy.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Create">Create alert</a>
+                <h2>Posts and videos</h2>
+                <p>Create hooks, scripts and captions for TikTok, Instagram, Facebook and LinkedIn.</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Create">Create campaign</a>
             </div>
         </article>
         <article class="alerts-promo-card">
-            <div class="alerts-promo-visual visual-phone"><i class="bi bi-phone"></i></div>
+            <div class="alerts-promo-visual visual-phone"><i class="bi bi-envelope-paper"></i></div>
             <div class="alerts-promo-body">
-                <h2>Route alerts to your devices</h2>
-                <p>Send notifications through email, Telegram, Discord, Slack, Teams or webhooks from one settings panel.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Settings">Notification settings</a>
+                <h2>Email and SMS</h2>
+                <p>Prepare personalized messages for potential-client lists and promotional follow-up.</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Settings">Channels</a>
             </div>
         </article>
         <article class="alerts-promo-card">
             <div class="alerts-promo-visual visual-chart"><i class="bi bi-graph-up-arrow"></i></div>
             <div class="alerts-promo-body">
-                <h2>Advanced indicator alerts</h2>
-                <p>RSI thresholds and EMA cross confirmations work across crypto and traditional market symbols.</p>
-                <a class="btn btn-outline-secondary" asp-page="/HowItWorks">More info</a>
+                <h2>Measurable funnel</h2>
+                <p>Track reach, interaction and conversions before deciding which campaign to scale.</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Dashboard">Dashboard</a>
             </div>
         </article>
     </div>
@@ -228,19 +221,19 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content account-modal alerts-modal">
             <div class="modal-header border-0">
-                <h2 class="modal-title h3">Alerts schedule</h2>
+                <h2 class="modal-title h3">Delivery window</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" asp-page-handler="Schedule">
                 <div class="modal-body">
-                    <p class="fw-semibold mb-3">Send me alerts between...</p>
+                    <p class="fw-semibold mb-3">Run campaigns between...</p>
                     <div class="row g-3">
                         <div class="col-5">
-                            <input class="form-control" type="time" name="startTime" value="@(Model.ScheduleSettings?.AlertWindowStart ?? "00:00")" />
+                            <input class="form-control" type="time" name="startTime" value="@(Model.ScheduleSettings?.AlertWindowStart ?? "09:00")" />
                         </div>
                         <div class="col-2 d-flex align-items-center justify-content-center muted">and</div>
                         <div class="col-5">
-                            <input class="form-control" type="time" name="endTime" value="@(Model.ScheduleSettings?.AlertWindowEnd ?? "23:59")" />
+                            <input class="form-control" type="time" name="endTime" value="@(Model.ScheduleSettings?.AlertWindowEnd ?? "18:00")" />
                         </div>
                     </div>
                     <label class="modal-field-label mt-3" for="scheduleTimeZone">Schedule time zone</label>
@@ -261,7 +254,6 @@
                             <strong data-selected-timezone-clock>Checking selected time...</strong>
                         </div>
                     </div>
-                    <p class="schedule-timezone-note">Times are evaluated in the selected city time and automatically follow daylight saving rules where applicable.</p>
 
                     <p class="fw-semibold mt-4 mb-3">On these days...</p>
                     <div class="schedule-days">
@@ -273,12 +265,12 @@
                             </label>
                         }
                     </div>
-                    <p class="small muted mt-4 mb-0">Use a delivery window only when you want to mute notifications outside selected days or hours. For uninterrupted delivery, keep alerts running 24/7.</p>
+                    <p class="small muted mt-4 mb-0">Use this window to avoid outreach outside the desired marketing hours.</p>
                 </div>
                 <div class="modal-footer border-0 schedule-footer @(Model.ScheduleSettings?.AlertScheduleEnabled == true ? "" : "schedule-footer-compact")">
                     @if (Model.ScheduleSettings?.AlertScheduleEnabled == true)
                     {
-                        <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary"><i class="bi bi-broadcast me-1"></i> Use 24/7 alerts</button>
+                        <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary"><i class="bi bi-broadcast me-1"></i> Use 24/7 delivery</button>
                     }
                     <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise me-1"></i> Save delivery window</button>
                     <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancel</button>
@@ -289,65 +281,69 @@
 </div>
 
 @functions {
-    private string GroupTitle(MarketType market, string symbol)
+    private static string GroupTitle(MarketType market, string symbol)
     {
-        return market == MarketType.Crypto
-            ? $"BINANCE : {FormatCryptoPair(symbol)}"
-            : $"YAHOO : {symbol}";
+        return string.IsNullOrWhiteSpace(symbol) ? SourceKind(market) : symbol;
     }
 
-    private static string FormatCryptoPair(string symbol)
+    private static string SourceKind(MarketType market)
     {
-        return symbol.EndsWith("USDT", StringComparison.OrdinalIgnoreCase)
-            ? $"{symbol[..^4]} / USDT"
-            : symbol;
+        return market == MarketType.Crypto ? "Application URL" : "Company or idea";
     }
 
     private static string GroupHistoryId(MarketType market, string symbol)
     {
         var safeSymbol = new string(symbol.Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '-').ToArray());
-        return $"trigger-history-{market.ToString().ToLowerInvariant()}-{safeSymbol}";
+        safeSymbol = string.IsNullOrWhiteSpace(safeSymbol) ? "campaign" : safeSymbol;
+        return $"campaign-history-{market.ToString().ToLowerInvariant()}-{safeSymbol}";
     }
 
     private static string RuleLabel(Alert alert)
     {
-        return alert.RuleType.RequiresTechnicalIndicators()
-            ? $"{RuleDisplayName(alert.RuleType)} - RSI {alert.RsiPeriod}, EMA {alert.FastEmaPeriod}/{alert.SlowEmaPeriod}"
-            : alert.RuleType.UsesPriceZone()
-                ? $"Price zone +/- {alert.ZonePercent}%"
-                : RuleDisplayName(alert.RuleType);
+        return alert.RuleType.DisplayName();
     }
 
     private static string RuleDisplayName(AlertRuleType rule)
     {
-        return rule switch
-        {
-            AlertRuleType.PriceAbove => "Price above",
-            AlertRuleType.PriceBelow => "Price below",
-            AlertRuleType.PercentDrop24h => "24h percent drop",
-            AlertRuleType.PercentRise24h => "24h percent rise",
-            AlertRuleType.VolumeAbove24h => "24h volume above",
-            AlertRuleType.PriceZone => "Price zone",
-            AlertRuleType.RsiBelow => "RSI below",
-            AlertRuleType.RsiAbove => "RSI above",
-            AlertRuleType.RsiOversoldEmaCrossUp => "RSI oversold + EMA cross up",
-            AlertRuleType.RsiOverboughtEmaCrossDown => "RSI overbought + EMA cross down",
-            _ => rule.ToString()
-        };
+        return rule.DisplayName();
     }
 
     private static string RuleIcon(AlertRuleType rule)
     {
-        return rule is AlertRuleType.PriceBelow or AlertRuleType.PercentDrop24h or AlertRuleType.RsiOverboughtEmaCrossDown
-            ? "bi-chevron-down"
-            : "bi-chevron-up";
+        return rule switch
+        {
+            AlertRuleType.PriceAbove => "bi-tiktok",
+            AlertRuleType.PriceBelow => "bi-instagram",
+            AlertRuleType.PercentDrop24h => "bi-facebook",
+            AlertRuleType.PercentRise24h => "bi-linkedin",
+            AlertRuleType.VolumeAbove24h => "bi-envelope",
+            AlertRuleType.PriceZone => "bi-phone-vibrate",
+            _ => "bi-megaphone"
+        };
     }
 
     private static string RuleClass(AlertRuleType rule)
     {
-        return rule is AlertRuleType.PriceBelow or AlertRuleType.PercentDrop24h or AlertRuleType.RsiOverboughtEmaCrossDown
-            ? "text-danger"
-            : "text-success";
+        return rule switch
+        {
+            AlertRuleType.PriceAbove or AlertRuleType.PriceBelow => "text-success",
+            AlertRuleType.PercentDrop24h or AlertRuleType.PercentRise24h => "text-info",
+            AlertRuleType.PriceZone => "text-warning",
+            _ => "text-primary"
+        };
+    }
+
+    private static string CadenceLabel(string timeframe)
+    {
+        return timeframe switch
+        {
+            "1d" => "Daily",
+            "3d" => "Every 3 days",
+            "1wk" => "Weekly",
+            "2wk" => "Biweekly",
+            "1mo" => "Monthly",
+            _ => timeframe
+        };
     }
 
     private bool DayChecked(string day)
