@@ -3420,7 +3420,7 @@ a { text-decoration: none; }
   font-size: 0.92rem;
 }
 
-/* AI planner */
+/* Campaign builder */
 .planner-layout,
 .planner-two-col {
   display: grid;
@@ -3432,6 +3432,10 @@ a { text-decoration: none; }
 .planner-form,
 .planner-side {
   padding: 24px;
+}
+
+.planner-form {
+  scroll-margin-top: 24px;
 }
 
 .planner-platforms {

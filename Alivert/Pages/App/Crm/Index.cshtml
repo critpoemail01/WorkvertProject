@@ -8,10 +8,10 @@
     <div>
         <span class="tag mb-3">CRM integration</span>
         <h1 class="hero-title fw-bold mb-2">Use your prospecting team's leads in campaigns.</h1>
-        <p class="lead muted mb-0">Import customers and leads from an external CRM, then focus AI campaigns on those contacts inside the planner.</p>
+        <p class="lead muted mb-0">Import customers and leads from an external CRM, then focus campaigns on those contacts inside the campaign builder.</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-primary btn-lg" asp-page="/App/Planner/Index"><i class="bi bi-stars me-1"></i>Open planner</a>
+        <a class="btn btn-primary btn-lg" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i>New campaign</a>
     </div>
 </section>
 
@@ -142,7 +142,7 @@
 
             <div class="alert-form-actions mt-4">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-cloud-arrow-up me-1"></i>Import leads</button>
-                <span class="muted">The planner excludes unsubscribed and suppressed contacts from email campaigns.</span>
+                <span class="muted">The campaign builder excludes unsubscribed and suppressed contacts from email campaigns.</span>
             </div>
         </form>
     </section>
@@ -152,7 +152,7 @@
     <div class="app-panel-header">
         <div>
             <h2>Consent & Email Hub</h2>
-            <p>Manage authorized contacts, unsubscribe status and exclusion lists before the planner uses CRM emails in campaigns.</p>
+            <p>Manage authorized contacts, unsubscribe status and exclusion lists before the campaign builder uses CRM emails in campaigns.</p>
         </div>
     </div>
     <div class="consent-hub-grid">
@@ -178,7 +178,7 @@
     <div class="app-panel-header">
         <div>
             <h2>Imported CRM leads</h2>
-            <p>These contacts become a selectable campaign audience in the AI Planner.</p>
+            <p>These contacts become a selectable audience in the campaign builder.</p>
         </div>
     </div>
 

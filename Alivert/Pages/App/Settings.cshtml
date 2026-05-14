@@ -30,7 +30,7 @@
                     <h2>Publish only through official OAuth connections</h2>
                     <p>Promovert only marks social content as published when the account, page or provider is authorized. LinkedIn, Instagram and Facebook require official page/account permissions; unsupported networks stay as creative briefs until a provider is connected.</p>
                 </div>
-                <a class="btn btn-outline-secondary" asp-page="/App/Planner/Index"><i class="bi bi-calendar-check me-1"></i>Review campaigns</a>
+                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index"><i class="bi bi-calendar-check me-1"></i>Review campaigns</a>
             </div>
 
             <div class="official-integration-grid">
@@ -255,7 +255,7 @@
                     <h2>Prepare outreach where customers already react</h2>
                     <p>Email and SMS cover direct outreach, social channels cover distribution, and webhooks connect campaigns to CRMs or automation workflows.</p>
                 </div>
-                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Planner/Index"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
+                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
             </div>
 
             <div class="notification-channel-grid">

@@ -11,8 +11,8 @@
         <p class="lead muted mb-0">@Model.Plan.TargetAudience</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index"><i class="bi bi-arrow-left me-1"></i>Planner</a>
-        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id"><i class="bi bi-arrow-repeat me-1"></i>Next campaign</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Campaigns</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-fragment="campaign-config"><i class="bi bi-arrow-repeat me-1"></i>Next campaign</a>
         <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
             <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all</button>
         </form>
@@ -91,7 +91,7 @@
                 <h2>Company learning</h2>
                 <p>Promovert learns from this company results and adapts the next campaign.</p>
             </div>
-            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id"><i class="bi bi-arrow-repeat me-1"></i>Use learning in next campaign</a>
+            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-fragment="campaign-config"><i class="bi bi-arrow-repeat me-1"></i>Use learning in next campaign</a>
         </div>
 
         <div class="company-learning-grid">
@@ -399,7 +399,7 @@
                         <div><dt>Channels</dt><dd>@string.Join(" + ", recommendation.Platforms)</dd></div>
                         <div><dt>Report</dt><dd>@recommendation.ReportFocus</dd></div>
                     </dl>
-                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-route-templateKey="@recommendation.Key">Prepare this campaign</a>
+                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-route-templateKey="@recommendation.Key" asp-fragment="campaign-config">Prepare this campaign</a>
                 </article>
             }
         </div>

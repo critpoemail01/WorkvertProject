@@ -59,7 +59,7 @@ public class DetailsModel : PageModel
         if (!loaded)
         {
             StatusMessage = "Campaign not found for this account or it was already deleted.";
-            return RedirectToPage("/App/Planner/Index");
+            return RedirectToPage("/App/Alerts/Index");
         }
 
         if (EnsureCampaignArtifacts())
@@ -399,7 +399,7 @@ public class DetailsModel : PageModel
         if (plan is null)
         {
             StatusMessage = "Campaign not found or already deleted.";
-            return RedirectToPage("/App/Planner/Index");
+            return RedirectToPage("/App/Alerts/Index");
         }
 
         var productName = plan.ProductName;
@@ -407,7 +407,7 @@ public class DetailsModel : PageModel
         await _db.SaveChangesAsync();
 
         StatusMessage = $"Campaign '{productName}' deleted.";
-        return RedirectToPage("/App/Planner/Index");
+        return RedirectToPage("/App/Alerts/Index");
     }
 
     private async Task<bool> LoadPlanAsync(int id, bool tracked = false)

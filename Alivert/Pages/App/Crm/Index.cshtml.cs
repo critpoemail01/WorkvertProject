@@ -213,7 +213,7 @@ public class IndexModel : PageModel
             integration.LastImportedAtUtc = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
-        StatusMessage = $"{imported} new lead{(imported == 1 ? "" : "s")} imported and {updated} updated. These leads can now be selected in the AI Planner.";
+        StatusMessage = $"{imported} new lead{(imported == 1 ? "" : "s")} imported and {updated} updated. These leads can now be selected in the campaign builder.";
         return RedirectToPage();
     }
 

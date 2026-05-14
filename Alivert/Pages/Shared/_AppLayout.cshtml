@@ -4,6 +4,7 @@
     var currentPath = Context.Request.Path.Value ?? string.Empty;
     var isActive = (string pagePath) => currentPath.Equals(pagePath, StringComparison.OrdinalIgnoreCase);
     var isActivePrefix = (string pagePath) => currentPath.StartsWith(pagePath, StringComparison.OrdinalIgnoreCase);
+    var isCampaignArea = isActivePrefix("/App/Alerts") || isActivePrefix("/App/Planner");
 }
 
 <!DOCTYPE html>
@@ -55,15 +56,11 @@
                 <i class="bi bi-bar-chart-fill"></i>
                 <span>Dashboard</span>
             </a>
-            <a class="app-nav-link @(isActivePrefix("/App/Planner") ? "active" : "")" asp-page="/App/Planner/Index">
-                <i class="bi bi-stars"></i>
-                <span>AI Planner</span>
-            </a>
             <a class="app-nav-link @(isActivePrefix("/App/Crm") ? "active" : "")" asp-page="/App/Crm/Index">
                 <i class="bi bi-database-add"></i>
                 <span>CRM leads</span>
             </a>
-            <a class="app-nav-link @(isActivePrefix("/App/Alerts") ? "active" : "")" asp-page="/App/Alerts/Index">
+            <a class="app-nav-link @(isCampaignArea ? "active" : "")" asp-page="/App/Alerts/Index">
                 <i class="bi bi-bell-fill"></i>
                 <span>Campaigns</span>
             </a>
@@ -105,7 +102,7 @@
             </div>
             <div class="app-topbar-actions">
                 <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Account/Index"><i class="bi bi-person-circle me-1"></i>My account</a>
-                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Planner/Index"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
+                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
             </div>
         </header>
 

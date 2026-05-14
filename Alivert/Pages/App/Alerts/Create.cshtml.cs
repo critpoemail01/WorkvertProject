@@ -106,7 +106,7 @@ public class CreateAlertModel : PageModel
 
     public IActionResult OnGet(MarketType? marketType = null, string? symbol = null, AlertRuleType? ruleType = null, string? timeframe = null, decimal? threshold = null)
     {
-        return RedirectToPage("/App/Planner/Index");
+        return Redirect("/App/Planner#campaign-config");
     }
 
     public async Task LoadManualFormAsync(MarketType? marketType = null, string? symbol = null, AlertRuleType? ruleType = null, string? timeframe = null, decimal? threshold = null)
