@@ -1,5 +1,6 @@
 using Alivert.Data;
 using Alivert.Models;
+using Alivert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +14,18 @@ public class DetailsModel : PageModel
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly IUserAccountService _accounts;
 
-    public DetailsModel(ApplicationDbContext db, UserManager<IdentityUser> userManager)
+    public DetailsModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts)
     {
         _db = db;
         _userManager = userManager;
+        _accounts = accounts;
     }
 
     public MarketingPlan Plan { get; private set; } = default!;
     public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0);
+    public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
     [TempData]
     public string? StatusMessage { get; set; }
 
@@ -217,6 +221,18 @@ public class DetailsModel : PageModel
     {
         var loaded = await LoadPlanAsync(id, tracked: true);
         if (!loaded) return NotFound();
+
+        if (!CampaignCreditUsage.IsActiveMarketingPlanStatus(Plan.Status))
+        {
+            var userId = _userManager.GetUserId(User) ?? string.Empty;
+            var requiredCredits = CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
+            var limits = await _accounts.GetLimitsAsync(userId);
+            if (!limits.IsUnlimited && requiredCredits > limits.RemainingSlots)
+            {
+                StatusMessage = $"This plan needs {requiredCredits} active platform credit{(requiredCredits == 1 ? "" : "s")}, but only {limits.RemainingSlots} remain. Remove platforms, pause another campaign or upgrade your plan.";
+                return RedirectToPage(new { id });
+            }
+        }
 
         foreach (var post in Plan.Posts.Where(x => x.Status == "Approved"))
             post.Status = "Scheduled";

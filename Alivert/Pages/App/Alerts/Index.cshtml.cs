@@ -32,7 +32,7 @@ public class AlertsIndexModel : PageModel
     public bool IsUnlimitedPlan { get; private set; }
     public bool IsAnnualUnlimitedPlan { get; private set; }
     public string PlanPromoTitle { get; private set; } = "Unlock unlimited campaigns";
-    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 299 and covers every campaign, channel and cadence without counting credits.";
+    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 299 and covers every campaign, platform, channel and cadence without counting credits.";
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -56,7 +56,7 @@ public class AlertsIndexModel : PageModel
             var limits = await _accounts.GetLimitsAsync(userId);
             if (!limits.IsUnlimited && limits.RemainingSlots <= 0)
             {
-                StatusMessage = "No credits available. Pause another campaign or upgrade your plan before activating this campaign.";
+                StatusMessage = "No credits available. Pause another campaign-platform or upgrade your plan before activating this campaign.";
                 return RedirectToPage();
             }
         }
@@ -95,7 +95,7 @@ public class AlertsIndexModel : PageModel
             var alertsToEnable = alerts.Count(a => !a.IsEnabled);
             if (!limits.IsUnlimited && alertsToEnable > limits.RemainingSlots)
             {
-                StatusMessage = $"No credits available. This source needs {alertsToEnable} slot(s), but only {limits.RemainingSlots} remain.";
+                StatusMessage = $"No credits available. This source needs {alertsToEnable} platform credit(s), but only {limits.RemainingSlots} remain.";
                 return RedirectToPage();
             }
         }
@@ -296,15 +296,15 @@ public class AlertsIndexModel : PageModel
         {
             PlanPromoTitle = "Annual unlimited active";
             PlanPromoText = account?.UnlimitedUntilUtc is null
-                ? "Every campaign type, channel and cadence is already included in your annual account."
-                : $"Every campaign type, channel and cadence is included until {account.UnlimitedUntilUtc.Value.ToLocalTime():MMM d, yyyy}.";
+                ? "Every campaign type, platform, channel and cadence is already included in your annual account."
+                : $"Every campaign type, platform, channel and cadence is included until {account.UnlimitedUntilUtc.Value.ToLocalTime():MMM d, yyyy}.";
             return;
         }
 
         if (IsUnlimitedPlan)
         {
             PlanPromoTitle = "Switch to annual and save";
-            PlanPromoText = "You already have unlimited campaigns. Annual billing is EUR 299/year and saves more than 50% versus paying monthly.";
+            PlanPromoText = "You already have unlimited campaign-platforms. Annual billing is EUR 299/year and saves more than 50% versus paying monthly.";
         }
     }
 }

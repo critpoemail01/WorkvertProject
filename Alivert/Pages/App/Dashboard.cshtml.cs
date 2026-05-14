@@ -36,8 +36,8 @@ public class DashboardModel : PageModel
     public string ConversionRateLabel { get; private set; } = "0.0%";
     public bool IsUnlimitedPlan { get; private set; }
     public string PlanName { get; private set; } = "Basic (Free)";
-    public string PlanDescription { get; private set; } = "Start with 5 free active campaign credits.";
-    public string PlanCapacityLabel { get; private set; } = "5 active campaign slots";
+    public string PlanDescription { get; private set; } = "Start with 5 free active platform credits.";
+    public string PlanCapacityLabel { get; private set; } = "5 active platform credits";
     public string PlanRemainingLabel { get; private set; } = "5 remaining";
     public int PlanUsagePercent { get; private set; }
     public DateTime? PlanExpiresOnUtc { get; private set; }
@@ -180,9 +180,9 @@ public class DashboardModel : PageModel
                     ? "Unlimited annual"
                     : "Unlimited monthly";
             PlanDescription = PlanDaysRemaining is null
-                ? "Unlimited active campaigns are enabled."
-                : $"Unlimited active campaigns until {PlanExpiresOnUtc!.Value.ToLocalTime():MMMM d, yyyy}.";
-            PlanCapacityLabel = "Unlimited active campaigns";
+                ? "Unlimited active campaign-platforms are enabled."
+                : $"Unlimited active campaign-platforms until {PlanExpiresOnUtc!.Value.ToLocalTime():MMMM d, yyyy}.";
+            PlanCapacityLabel = "Unlimited active platform credits";
             PlanRemainingLabel = PlanDaysRemaining is null
                 ? "Active now"
                 : $"{PlanDaysRemaining} day{(PlanDaysRemaining == 1 ? "" : "s")} remaining";
@@ -192,9 +192,9 @@ public class DashboardModel : PageModel
 
         PlanName = limits.Capacity <= 5 ? "Basic (Free)" : "Credit pack";
         PlanDescription = limits.Capacity <= 5
-            ? "Free credits let you validate the campaign workflow before paying."
-            : "Credit capacity is active. Add packs when you need more campaigns.";
-        PlanCapacityLabel = $"{limits.Capacity} active campaign slot{(limits.Capacity == 1 ? "" : "s")}";
+            ? "Free credits let you validate campaign-platforms before paying."
+            : "Credit capacity is active. Add packs when you need more platforms live.";
+        PlanCapacityLabel = $"{limits.Capacity} active platform credit{(limits.Capacity == 1 ? "" : "s")}";
         PlanRemainingLabel = $"{limits.RemainingSlots} remaining";
         PlanUsagePercent = limits.Capacity <= 0
             ? 100

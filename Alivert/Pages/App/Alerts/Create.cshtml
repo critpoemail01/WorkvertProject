@@ -148,8 +148,8 @@
             }
             else
             {
-                <h2>@Model.RemainingSlots campaign slot@(Model.RemainingSlots == 1 ? "" : "s") available</h2>
-                <p>You can have up to <strong>@Model.Capacity</strong> active campaigns. You currently have <strong>@Model.ActiveAlerts</strong>.</p>
+                <h2>@Model.RemainingSlots platform credit@(Model.RemainingSlots == 1 ? "" : "s") available</h2>
+                <p>Each active campaign on each platform uses 1 credit. You can run <strong>@Model.Capacity</strong> active platform credits and currently use <strong>@Model.ActiveAlerts</strong>.</p>
                 <a class="btn btn-outline-secondary w-100" asp-page="/Pricing">View packs</a>
             }
 

@@ -9,7 +9,7 @@
         <div>
             <span class="tag mb-2">Account & settings</span>
             <h1 class="fw-bold mb-0">Subscription details</h1>
-            <p class="muted mb-0">Review your plan, payment options and campaign capacity.</p>
+            <p class="muted mb-0">Review your plan, payment options and campaign-platform capacity.</p>
         </div>
         @if (Model.IsUnlimited)
         {
@@ -76,19 +76,19 @@
     <div class="row g-3 mt-3">
         <div class="col-md-4">
             <div class="surface metric-card">
-                <div class="small muted">Current capacity</div>
+                <div class="small muted">Credit capacity</div>
                 <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.Capacity)</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="surface metric-card">
-                <div class="small muted">Active campaigns</div>
+                <div class="small muted">Active platform credits</div>
                 <div class="display-6 fw-bold">@Model.ActiveAlerts</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="surface metric-card">
-                <div class="small muted">Remaining slots</div>
+                <div class="small muted">Remaining credits</div>
                 <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.RemainingSlots)</div>
             </div>
         </div>
@@ -121,7 +121,7 @@
                 <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexible</div>
                 <h2 class="h3 fw-bold mb-1">Unlimited monthly</h2>
                 <div class="plan-price">@Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)<span class="fs-6 muted">/month</span></div>
-                <p class="muted mt-2">Unlimited campaigns, all channels and all cadences with 30-day access.</p>
+                <p class="muted mt-2">Unlimited campaigns, platforms, channels and cadences with 30-day access.</p>
                 <ul class="muted">
                     <li>No long-term commitment</li>
                     <li>Social, email and SMS campaign assets</li>
@@ -138,7 +138,7 @@
                             data-checkout-pack=""
                             data-checkout-title="Unlimited monthly"
                             data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)}/month")"
-                            data-checkout-detail="Unlimited active campaigns for 30 days. Best when you want to keep every channel active month to month.">
+                            data-checkout-detail="Unlimited active campaign-platforms for 30 days. Best when you want to keep every channel active month to month.">
                         <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
                     </button>
                 </div>
@@ -148,9 +148,9 @@
                 <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Best value</div>
                 <h2 class="h3 fw-bold mb-1">Unlimited annual</h2>
                 <div class="plan-price">@Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)<span class="fs-6 muted">/year</span></div>
-                <p class="muted mt-2">One year of unlimited campaigns with more than 50% saved versus paying monthly.</p>
+                <p class="muted mt-2">One year of unlimited campaign-platforms with more than 50% saved versus paying monthly.</p>
                 <ul class="muted">
-                    <li>Unlimited active campaigns for 1 year</li>
+                    <li>Unlimited active campaign-platforms for 1 year</li>
                     <li>Best option for active growth workflows</li>
                     <li>No campaign counting or capacity checks</li>
                 </ul>
@@ -175,7 +175,7 @@
 
     <section class="account-section mt-4" id="credit-packs">
         <div class="account-section-title">Credit packs</div>
-        <p class="muted mb-4">1 paid credit = 1 active campaign slot for @Model.CreditPackValidityDays days after payment confirmation. Packs are useful when you need a fixed short-term campaign batch without a subscription.</p>
+        <p class="muted mb-4">1 paid credit = 1 active campaign on 1 platform for @Model.CreditPackValidityDays days after payment confirmation. Packs are useful when you need a fixed short-term campaign batch without a subscription.</p>
         <div class="row g-3">
             @foreach (var pack in Model.Packs)
             {
@@ -184,7 +184,7 @@
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
                                 <div class="fw-semibold">@pack.Credits credits</div>
-                                <div class="muted small">Adds @pack.Credits active campaign slots for @Model.CreditPackValidityDays days</div>
+                                <div class="muted small">Adds @pack.Credits active campaign-platform credits for @Model.CreditPackValidityDays days</div>
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold">@Model.FormatMoney(pack.Amount, pack.Currency)</div>
@@ -206,7 +206,7 @@
                                     data-checkout-pack="@pack.Id"
                                     data-checkout-title="@($"{pack.Credits} credits")"
                                     data-checkout-price="@Model.FormatMoney(pack.Amount, pack.Currency)"
-                                    data-checkout-detail="@($"Adds {pack.Credits} active campaign slots for {Model.CreditPackValidityDays} days after payment confirmation.")">
+                                    data-checkout-detail="@($"Adds {pack.Credits} active campaign-platform credits for {Model.CreditPackValidityDays} days after payment confirmation.")">
                                 <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
                             </button>
                         </div>

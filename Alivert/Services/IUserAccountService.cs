@@ -8,7 +8,8 @@ public interface IUserAccountService
     Task EnsureAsync(string userId, CancellationToken ct = default);
 
     /// <summary>
-    /// Returns (isUnlimited, allowedAlertCapacity, activeAlerts, remainingSlots).
+    /// Returns (isUnlimited, allowedCreditCapacity, activeCreditUnits, remainingSlots).
+    /// One active manual campaign channel uses 1 credit. One scheduled AI plan uses 1 credit per active platform.
     /// Paid credit capacity is calculated from credit transactions that are still inside the 30-day validity window.
     /// </summary>
     Task<(bool IsUnlimited, int Capacity, int ActiveAlerts, int RemainingSlots)> GetLimitsAsync(string userId, CancellationToken ct = default);

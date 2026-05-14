@@ -38,7 +38,7 @@ public class LogModel : PageModel
     public string SelectedAlertName { get; private set; } = "All campaigns";
     public string SelectedTimeframe { get; private set; } = "all";
     public bool IsUnlimitedPlan { get; private set; }
-    public string PlanCapacityLabel { get; private set; } = "5 active campaign slots";
+    public string PlanCapacityLabel { get; private set; } = "5 active platform credits";
 
     public record AlertOption(int Id, string Label);
     public record LogRow(
@@ -59,8 +59,8 @@ public class LogModel : PageModel
         var limits = await _accounts.GetLimitsAsync(userId);
         IsUnlimitedPlan = limits.IsUnlimited;
         PlanCapacityLabel = limits.IsUnlimited
-            ? "Unlimited active campaigns"
-            : $"{limits.ActiveAlerts}/{limits.Capacity} active campaign slots used";
+            ? "Unlimited active campaign-platforms"
+            : $"{limits.ActiveAlerts}/{limits.Capacity} active platform credits used";
 
         var alerts = await _db.Alerts
             .AsNoTracking()

@@ -80,8 +80,8 @@ public sealed class AppPlanBadgeViewComponent : ViewComponent
         var isFree = capacity <= 5;
         var name = isFree ? "Basic (Free)" : "Credit pack";
         var metaText = isFree
-            ? $"{capacity} free campaign slots"
-            : $"{remaining} of {capacity} slots free";
+            ? $"{capacity} free platform credits"
+            : $"{remaining} of {capacity} platform credits free";
 
         return new AppPlanBadgeModel(name, metaText, isFree ? "bi-wallet2" : "bi-credit-card-2-front", isFree ? "basic" : "credits");
     }

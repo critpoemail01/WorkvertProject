@@ -159,7 +159,7 @@ public class CreateAlertModel : PageModel
 
         if (Input.IsEnabled && !IsUnlimited && RemainingSlots <= 0)
         {
-            ModelState.AddModelError(string.Empty, "No campaign credits available. Buy a credit pack or upgrade before activating more campaigns.");
+            ModelState.AddModelError(string.Empty, "No platform credits available. Buy a credit pack or upgrade before activating more campaign-platforms.");
             return Page();
         }
         var symbol = NormalizeSource(Input.Symbol);
@@ -186,6 +186,7 @@ public class CreateAlertModel : PageModel
             a.RsiPeriod == Input.RsiPeriod &&
             a.FastEmaPeriod == Input.FastEmaPeriod &&
             a.SlowEmaPeriod == Input.SlowEmaPeriod &&
+            a.Channel == channel &&
             a.AudienceList == audienceList);
         if (exists)
         {
