@@ -44,11 +44,14 @@ public class DetailsModel : PageModel
     public CompanyLearningProfile CompanyLearning { get; private set; } = CompanyLearningProfile.Empty();
     public IReadOnlyList<SectorCampaignRecommendation> NextCampaignRecommendations { get; private set; } = [];
     public IReadOnlyList<PublicationAuthorization> PublicationAuthorizations { get; private set; } = [];
+    public IReadOnlyList<CampaignOperatingModule> OperatingModules { get; private set; } = [];
     public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
     [TempData]
     public string? StatusMessage { get; set; }
 
     public record MetricsSummary(int Drafts, int Approved, int Scheduled, int Published, int Reach, int Interactions, int Conversions, int LandingViews, int CapturedLeads);
+    public record CampaignOperatingModule(string Name, string Purpose, string Status, string Detail, string Icon, bool Ready);
+    private record ConsentStats(int CampaignReady, int Suppressed);
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
@@ -416,6 +419,8 @@ public class DetailsModel : PageModel
         CompanyLearning = await _companyLearning.BuildAsync(plan.UserId, plan.ProductName, plan.ProductUrl, plan.CompanyOrIdea);
         var settings = await LoadSettingsAsync(plan.UserId);
         PublicationAuthorizations = BuildPublicationAuthorizations(plan, settings);
+        var consentStats = await BuildConsentStatsAsync(plan.UserId);
+        OperatingModules = BuildOperatingModules(plan, settings, PublicationAuthorizations, consentStats);
         NextCampaignRecommendations = _campaignLibrary.Recommend(new CampaignLibraryRequest(
             plan.ProductName,
             plan.CompanyOrIdea,
@@ -424,6 +429,21 @@ public class DetailsModel : PageModel
             plan.CampaignGoal,
             plan.BusinessDna), 3);
         return true;
+    }
+
+    private async Task<ConsentStats> BuildConsentStatsAsync(string userId)
+    {
+        var campaignReady = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
+            x.UserId == userId &&
+            x.Status == "Imported" &&
+            x.Email != "" &&
+            x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
+            x.ConsentStatus != CrmConsentPolicy.Suppressed);
+        var suppressed = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
+            x.UserId == userId &&
+            (x.ConsentStatus == CrmConsentPolicy.Unsubscribed || x.ConsentStatus == CrmConsentPolicy.Suppressed));
+
+        return new ConsentStats(campaignReady, suppressed);
     }
 
     private async Task<UserNotificationSettings?> LoadSettingsAsync(string userId)
@@ -445,6 +465,88 @@ public class DetailsModel : PageModel
 
         items.Add(new PublicationAuthorization(true, "Landing pages", "Landing pages are published inside Promovert after campaign approval."));
         return items;
+    }
+
+    private IReadOnlyList<CampaignOperatingModule> BuildOperatingModules(
+        MarketingPlan plan,
+        UserNotificationSettings? settings,
+        IReadOnlyList<PublicationAuthorization> publicationAuthorizations,
+        ConsentStats consentStats)
+    {
+        var durationDays = plan.EndDate.DayNumber - plan.StartDate.DayNumber + 1;
+        var authorizedChannels = publicationAuthorizations.Count(x => x.IsAuthorized);
+        var totalChannels = publicationAuthorizations.Count;
+        var landingStatus = plan.LandingPage is null
+            ? "Missing"
+            : $"{plan.LandingPage.Status}, {plan.LandingPage.Leads.Count} lead{(plan.LandingPage.Leads.Count == 1 ? "" : "s")}";
+        var agencyConfigured = !string.IsNullOrWhiteSpace(settings?.AgencyName) ||
+            !string.IsNullOrWhiteSpace(settings?.AgencyWorkspaceName) ||
+            !string.IsNullOrWhiteSpace(settings?.AgencyBrandColor);
+
+        return
+        [
+            new("Business DNA", "Analyses the URL and creates the commercial and visual profile.",
+                string.IsNullOrWhiteSpace(plan.BusinessDna) ? "Needs generation" : "Ready",
+                string.IsNullOrWhiteSpace(plan.ProductUrl) ? "Built from the business idea." : $"Built from {plan.ProductUrl}.",
+                "bi-fingerprint", !string.IsNullOrWhiteSpace(plan.BusinessDna)),
+
+            new("Campaign Builder", "Generates complete campaigns by objective: leads, bookings, sales, launch or promotion.",
+                "Ready",
+                $"{plan.CampaignGoal} over {durationDays} days for {BuildLocationLabel(plan)}.",
+                "bi-diagram-3", true),
+
+            new("Content Studio", "Creates posts, creative briefs, emails, ads and channel variations.",
+                plan.Posts.Any() || plan.Emails.Any() ? "Ready" : "Empty",
+                $"{plan.Posts.Count} posts/scripts, {plan.Emails.Count} emails, {plan.Posts.Count} creative briefs and ad-ready variations.",
+                "bi-brush", plan.Posts.Any() || plan.Emails.Any()),
+
+            new("Landing Page Builder", "Creates conversion pages with form, CTA and tracking.",
+                plan.LandingPage is null ? "Missing" : "Ready",
+                landingStatus,
+                "bi-window-stack", plan.LandingPage is not null),
+
+            new("Consent & Email Hub", "Manages authorized contacts, consent, unsubscribe and exclusion lists.",
+                "Ready",
+                $"{consentStats.CampaignReady} CRM contacts available, {consentStats.Suppressed} excluded from outreach.",
+                "bi-shield-check", true),
+
+            new("Approval Portal", "Lets the agency, team or client approve everything before publishing.",
+                plan.Status,
+                $"{Metrics.Drafts} drafts, {Metrics.Approved} approved, {Metrics.Scheduled} scheduled.",
+                "bi-check2-square", true),
+
+            new("Publishing Hub", "Schedules and publishes through official integrations.",
+                authorizedChannels == totalChannels ? "Authorized" : "Needs setup",
+                $"{authorizedChannels}/{totalChannels} campaign channels authorized.",
+                "bi-send-check", authorizedChannels == totalChannels),
+
+            new("Lead CRM", "Stores leads and shows origin by campaign and channel.",
+                "Ready",
+                $"{Metrics.CapturedLeads} captured landing leads, {plan.CrmLeadSourceCount} CRM emails used in this plan.",
+                "bi-person-lines-fill", true),
+
+            new("Analytics & Learning", "Measures results and recommends the next campaign.",
+                "Ready",
+                $"{BusinessReport.Leads} leads, {BusinessReport.ConversionRateLabel} conversion. Next: {BusinessReport.RecommendedNextAction}",
+                "bi-graph-up-arrow", true),
+
+            new("Agency White-label", "Supports multi-client reports, permissions and agency branding.",
+                agencyConfigured ? "Configured" : "Ready to configure",
+                agencyConfigured
+                    ? $"{settings?.AgencyName ?? settings?.AgencyWorkspaceName ?? "Agency workspace"} branding with {PermissionModeLabel(settings?.AgencyPermissionMode)} permissions."
+                    : "Configure agency name, workspace, permission mode and brand color in settings.",
+                "bi-building-gear", true)
+        ];
+    }
+
+    private static string PermissionModeLabel(string? mode)
+    {
+        return mode switch
+        {
+            "TeamReview" => "team review",
+            "ClientApproval" => "client approval",
+            _ => "owner-only"
+        };
     }
 
     private static MetricsSummary BuildMetrics(MarketingPlan plan)

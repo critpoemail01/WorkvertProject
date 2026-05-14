@@ -42,6 +42,20 @@
             <div class="app-stat-value">@Model.ReadyForCampaign</div>
         </div>
     </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-shield-check"></i></span>
+        <div>
+            <div class="app-stat-label">Consented</div>
+            <div class="app-stat-value">@Model.AuthorizedContacts</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-shield-x"></i></span>
+        <div>
+            <div class="app-stat-label">Suppressed</div>
+            <div class="app-stat-value">@Model.SuppressedContacts</div>
+        </div>
+    </div>
 </div>
 
 <div class="crm-layout mt-4">
@@ -99,9 +113,28 @@
         </div>
 
         <form method="post" asp-page-handler="ImportLeads" class="crm-form">
-            <label asp-for="Import.Source" class="form-label"></label>
-            <input asp-for="Import.Source" class="form-control" placeholder="HubSpot, SDR list, trade show..." />
-            <span asp-validation-for="Import.Source" class="text-danger"></span>
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label asp-for="Import.Source" class="form-label"></label>
+                    <input asp-for="Import.Source" class="form-control" placeholder="HubSpot, SDR list, trade show..." />
+                    <span asp-validation-for="Import.Source" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Import.ConsentStatus" class="form-label"></label>
+                    <select asp-for="Import.ConsentStatus" class="form-select">
+                        @foreach (var status in Model.ConsentStatusOptions)
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Import.ConsentStatus" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Import.ConsentSource" class="form-label"></label>
+                    <input asp-for="Import.ConsentSource" class="form-control" placeholder="Opt-in form, event, CRM consent..." />
+                    <span asp-validation-for="Import.ConsentSource" class="text-danger"></span>
+                </div>
+            </div>
 
             <label asp-for="Import.RawLeads" class="form-label mt-3"></label>
             <textarea asp-for="Import.RawLeads" class="form-control crm-import-box" rows="10" placeholder="name,email,company,role,industry,country,city,stage,tags&#10;Ana Silva,ana@empresa.pt,Empresa SA,Operations Manager,Manufacturing,Portugal,Porto,Qualified,industrial"></textarea>
@@ -109,11 +142,37 @@
 
             <div class="alert-form-actions mt-4">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-cloud-arrow-up me-1"></i>Import leads</button>
-                <span class="muted">The planner can use these emails instead of only discovered public contacts.</span>
+                <span class="muted">The planner excludes unsubscribed and suppressed contacts from email campaigns.</span>
             </div>
         </form>
     </section>
 </div>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Consent & Email Hub</h2>
+            <p>Manage authorized contacts, unsubscribe status and exclusion lists before the planner uses CRM emails in campaigns.</p>
+        </div>
+    </div>
+    <div class="consent-hub-grid">
+        <article>
+            <span><i class="bi bi-envelope-check"></i></span>
+            <strong>Allowed for outreach</strong>
+            <p>Unknown and consented contacts can be selected for review. Consented contacts carry an explicit source.</p>
+        </article>
+        <article>
+            <span><i class="bi bi-person-x"></i></span>
+            <strong>Exclusion list</strong>
+            <p>Unsubscribed or suppressed contacts are blocked from campaign targeting and stay visible for audit.</p>
+        </article>
+        <article>
+            <span><i class="bi bi-window-stack"></i></span>
+            <strong>Landing lead capture</strong>
+            <p>Public campaign forms capture consent and add leads back into the CRM with campaign and channel origin.</p>
+        </article>
+    </div>
+</section>
 
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
@@ -141,6 +200,8 @@
                         <th>Segment</th>
                         <th>Location</th>
                         <th>Stage</th>
+                        <th>Consent</th>
+                        <th>Source</th>
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
@@ -162,11 +223,72 @@
                         </td>
                         <td>@string.Join(", ", new[] { lead.City, lead.Country }.Where(x => !string.IsNullOrWhiteSpace(x)))</td>
                         <td><span class="badge text-bg-secondary">@lead.Stage</span></td>
+                        <td>
+                            <form method="post" asp-page-handler="UpdateConsent" asp-route-leadId="@lead.Id" class="crm-consent-form">
+                                <select class="form-select form-select-sm" name="consentStatus">
+                                    @foreach (var status in Model.ConsentStatusOptions)
+                                    {
+                                        <option value="@status" selected="@(lead.ConsentStatus == status)">@status</option>
+                                    }
+                                </select>
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">Save</button>
+                            </form>
+                            <div class="text-muted small">@lead.ConsentSource</div>
+                        </td>
+                        <td>
+                            <span>@lead.Source</span>
+                            <div class="text-muted">@lead.Tags</div>
+                        </td>
                         <td class="text-end">
                             <form method="post" asp-page-handler="DeleteLead" asp-route-leadId="@lead.Id">
                                 <button class="btn btn-sm btn-outline-secondary" type="submit">Remove</button>
                             </form>
                         </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Captured leads by campaign</h2>
+            <p>Leads from landing pages are stored with campaign, form consent and UTM/channel source for reporting.</p>
+        </div>
+    </div>
+
+    @if (!Model.CapturedLandingLeads.Any())
+    {
+        <div class="empty-state compact">
+            <i class="bi bi-person-plus"></i>
+            <span>No landing page leads captured yet.</span>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Lead</th>
+                        <th>Campaign</th>
+                        <th>Origin</th>
+                        <th>Consent</th>
+                        <th>Captured</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var lead in Model.CapturedLandingLeads)
+                {
+                    <tr>
+                        <td><strong>@lead.ContactName</strong><div class="text-muted">@lead.Email</div></td>
+                        <td><strong>@lead.Campaign</strong><div class="text-muted">/@lead.LandingSlug</div></td>
+                        <td><strong>@lead.Source</strong><div class="text-muted">@lead.CompanyName @lead.Role</div></td>
+                        <td><span class="badge @(lead.ConsentAccepted ? "text-bg-success" : "text-bg-warning")">@(lead.ConsentAccepted ? "Accepted" : "Missing")</span></td>
+                        <td class="text-muted">@lead.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                     </tr>
                 }
                 </tbody>

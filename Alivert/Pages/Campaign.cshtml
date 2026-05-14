@@ -49,6 +49,12 @@
                 <label class="form-label mt-3" asp-for="Input.Message"></label>
                 <textarea class="form-control" asp-for="Input.Message" rows="4" placeholder="What are you trying to improve?"></textarea>
 
+                <label class="campaign-consent-check mt-3">
+                    <input asp-for="Input.MarketingConsentAccepted" />
+                    <span>@Model.ConsentText</span>
+                </label>
+                <span class="text-danger" asp-validation-for="Input.MarketingConsentAccepted"></span>
+
                 <button class="btn btn-primary w-100 mt-4" type="submit">@Model.LandingPage.PrimaryCallToAction</button>
             </form>
         }
@@ -59,6 +65,19 @@
     @foreach (var paragraph in Model.LandingPage.Body.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
     {
         <p>@paragraph</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.AgencyName) || !string.IsNullOrWhiteSpace(Model.AgencyReportFooter))
+    {
+        <div class="campaign-agency-footer" style="@(string.IsNullOrWhiteSpace(Model.AgencyBrandColor) ? null : $"border-color:{Model.AgencyBrandColor}")">
+            @if (!string.IsNullOrWhiteSpace(Model.AgencyName))
+            {
+                <strong>@Model.AgencyName</strong>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.AgencyReportFooter))
+            {
+                <span>@Model.AgencyReportFooter</span>
+            }
+        </div>
     }
 </section>
 

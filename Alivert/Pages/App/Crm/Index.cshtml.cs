@@ -34,6 +34,10 @@ public class IndexModel : PageModel
     public int TotalLeads { get; private set; }
     public int LeadsWithEmail { get; private set; }
     public int ReadyForCampaign { get; private set; }
+    public int AuthorizedContacts { get; private set; }
+    public int SuppressedContacts { get; private set; }
+    public List<CapturedLandingLeadRow> CapturedLandingLeads { get; private set; } = new();
+    public IReadOnlyList<string> ConsentStatusOptions => CrmConsentPolicy.Statuses;
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -63,6 +67,14 @@ public class IndexModel : PageModel
         [StringLength(120)]
         public string Source { get; set; } = "CRM import";
 
+        [Display(Name = "Consent status")]
+        [StringLength(24)]
+        public string ConsentStatus { get; set; } = CrmConsentPolicy.Unknown;
+
+        [Display(Name = "Consent source")]
+        [StringLength(180)]
+        public string? ConsentSource { get; set; }
+
         [Display(Name = "Paste CRM leads")]
         [Required, StringLength(20000)]
         public string RawLeads { get; set; } = string.Empty;
@@ -79,7 +91,22 @@ public class IndexModel : PageModel
         string? City,
         string? Stage,
         string? Tags,
+        string? Source,
+        string ConsentStatus,
+        string? ConsentSource,
         DateTime UpdatedAtUtc);
+
+    public record CapturedLandingLeadRow(
+        int Id,
+        string ContactName,
+        string Email,
+        string? CompanyName,
+        string? Role,
+        string? Source,
+        string Campaign,
+        string LandingSlug,
+        bool ConsentAccepted,
+        DateTime CreatedAtUtc);
 
     public async Task OnGetAsync()
     {
@@ -137,10 +164,13 @@ public class IndexModel : PageModel
         var rows = _importer.Parse(Import.RawLeads, Import.Source);
         var imported = 0;
         var updated = 0;
+        var importedConsentStatus = CrmConsentPolicy.Normalize(Import.ConsentStatus);
+        var importedConsentSource = Clean(Import.ConsentSource) ?? Clean(Import.Source);
 
         foreach (var row in rows)
         {
             var existing = await _db.CrmLeads.FirstOrDefaultAsync(x => x.UserId == userId && x.Email == row.Email);
+            var isNew = existing is null;
             if (existing is null)
             {
                 existing = new CrmLead
@@ -171,6 +201,9 @@ public class IndexModel : PageModel
             existing.Notes = row.Notes;
             existing.Status = "Imported";
             existing.LastSyncedAtUtc = DateTime.UtcNow;
+
+            if (isNew || importedConsentStatus != CrmConsentPolicy.Unknown)
+                ApplyConsent(existing, importedConsentStatus, importedConsentSource);
         }
 
         var integration = await _db.CrmIntegrations
@@ -181,6 +214,20 @@ public class IndexModel : PageModel
 
         await _db.SaveChangesAsync();
         StatusMessage = $"{imported} new lead{(imported == 1 ? "" : "s")} imported and {updated} updated. These leads can now be selected in the AI Planner.";
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostUpdateConsentAsync(int leadId, string consentStatus)
+    {
+        var userId = _userManager.GetUserId(User) ?? string.Empty;
+        var lead = await _db.CrmLeads.FirstOrDefaultAsync(x => x.Id == leadId && x.UserId == userId);
+        if (lead is not null)
+        {
+            ApplyConsent(lead, CrmConsentPolicy.Normalize(consentStatus), "Manual CRM consent hub");
+            await _db.SaveChangesAsync();
+            StatusMessage = $"Consent status updated for {lead.Email}.";
+        }
+
         return RedirectToPage();
     }
 
@@ -220,7 +267,18 @@ public class IndexModel : PageModel
 
         TotalLeads = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId);
         LeadsWithEmail = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Email != "");
-        ReadyForCampaign = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Status == "Imported" && x.Email != "");
+        ReadyForCampaign = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
+            x.UserId == userId &&
+            x.Status == "Imported" &&
+            x.Email != "" &&
+            x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
+            x.ConsentStatus != CrmConsentPolicy.Suppressed);
+        AuthorizedContacts = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
+            x.UserId == userId &&
+            x.ConsentStatus == CrmConsentPolicy.Consented);
+        SuppressedContacts = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
+            x.UserId == userId &&
+            (x.ConsentStatus == CrmConsentPolicy.Unsubscribed || x.ConsentStatus == CrmConsentPolicy.Suppressed));
 
         Leads = await _db.CrmLeads
             .AsNoTracking()
@@ -238,8 +296,48 @@ public class IndexModel : PageModel
                 x.City,
                 x.Stage,
                 x.Tags,
+                x.Source,
+                x.ConsentStatus,
+                x.ConsentSource,
                 x.UpdatedAtUtc))
             .ToListAsync();
+
+        CapturedLandingLeads = await _db.MarketingLandingLeads
+            .AsNoTracking()
+            .Where(x => x.MarketingLandingPage != null &&
+                x.MarketingLandingPage.MarketingPlan != null &&
+                x.MarketingLandingPage.MarketingPlan.UserId == userId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .Take(50)
+            .Select(x => new CapturedLandingLeadRow(
+                x.Id,
+                x.Name,
+                x.Email,
+                x.Company,
+                x.Role,
+                x.Source,
+                x.MarketingLandingPage!.MarketingPlan!.ProductName,
+                x.MarketingLandingPage.Slug,
+                x.MarketingConsentAccepted,
+                x.CreatedAtUtc))
+            .ToListAsync();
+    }
+
+    private static void ApplyConsent(CrmLead lead, string consentStatus, string? consentSource)
+    {
+        var now = DateTime.UtcNow;
+        lead.ConsentStatus = consentStatus;
+        lead.ConsentSource = Clean(consentSource);
+
+        if (consentStatus == CrmConsentPolicy.Consented)
+        {
+            lead.ConsentedAtUtc ??= now;
+            lead.UnsubscribedAtUtc = null;
+        }
+        else if (CrmConsentPolicy.IsBlocked(consentStatus))
+        {
+            lead.UnsubscribedAtUtc ??= now;
+        }
     }
 
     private static string? Clean(string? value)

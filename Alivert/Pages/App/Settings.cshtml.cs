@@ -136,6 +136,26 @@ public class SettingsModel : PageModel
         [StringLength(80)]
         public string? MetaPixelId { get; set; }
 
+        [Display(Name = "Agency name")]
+        [StringLength(160)]
+        public string? AgencyName { get; set; }
+
+        [Display(Name = "Client workspace label")]
+        [StringLength(80)]
+        public string? AgencyWorkspaceName { get; set; }
+
+        [Display(Name = "Agency brand color")]
+        [StringLength(16)]
+        public string? AgencyBrandColor { get; set; }
+
+        [Display(Name = "Report footer")]
+        [StringLength(260)]
+        public string? AgencyReportFooter { get; set; }
+
+        [Display(Name = "Permission mode")]
+        [StringLength(40)]
+        public string? AgencyPermissionMode { get; set; } = "OwnerOnly";
+
         [Display(Name = "Notification time zone")]
         [StringLength(80)]
         public string AlertTimeZone { get; set; } = TimeZoneCatalog.DefaultTimeZoneId;
@@ -179,6 +199,11 @@ public class SettingsModel : PageModel
             WhatsAppProviderName = settings?.WhatsAppProviderName,
             GoogleAnalyticsMeasurementId = settings?.GoogleAnalyticsMeasurementId,
             MetaPixelId = settings?.MetaPixelId,
+            AgencyName = settings?.AgencyName,
+            AgencyWorkspaceName = settings?.AgencyWorkspaceName,
+            AgencyBrandColor = settings?.AgencyBrandColor,
+            AgencyReportFooter = settings?.AgencyReportFooter,
+            AgencyPermissionMode = settings?.AgencyPermissionMode ?? "OwnerOnly",
             AlertTimeZone = TimeZoneCatalog.Normalize(settings?.AlertTimeZone)
         };
     }
@@ -200,6 +225,7 @@ public class SettingsModel : PageModel
         ValidateAuthorizedAccount(Input.WhatsAppAuthorized, "Input.WhatsAppProviderName", Input.WhatsAppProviderName, "Add the authorized WhatsApp provider name.");
         ValidateTrackingId("Input.GoogleAnalyticsMeasurementId", Input.GoogleAnalyticsMeasurementId, "Use a valid GA4 measurement ID, for example G-ABC123XYZ.");
         ValidateTrackingId("Input.MetaPixelId", Input.MetaPixelId, "Use a valid Meta Pixel ID.");
+        ValidateOptionalColor("Input.AgencyBrandColor", Input.AgencyBrandColor);
 
         if (!ModelState.IsValid)
             return Page();
@@ -219,6 +245,7 @@ public class SettingsModel : PageModel
         settings.TeamsWebhookUrl = Clean(Input.TeamsWebhookUrl);
         settings.TelegramChatId = Clean(Input.TelegramChatId);
         ApplyOfficialIntegrations(settings);
+        ApplyAgencyWhiteLabel(settings);
         settings.AlertTimeZone = TimeZoneCatalog.Normalize(Input.AlertTimeZone);
 
         await _db.SaveChangesAsync();
@@ -270,6 +297,15 @@ public class SettingsModel : PageModel
         settings.MetaPixelId = Clean(Input.MetaPixelId);
     }
 
+    private void ApplyAgencyWhiteLabel(UserNotificationSettings settings)
+    {
+        settings.AgencyName = Clean(Input.AgencyName);
+        settings.AgencyWorkspaceName = Clean(Input.AgencyWorkspaceName);
+        settings.AgencyBrandColor = Clean(Input.AgencyBrandColor);
+        settings.AgencyReportFooter = Clean(Input.AgencyReportFooter);
+        settings.AgencyPermissionMode = NormalizePermissionMode(Input.AgencyPermissionMode);
+    }
+
     private void ValidateOptionalUrl(string fieldName, string? value)
     {
         var cleaned = Clean(value);
@@ -299,10 +335,26 @@ public class SettingsModel : PageModel
             ModelState.AddModelError(fieldName, message);
     }
 
+    private void ValidateOptionalColor(string fieldName, string? value)
+    {
+        var cleaned = Clean(value);
+        if (cleaned is null)
+            return;
+
+        if (!Regex.IsMatch(cleaned, "^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$"))
+            ModelState.AddModelError(fieldName, "Use a valid hex color, for example #14b8a6.");
+    }
+
     private static string? Clean(string? value)
     {
         var cleaned = value?.Trim();
         return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
+    }
+
+    private static string NormalizePermissionMode(string? value)
+    {
+        var cleaned = Clean(value);
+        return cleaned is "TeamReview" or "ClientApproval" ? cleaned : "OwnerOnly";
     }
 
     private bool IsEmailTransportConfigured()

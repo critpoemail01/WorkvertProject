@@ -1,5 +1,6 @@
 using Alivert.Data;
 using Alivert.Models;
+using Alivert.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,10 @@ public class CampaignModel : PageModel
     public bool Submitted { get; private set; }
     public string? GoogleAnalyticsMeasurementId { get; private set; }
     public string? MetaPixelId { get; private set; }
+    public string? AgencyName { get; private set; }
+    public string? AgencyBrandColor { get; private set; }
+    public string? AgencyReportFooter { get; private set; }
+    public string ConsentText => $"I agree to be contacted about {Plan.ProductName} and understand I can unsubscribe at any time.";
 
     [BindProperty]
     public LeadInput Input { get; set; } = new();
@@ -44,6 +49,10 @@ public class CampaignModel : PageModel
 
         [StringLength(800)]
         public string? Message { get; set; }
+
+        [Display(Name = "Marketing consent")]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Confirm consent before submitting the form.")]
+        public bool MarketingConsentAccepted { get; set; }
     }
 
     public async Task<IActionResult> OnGetAsync(string slug)
@@ -66,17 +75,26 @@ public class CampaignModel : PageModel
         if (!ModelState.IsValid)
             return Page();
 
+        var now = DateTime.UtcNow;
+        var email = Input.Email.Trim();
+        var source = SourceLabel();
+        var consentText = ConsentText;
+
         LandingPage.Leads.Add(new MarketingLandingLead
         {
             Name = Input.Name.Trim(),
-            Email = Input.Email.Trim(),
+            Email = email,
             Phone = Clean(Input.Phone),
             Company = Clean(Input.Company),
             Role = Clean(Input.Role),
             Message = Clean(Input.Message),
-            Source = SourceLabel()
+            Source = source,
+            MarketingConsentAccepted = Input.MarketingConsentAccepted,
+            ConsentText = consentText,
+            ConsentedAtUtc = now
         });
 
+        await UpsertCapturedLeadAsync(email, source, consentText, now);
         await _db.SaveChangesAsync();
         Submitted = true;
         ModelState.Clear();
@@ -103,7 +121,45 @@ public class CampaignModel : PageModel
             .FirstOrDefaultAsync(x => x.UserId == Plan.UserId);
         GoogleAnalyticsMeasurementId = settings?.GoogleAnalyticsMeasurementId;
         MetaPixelId = settings?.MetaPixelId;
+        AgencyName = settings?.AgencyName;
+        AgencyBrandColor = settings?.AgencyBrandColor;
+        AgencyReportFooter = settings?.AgencyReportFooter;
         return true;
+    }
+
+    private async Task UpsertCapturedLeadAsync(string email, string source, string consentText, DateTime now)
+    {
+        var crmLead = await _db.CrmLeads
+            .FirstOrDefaultAsync(x => x.UserId == Plan.UserId && x.Email == email);
+
+        if (crmLead is null)
+        {
+            crmLead = new CrmLead
+            {
+                UserId = Plan.UserId,
+                Email = email
+            };
+            _db.CrmLeads.Add(crmLead);
+        }
+
+        crmLead.ContactName = Clip(Input.Name.Trim(), 160);
+        crmLead.Phone = Clean(Input.Phone);
+        crmLead.CompanyName = Clean(Input.Company);
+        crmLead.Role = Clean(Input.Role);
+        crmLead.Stage = "Captured lead";
+        crmLead.Tags = Clip($"landing-page,{Plan.ProductName}", 300);
+        crmLead.Source = Clip($"Landing page: {Plan.ProductName} / {source}", 120);
+        crmLead.Notes = Clean(Input.Message);
+        crmLead.Status = "Imported";
+        crmLead.LastSyncedAtUtc = now;
+
+        if (!string.Equals(crmLead.ConsentStatus, CrmConsentPolicy.Suppressed, StringComparison.OrdinalIgnoreCase))
+        {
+            crmLead.ConsentStatus = CrmConsentPolicy.Consented;
+            crmLead.ConsentSource = Clip($"Landing page form: {LandingPage.Slug}", 180);
+            crmLead.ConsentedAtUtc = now;
+            crmLead.UnsubscribedAtUtc = null;
+        }
     }
 
     private string SourceLabel()
@@ -119,5 +175,10 @@ public class CampaignModel : PageModel
     private static string? Clean(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string Clip(string value, int maxLength)
+    {
+        return value.Length <= maxLength ? value : value[..maxLength].TrimEnd();
     }
 }

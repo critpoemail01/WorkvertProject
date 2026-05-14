@@ -30,5 +30,12 @@ public class MarketingLandingLead
     [StringLength(120)]
     public string? Source { get; set; }
 
+    public bool MarketingConsentAccepted { get; set; }
+
+    [StringLength(300)]
+    public string? ConsentText { get; set; }
+
+    public DateTime? ConsentedAtUtc { get; set; }
+
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }

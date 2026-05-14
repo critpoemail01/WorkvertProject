@@ -327,6 +327,13 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         builder.Entity<CrmLead>()
             .HasIndex(x => new { x.UserId, x.Industry });
 
+        builder.Entity<CrmLead>()
+            .HasIndex(x => new { x.UserId, x.ConsentStatus });
+
+        builder.Entity<CrmLead>()
+            .Property(x => x.ConsentStatus)
+            .HasDefaultValue("Unknown");
+
         builder.Entity<AlertTrigger>()
             .HasIndex(t => new { t.AlertId, t.TriggeredAtUtc });
 

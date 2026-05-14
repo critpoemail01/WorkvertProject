@@ -45,6 +45,15 @@ public class CrmLead
     [StringLength(120)]
     public string? Source { get; set; }
 
+    [Required, StringLength(24)]
+    public string ConsentStatus { get; set; } = "Unknown";
+
+    [StringLength(180)]
+    public string? ConsentSource { get; set; }
+
+    public DateTime? ConsentedAtUtc { get; set; }
+    public DateTime? UnsubscribedAtUtc { get; set; }
+
     [StringLength(800)]
     public string? Notes { get; set; }
 

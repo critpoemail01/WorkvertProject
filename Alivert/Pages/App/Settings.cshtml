@@ -201,6 +201,53 @@
         </section>
 
         <section class="account-section mt-4">
+            <div class="account-section-title">Agency white-label</div>
+            <div class="agency-white-label-panel">
+                <div>
+                    <span class="tag">Multi-client ready</span>
+                    <h2>Brand reports and landing pages for the agency/client workspace</h2>
+                    <p>Use this when Promovert is operated by an agency or internal growth team with multiple clients. The values below are shown in campaign reports and public landing pages.</p>
+                </div>
+                <div class="agency-white-label-preview">
+                    <span style="@(string.IsNullOrWhiteSpace(Model.Input.AgencyBrandColor) ? null : $"background:{Model.Input.AgencyBrandColor}")"></span>
+                    <strong>@(string.IsNullOrWhiteSpace(Model.Input.AgencyName) ? "Agency brand" : Model.Input.AgencyName)</strong>
+                    <small>@(string.IsNullOrWhiteSpace(Model.Input.AgencyWorkspaceName) ? "Client workspace" : Model.Input.AgencyWorkspaceName)</small>
+                </div>
+            </div>
+            <div class="official-integration-fields mt-3">
+                <label>
+                    <span>Agency name</span>
+                    <input asp-for="Input.AgencyName" class="form-control" placeholder="Growth agency or internal team" />
+                </label>
+                <label>
+                    <span>Workspace label</span>
+                    <input asp-for="Input.AgencyWorkspaceName" class="form-control" placeholder="Client portfolio, PME Portugal..." />
+                </label>
+                <label>
+                    <span>Permission mode</span>
+                    <select asp-for="Input.AgencyPermissionMode" class="form-select">
+                        <option value="OwnerOnly">Owner only</option>
+                        <option value="TeamReview">Team review before publish</option>
+                        <option value="ClientApproval">Client approval before publish</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Brand color</span>
+                    <input asp-for="Input.AgencyBrandColor" class="form-control" placeholder="#14b8a6" />
+                    <span asp-validation-for="Input.AgencyBrandColor" class="text-danger"></span>
+                </label>
+                <label>
+                    <span>Report footer</span>
+                    <input asp-for="Input.AgencyReportFooter" class="form-control" placeholder="Prepared by the growth team. Contact: agency@example.com" />
+                </label>
+            </div>
+            <div class="notification-channel-actions">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i> Save white-label settings</button>
+                <span>These settings support agency branding, client workspaces and branded reports.</span>
+            </div>
+        </section>
+
+        <section class="account-section mt-4">
             <div class="account-section-title">Campaign delivery preferences</div>
             <div class="notification-channel-intro">
                 <div>

@@ -51,6 +51,7 @@ public class IndexModel : PageModel
     public IReadOnlyList<string> PlatformOptions => SupportedPlatforms;
     public IReadOnlyList<string> FrequencyOptions => SupportedFrequencies;
     public IReadOnlyList<string> LocationScopeOptions => SupportedLocationScopes;
+    public IReadOnlyList<string> GoalOptions { get; } = ["qualified leads", "bookings", "sales", "launch", "promotion"];
     public List<PlanRow> RecentPlans { get; private set; } = new();
     public string? SuggestionMessage { get; private set; }
     public string? LeadDiscoveryMessage { get; private set; }
@@ -449,7 +450,11 @@ public class IndexModel : PageModel
             .ToList();
 
         CrmLeadCount = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId);
-        CrmLeadEmails = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Email != "");
+        CrmLeadEmails = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
+            x.UserId == userId &&
+            x.Email != "" &&
+            x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
+            x.ConsentStatus != CrmConsentPolicy.Suppressed);
         CompanyLearning = await _companyLearning.BuildAsync(
             userId,
             Input.ProductName,
@@ -535,7 +540,12 @@ public class IndexModel : PageModel
     {
         var query = _db.CrmLeads
             .AsNoTracking()
-            .Where(x => x.UserId == userId && x.Email != "" && x.Status == "Imported");
+            .Where(x =>
+                x.UserId == userId &&
+                x.Email != "" &&
+                x.Status == "Imported" &&
+                x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
+                x.ConsentStatus != CrmConsentPolicy.Suppressed);
 
         if (!string.IsNullOrWhiteSpace(filter))
         {

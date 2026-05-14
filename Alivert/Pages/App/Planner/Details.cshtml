@@ -54,6 +54,32 @@
     </div>
 </section>
 
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Promovert operating modules</h2>
+            <p>This campaign is managed as one complete funnel, from Business DNA to publication, lead capture, report and next campaign.</p>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-sliders me-1"></i>Configure modules</a>
+    </div>
+    <div class="operating-module-grid">
+        @foreach (var module in Model.OperatingModules)
+        {
+            <article class="operating-module-card @(module.Ready ? "ready" : "setup")">
+                <span><i class="bi @module.Icon"></i></span>
+                <div>
+                    <div class="operating-module-head">
+                        <h3>@module.Name</h3>
+                        <em>@module.Status</em>
+                    </div>
+                    <strong>@module.Purpose</strong>
+                    <p>@module.Detail</p>
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
 @if (Model.CompanyLearning.HasData)
 {
     <section class="surface app-panel mt-4">
@@ -204,6 +230,69 @@
             </table>
         </div>
     }
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Content Studio</h2>
+            <p>Channel-specific social content, creative direction, email templates and ad-ready variations are generated before approval.</p>
+        </div>
+    </div>
+    <div class="content-studio-grid">
+        @foreach (var channel in Model.Plan.Posts.GroupBy(x => x.Platform).OrderBy(x => x.Key))
+        {
+            <article>
+                <span class="planner-platform">@PlatformIcon(channel.Key) @channel.Key</span>
+                <strong>@channel.Count() content pieces</strong>
+                <p>@channel.Count() captions/scripts, @channel.Count() creative briefs, @channel.Count() CTA variants.</p>
+            </article>
+        }
+        <article>
+            <span class="planner-platform"><i class="bi bi-envelope"></i> Email</span>
+            <strong>@Model.Plan.Emails.Count templates</strong>
+            <p>Multi-day sequence with subject, preview text, personalized body and audience segment.</p>
+        </article>
+        <article>
+            <span class="planner-platform"><i class="bi bi-badge-ad"></i> Ads</span>
+            <strong>@Model.Plan.Posts.Count variations</strong>
+            <p>Each social post can be reused as an organic post or paid ad brief after approval.</p>
+        </article>
+    </div>
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Approval Portal</h2>
+            <p>Approve posts, emails, lead targets and landing pages before the Publishing Hub can schedule or publish anything.</p>
+        </div>
+        <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
+            <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all assets</button>
+        </form>
+    </div>
+    <div class="approval-portal-grid">
+        <article>
+            <span><i class="bi bi-share"></i></span>
+            <strong>Posts</strong>
+            <p>@Model.Plan.Posts.Count(x => x.Status == "Draft") draft, @Model.Plan.Posts.Count(x => x.Status == "Approved") approved, @Model.Plan.Posts.Count(x => x.Status == "Scheduled") scheduled.</p>
+        </article>
+        <article>
+            <span><i class="bi bi-envelope-paper"></i></span>
+            <strong>Emails</strong>
+            <p>@Model.Plan.Emails.Count(x => x.Status == "Draft") draft, @Model.Plan.Emails.Count(x => x.Status == "Approved") approved, @Model.Plan.Emails.Count(x => x.Status == "Scheduled") scheduled.</p>
+        </article>
+        <article>
+            <span><i class="bi bi-window-stack"></i></span>
+            <strong>Landing page</strong>
+            <p>@(Model.Plan.LandingPage is null ? "No landing page" : $"{Model.Plan.LandingPage.Status} with {Model.Plan.LandingPage.Leads.Count} captured leads.")</p>
+        </article>
+        <article>
+            <span><i class="bi bi-building-add"></i></span>
+            <strong>Lead targets</strong>
+            <p>@Model.Plan.Leads.Count(x => x.Status == "Suggested") suggested, @Model.Plan.Leads.Count(x => x.Status == "Accepted") accepted for prospecting.</p>
+        </article>
+    </div>
 </section>
 
 <section class="surface app-panel mt-4">

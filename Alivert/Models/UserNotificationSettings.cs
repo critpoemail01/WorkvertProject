@@ -87,6 +87,21 @@ public class UserNotificationSettings
     [StringLength(80)]
     public string? MetaPixelId { get; set; }
 
+    [StringLength(160)]
+    public string? AgencyName { get; set; }
+
+    [StringLength(80)]
+    public string? AgencyWorkspaceName { get; set; }
+
+    [StringLength(16)]
+    public string? AgencyBrandColor { get; set; }
+
+    [StringLength(260)]
+    public string? AgencyReportFooter { get; set; }
+
+    [StringLength(40)]
+    public string? AgencyPermissionMode { get; set; }
+
     public bool AlertScheduleEnabled { get; set; }
 
     [StringLength(5)]

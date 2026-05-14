@@ -229,7 +229,13 @@
             </div>
             <div class="col-md-4">
                 <label asp-for="Input.CampaignGoal" class="form-label"></label>
-                <input asp-for="Input.CampaignGoal" class="form-control" placeholder="subscriptions, demos, purchases..." />
+                <input asp-for="Input.CampaignGoal" class="form-control" list="campaignGoalOptions" placeholder="subscriptions, demos, purchases..." />
+                <datalist id="campaignGoalOptions">
+                    @foreach (var goal in Model.GoalOptions)
+                    {
+                        <option value="@goal"></option>
+                    }
+                </datalist>
                 <span asp-validation-for="Input.CampaignGoal" class="text-danger"></span>
             </div>
             <div class="col-md-4">
@@ -282,7 +288,7 @@
                     <div class="lead-discovery-head">
                         <div>
                             <label asp-for="Input.UseCrmLeads" class="form-label mb-1"></label>
-                            <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Use these when your own prospecting team already found the audience.</p>
+                            <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available after consent/exclusion filtering from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Use these when your own prospecting team already found the audience.</p>
                         </div>
                         <a class="btn btn-outline-secondary" asp-page="/App/Crm/Index">
                             <i class="bi bi-database-add me-1"></i>Import CRM leads
