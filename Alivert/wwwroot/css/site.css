@@ -5098,6 +5098,18 @@ a { text-decoration: none; }
   border: 1px solid rgba(255,255,255,0.10);
 }
 
+.campaign-template-card.custom {
+  border-color: rgba(20,184,166,0.42);
+  background:
+    linear-gradient(135deg, rgba(20,184,166,0.16), rgba(8,13,24,0.68) 42%),
+    rgba(8,13,24,0.62);
+}
+
+.campaign-template-card.custom .tag {
+  background: rgba(20,184,166,0.16);
+  border-color: rgba(20,184,166,0.34);
+}
+
 .campaign-template-card h4 {
   margin: 0;
   color: #fff;

@@ -140,6 +140,20 @@
                             </div>
                         </div>
                         <div class="campaign-library-grid">
+                            <article class="campaign-template-card custom">
+                                <span class="tag">Customizado</span>
+                                <h4>Campanha customizada</h4>
+                                <p>Usa os campos da configuracao para definir objetivo, oferta, publico, canais, duracao, emails, landing page e tracking sem aplicar um template de setor.</p>
+                                <dl>
+                                    <div><dt>Goal</dt><dd>definido por ti</dd></div>
+                                    <div><dt>Offer</dt><dd>usa a tua proposta de valor</dd></div>
+                                    <div><dt>Channels</dt><dd>os canais selecionados abaixo</dd></div>
+                                    <div><dt>Duration</dt><dd>a duracao configurada</dd></div>
+                                </dl>
+                                <button class="btn btn-sm btn-outline-secondary" type="submit" formaction="?handler=UseCustom" formnovalidate>
+                                    Use custom
+                                </button>
+                            </article>
                             @foreach (var recommendation in Model.CampaignRecommendations)
                             {
                                 <article class="campaign-template-card">

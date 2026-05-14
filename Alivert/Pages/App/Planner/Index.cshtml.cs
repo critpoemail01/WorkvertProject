@@ -245,6 +245,17 @@ public class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostUseCustomAsync()
+    {
+        NormalizeInput();
+        ModelState.Clear();
+
+        Input.DetectedApplicationType = "Customizado";
+        SuggestionMessage = "Custom campaign selected. Define the objective, audience, offer, channels and cadence manually before generating the plan.";
+        await LoadPlansAsync();
+        return Page();
+    }
+
     public async Task<IActionResult> OnPostUseMvpAsync()
     {
         NormalizeInput();
