@@ -5705,6 +5705,36 @@ a { text-decoration: none; }
   font-weight: 800;
 }
 
+.mvp-funnel-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.34fr);
+  gap: 16px;
+  padding: 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(151,211,6,0.12), rgba(255,122,0,0.10));
+  border: 1px solid rgba(151,211,6,0.22);
+}
+
+.mvp-funnel-panel h3 {
+  margin: 10px 0 8px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.mvp-funnel-panel p,
+.mvp-funnel-actions span {
+  margin: 0;
+  color: rgba(232,238,255,0.72);
+  line-height: 1.55;
+}
+
+.mvp-funnel-actions {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
 @media (max-width: 1100px) {
   .campaign-flow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5758,6 +5788,9 @@ a { text-decoration: none; }
     width: fit-content;
   }
   .official-integration-fields {
+    grid-template-columns: 1fr;
+  }
+  .mvp-funnel-panel {
     grid-template-columns: 1fr;
   }
 }

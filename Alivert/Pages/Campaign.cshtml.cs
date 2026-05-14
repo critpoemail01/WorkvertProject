@@ -19,6 +19,8 @@ public class CampaignModel : PageModel
     public MarketingLandingPage LandingPage { get; private set; } = default!;
     public MarketingPlan Plan { get; private set; } = default!;
     public bool Submitted { get; private set; }
+    public string? GoogleAnalyticsMeasurementId { get; private set; }
+    public string? MetaPixelId { get; private set; }
 
     [BindProperty]
     public LeadInput Input { get; set; } = new();
@@ -95,6 +97,12 @@ public class CampaignModel : PageModel
 
         LandingPage = landing;
         Plan = landing.MarketingPlan;
+
+        var settings = await _db.UserNotificationSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == Plan.UserId);
+        GoogleAnalyticsMeasurementId = settings?.GoogleAnalyticsMeasurementId;
+        MetaPixelId = settings?.MetaPixelId;
         return true;
     }
 

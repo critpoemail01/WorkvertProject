@@ -39,6 +39,21 @@
         <input asp-for="Input.DetectedApplicationType" type="hidden" />
 
         <div class="row g-3">
+            <div class="col-12">
+                <section class="mvp-funnel-panel">
+                    <div>
+                        <span class="tag">Recommended MVP</span>
+                        <h3>14-day complete campaign funnel</h3>
+                        <p>Use this to keep the first version focused: company URL, Business DNA, 3 suggested campaigns, one selected campaign, 5 LinkedIn posts, 5 Instagram posts, 3 emails, 1 landing page, UTM links, lead capture and a simple results dashboard.</p>
+                    </div>
+                    <div class="mvp-funnel-actions">
+                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=UseMvp" formnovalidate>
+                            <i class="bi bi-magic me-1"></i>Use MVP funnel
+                        </button>
+                        <span>Initial integrations: LinkedIn, Instagram/Facebook, Brevo or Mailchimp, Google Analytics/Pixel/UTM.</span>
+                    </div>
+                </section>
+            </div>
             <div class="col-md-6">
                 <label asp-for="Input.ProductName" class="form-label"></label>
                 <input asp-for="Input.ProductName" class="form-control" placeholder="Promovert, Acme CRM, AI invoicing..." />
@@ -245,6 +260,7 @@
                     <option value="Weekdays">Weekdays</option>
                     <option value="ThreePerWeek">3 times per week</option>
                     <option value="Weekly">Weekly</option>
+                    <option value="Mvp14">MVP: 5 LinkedIn + 5 Instagram over 14 days</option>
                 </select>
                 <span asp-validation-for="Input.Frequency" class="text-danger"></span>
             </div>
@@ -362,6 +378,13 @@
 
     <aside class="surface app-panel planner-side">
         <span class="tag">What gets generated</span>
+        <div class="planner-feature">
+            <i class="bi bi-rocket-takeoff"></i>
+            <div>
+                <strong>MVP funnel</strong>
+                <span>14 days with 5 LinkedIn posts, 5 Instagram posts, 3 emails, 1 landing page and UTM tracking.</span>
+            </div>
+        </div>
         <div class="planner-feature">
             <i class="bi bi-calendar2-week"></i>
             <div>

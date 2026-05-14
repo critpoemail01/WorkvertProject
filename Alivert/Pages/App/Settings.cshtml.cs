@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace Alivert.Pages.App;
 
@@ -118,7 +119,7 @@ public class SettingsModel : PageModel
 
         [Display(Name = "Email provider")]
         [StringLength(80)]
-        public string? EmailProvider { get; set; } = "Verified SMTP";
+        public string? EmailProvider { get; set; } = "Brevo";
 
         [Display(Name = "WhatsApp provider authorized")]
         public bool WhatsAppAuthorized { get; set; }
@@ -126,6 +127,14 @@ public class SettingsModel : PageModel
         [Display(Name = "WhatsApp provider name")]
         [StringLength(120)]
         public string? WhatsAppProviderName { get; set; }
+
+        [Display(Name = "Google Analytics measurement ID")]
+        [StringLength(40)]
+        public string? GoogleAnalyticsMeasurementId { get; set; }
+
+        [Display(Name = "Meta Pixel ID")]
+        [StringLength(80)]
+        public string? MetaPixelId { get; set; }
 
         [Display(Name = "Notification time zone")]
         [StringLength(80)]
@@ -165,9 +174,11 @@ public class SettingsModel : PageModel
             FacebookScopes = settings?.FacebookScopes ?? "pages_manage_posts,pages_read_engagement",
             GoogleBusinessAuthorized = settings?.GoogleBusinessAuthorized ?? false,
             GoogleBusinessProfileName = settings?.GoogleBusinessProfileName,
-            EmailProvider = settings?.EmailProvider ?? "Verified SMTP",
+            EmailProvider = settings?.EmailProvider ?? "Brevo",
             WhatsAppAuthorized = settings?.WhatsAppAuthorized ?? false,
             WhatsAppProviderName = settings?.WhatsAppProviderName,
+            GoogleAnalyticsMeasurementId = settings?.GoogleAnalyticsMeasurementId,
+            MetaPixelId = settings?.MetaPixelId,
             AlertTimeZone = TimeZoneCatalog.Normalize(settings?.AlertTimeZone)
         };
     }
@@ -187,6 +198,8 @@ public class SettingsModel : PageModel
         ValidateAuthorizedAccount(Input.FacebookAuthorized, "Input.FacebookPageId", Input.FacebookPageId, "Add the authorized Facebook Page ID.");
         ValidateAuthorizedAccount(Input.GoogleBusinessAuthorized, "Input.GoogleBusinessProfileName", Input.GoogleBusinessProfileName, "Add the authorized Google Business Profile name.");
         ValidateAuthorizedAccount(Input.WhatsAppAuthorized, "Input.WhatsAppProviderName", Input.WhatsAppProviderName, "Add the authorized WhatsApp provider name.");
+        ValidateTrackingId("Input.GoogleAnalyticsMeasurementId", Input.GoogleAnalyticsMeasurementId, "Use a valid GA4 measurement ID, for example G-ABC123XYZ.");
+        ValidateTrackingId("Input.MetaPixelId", Input.MetaPixelId, "Use a valid Meta Pixel ID.");
 
         if (!ModelState.IsValid)
             return Page();
@@ -253,6 +266,8 @@ public class SettingsModel : PageModel
         settings.WhatsAppAuthorizedAtUtc = Input.WhatsAppAuthorized
             ? settings.WhatsAppAuthorizedAtUtc ?? now
             : null;
+        settings.GoogleAnalyticsMeasurementId = Clean(Input.GoogleAnalyticsMeasurementId);
+        settings.MetaPixelId = Clean(Input.MetaPixelId);
     }
 
     private void ValidateOptionalUrl(string fieldName, string? value)
@@ -271,6 +286,16 @@ public class SettingsModel : PageModel
     private void ValidateAuthorizedAccount(bool enabled, string fieldName, string? value, string message)
     {
         if (enabled && string.IsNullOrWhiteSpace(value))
+            ModelState.AddModelError(fieldName, message);
+    }
+
+    private void ValidateTrackingId(string fieldName, string? value, string message)
+    {
+        var cleaned = Clean(value);
+        if (cleaned is null)
+            return;
+
+        if (!Regex.IsMatch(cleaned, "^[A-Za-z0-9_-]{4,40}$"))
             ModelState.AddModelError(fieldName, message);
     }
 

@@ -15,7 +15,8 @@ namespace Alivert.Pages.App.Planner;
 public class IndexModel : PageModel
 {
     private static readonly string[] SupportedPlatforms = ["TikTok", "Instagram", "Facebook", "LinkedIn", "X", "YouTube Shorts"];
-    private static readonly string[] SupportedFrequencies = ["Daily", "Weekdays", "ThreePerWeek", "Weekly"];
+    private const string MvpFrequency = "Mvp14";
+    private static readonly string[] SupportedFrequencies = ["Daily", "Weekdays", "ThreePerWeek", "Weekly", MvpFrequency];
     private static readonly string[] SupportedLocationScopes = ["World", "Country", "City"];
 
     private readonly ApplicationDbContext _db;
@@ -240,6 +241,26 @@ public class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostUseMvpAsync()
+    {
+        NormalizeInput();
+        ModelState.Clear();
+
+        Input.DurationDays = 14;
+        Input.Frequency = MvpFrequency;
+        Input.Platforms = ["LinkedIn", "Instagram"];
+        Input.CampaignGoal = string.IsNullOrWhiteSpace(Input.CampaignGoal) || Input.CampaignGoal == "subscriptions"
+            ? "qualified leads"
+            : Input.CampaignGoal;
+        Input.Tone = string.IsNullOrWhiteSpace(Input.Tone)
+            ? "clear, direct and conversion-focused"
+            : Input.Tone;
+
+        SuggestionMessage = "MVP funnel applied: 14 days, 5 LinkedIn posts, 5 Instagram posts, 3 emails, landing page, UTM links, approval workflow and dashboard.";
+        await LoadPlansAsync();
+        return Page();
+    }
+
     public async Task<IActionResult> OnPostDiscoverLeadsAsync(CancellationToken cancellationToken)
     {
         NormalizeInput();
@@ -441,6 +462,13 @@ public class IndexModel : PageModel
     {
         if (!SupportedFrequencies.Contains(Input.Frequency, StringComparer.OrdinalIgnoreCase))
             Input.Frequency = "Daily";
+
+        if (Input.Frequency.Equals(MvpFrequency, StringComparison.OrdinalIgnoreCase))
+        {
+            Input.Frequency = MvpFrequency;
+            Input.DurationDays = 14;
+            Input.Platforms = ["LinkedIn", "Instagram"];
+        }
 
         if (!SupportedLocationScopes.Contains(Input.AudienceLocationScope, StringComparer.OrdinalIgnoreCase))
             Input.AudienceLocationScope = "World";

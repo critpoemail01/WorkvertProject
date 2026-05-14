@@ -5,6 +5,35 @@ namespace Alivert.Tests;
 public class TemplateAiMarketingPlannerServiceTests
 {
     [Fact]
+    public void Generate_Mvp14_CreatesFocusedMvpCampaignPackage()
+    {
+        var service = new TemplateAiMarketingPlannerService();
+
+        var draft = service.Generate(new AiMarketingPlanRequest(
+            "Promovert",
+            "https://promovert.example.com",
+            "AI campaign software",
+            "B2B founders",
+            "turn a website into a measurable campaign",
+            "qualified leads",
+            "clear and direct",
+            ["LinkedIn", "Instagram"],
+            new DateOnly(2026, 5, 14),
+            new DateOnly(2026, 5, 27),
+            "Mvp14",
+            "ana@example.com\njoao@example.com",
+            new AiAudienceLocation("World", null, null, null, null, null)));
+
+        Assert.Equal(10, draft.Posts.Count);
+        Assert.Equal(5, draft.Posts.Count(x => x.Platform == "LinkedIn"));
+        Assert.Equal(5, draft.Posts.Count(x => x.Platform == "Instagram"));
+        Assert.Equal(3, draft.Emails.Count);
+        Assert.NotNull(draft.LandingPage);
+        Assert.False(string.IsNullOrWhiteSpace(draft.BusinessDna));
+        Assert.All(draft.Posts, post => Assert.InRange(post.ScheduledForUtc, new DateTime(2026, 5, 14), new DateTime(2026, 5, 27, 23, 59, 59)));
+    }
+
+    [Fact]
     public void Generate_ClipsGeneratedTextToPersistedFieldLimits()
     {
         var service = new TemplateAiMarketingPlannerService();

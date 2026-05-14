@@ -123,8 +123,15 @@
                     </div>
                     <label class="notification-channel-field">
                         <span>Provider name</span>
-                        <input asp-for="Input.EmailProvider" class="form-control" placeholder="Brevo, SendGrid, Amazon SES..." />
+                        <input asp-for="Input.EmailProvider" class="form-control" list="emailProviderOptions" placeholder="Brevo, Mailchimp, SendGrid, Amazon SES..." />
                     </label>
+                    <datalist id="emailProviderOptions">
+                        <option value="Brevo"></option>
+                        <option value="Mailchimp"></option>
+                        <option value="SendGrid"></option>
+                        <option value="Amazon SES"></option>
+                        <option value="Verified SMTP"></option>
+                    </datalist>
                 </article>
 
                 <article class="official-integration-card">
@@ -165,6 +172,30 @@
                         <input asp-for="Input.WhatsAppProviderName" class="form-control" placeholder="WhatsApp Business provider" />
                     </label>
                     <span asp-validation-for="Input.WhatsAppProviderName" class="text-danger"></span>
+                </article>
+
+                <article class="official-integration-card priority">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-graph-up-arrow"></i></span>
+                        <div>
+                            <h3>Google Analytics / Pixel / UTM</h3>
+                            <p>Landing pages include UTM links by default and can load GA4 or Meta Pixel for campaign tracking.</p>
+                        </div>
+                        <strong class="notification-channel-status @(!string.IsNullOrWhiteSpace(Model.Input.GoogleAnalyticsMeasurementId) || !string.IsNullOrWhiteSpace(Model.Input.MetaPixelId) ? "ready" : "setup")">@(!string.IsNullOrWhiteSpace(Model.Input.GoogleAnalyticsMeasurementId) || !string.IsNullOrWhiteSpace(Model.Input.MetaPixelId) ? "Ready" : "Optional")</strong>
+                    </div>
+                    <div class="official-integration-fields">
+                        <label>
+                            <span>GA4 measurement ID</span>
+                            <input asp-for="Input.GoogleAnalyticsMeasurementId" class="form-control" placeholder="G-ABC123XYZ" />
+                        </label>
+                        <label>
+                            <span>Meta Pixel ID</span>
+                            <input asp-for="Input.MetaPixelId" class="form-control" placeholder="1234567890" />
+                        </label>
+                    </div>
+                    <small class="notification-channel-note">UTM links are generated per campaign in the plan detail page. GA4 and Pixel are injected only when IDs are configured.</small>
+                    <span asp-validation-for="Input.GoogleAnalyticsMeasurementId" class="text-danger"></span>
+                    <span asp-validation-for="Input.MetaPixelId" class="text-danger"></span>
                 </article>
             </div>
         </section>

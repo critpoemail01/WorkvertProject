@@ -81,6 +81,12 @@ public class UserNotificationSettings
 
     public DateTime? WhatsAppAuthorizedAtUtc { get; set; }
 
+    [StringLength(40)]
+    public string? GoogleAnalyticsMeasurementId { get; set; }
+
+    [StringLength(80)]
+    public string? MetaPixelId { get; set; }
+
     public bool AlertScheduleEnabled { get; set; }
 
     [StringLength(5)]

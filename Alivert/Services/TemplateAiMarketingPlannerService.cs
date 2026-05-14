@@ -132,6 +132,19 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
 
     private static IEnumerable<DateOnly> BuildSchedule(DateOnly startDate, DateOnly endDate, string frequency)
     {
+        if (frequency.Equals("Mvp14", StringComparison.OrdinalIgnoreCase))
+        {
+            var offsets = new[] { 0, 2, 5, 8, 11 };
+            foreach (var offset in offsets)
+            {
+                var date = startDate.AddDays(offset);
+                if (date <= endDate)
+                    yield return date;
+            }
+
+            yield break;
+        }
+
         for (var date = startDate; date <= endDate; date = date.AddDays(1))
         {
             var day = date.DayOfWeek;
