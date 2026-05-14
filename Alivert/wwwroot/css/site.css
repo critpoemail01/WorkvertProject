@@ -5100,9 +5100,9 @@ a { text-decoration: none; }
 
 .crm-focus-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1.5fr) minmax(120px, 0.5fr);
+  grid-template-columns: minmax(220px, 0.68fr) minmax(320px, 1.32fr);
   gap: 14px;
-  align-items: end;
+  align-items: start;
 }
 
 .crm-focus-toggle {
@@ -5137,8 +5137,78 @@ a { text-decoration: none; }
   align-self: start;
 }
 
-.crm-optional-info .btn {
-  width: fit-content;
+.crm-lead-picker {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(7,11,20,0.32);
+}
+
+.crm-lead-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: rgba(232,238,255,0.82);
+  font-weight: 850;
+}
+
+.crm-lead-picker-head strong {
+  color: rgba(184,194,214,0.78);
+  font-size: 0.84rem;
+}
+
+.crm-lead-list {
+  display: grid;
+  gap: 8px;
+  max-height: 292px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.crm-lead-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin: 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.035);
+  cursor: pointer;
+}
+
+.crm-lead-option:hover {
+  border-color: rgba(45,212,191,0.22);
+  background: rgba(45,212,191,0.06);
+}
+
+.crm-lead-option input {
+  margin-top: 4px;
+  accent-color: var(--alivert-positive);
+}
+
+.crm-lead-option span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.crm-lead-option strong {
+  color: rgba(245,248,255,0.96);
+  font-weight: 850;
+}
+
+.crm-lead-option small,
+.crm-lead-option em {
+  color: rgba(184,194,214,0.78);
+  font-size: 0.82rem;
+  font-style: normal;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .campaign-library-panel {

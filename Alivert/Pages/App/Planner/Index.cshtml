@@ -319,22 +319,44 @@
                     <div class="crm-focus-grid crm-optional-fields mt-3 @(Model.Input.UseCrmLeads ? "is-open" : "")" data-crm-leads-fields aria-hidden="@(Model.Input.UseCrmLeads ? "false" : "true")">
                         <div class="crm-optional-info">
                             <label asp-for="Input.UseCrmLeads" class="form-label mb-1"></label>
-                            <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available after consent/exclusion filtering from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Use these when your own prospecting team already found the audience.</p>
-                            <a class="btn btn-outline-secondary btn-sm mt-3" asp-page="/App/Crm/Index">
-                                <i class="bi bi-database-add me-1"></i>Import CRM leads
-                            </a>
+                            <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available after consent/exclusion filtering from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Select only leads that were imported before opening this campaign builder.</p>
+                            <p class="form-text mb-0 mt-2">CSV import stays in the CRM leads area; this campaign only chooses from contacts that already exist.</p>
                         </div>
-                        <label>
-                            <span class="form-label">Filter by stage, tag, industry, company or location</span>
-                            <input asp-for="Input.CrmLeadFilter" class="form-control" placeholder="Qualified, manufacturing, Portugal, demo..." />
-                        </label>
-                        <label>
-                            <span class="form-label">Max CRM leads</span>
-                            <input asp-for="Input.CrmLeadLimit" class="form-control" type="number" min="1" max="500" />
-                        </label>
+                        <div class="crm-lead-picker">
+                            <div class="crm-lead-picker-head">
+                                <span>Imported leads available</span>
+                                <strong>@Model.AvailableCrmLeads.Count shown</strong>
+                            </div>
+                            @if (!Model.AvailableCrmLeads.Any())
+                            {
+                                <div class="empty-state compact">
+                                    <i class="bi bi-database-x"></i>
+                                    <span>No imported CRM leads available. Import the CSV in CRM leads first, then return to create the campaign.</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="crm-lead-list">
+                                    @foreach (var lead in Model.AvailableCrmLeads)
+                                    {
+                                        var leadMeta = string.Join(" · ", new[] { lead.CompanyName, lead.Role, lead.Industry, lead.Country, lead.City, lead.Stage }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                                        <label class="crm-lead-option">
+                                            <input type="checkbox" name="Input.SelectedCrmLeadIds" value="@lead.Id" checked="@Model.Input.SelectedCrmLeadIds.Contains(lead.Id)" />
+                                            <span>
+                                                <strong>@(string.IsNullOrWhiteSpace(lead.ContactName) ? lead.Email : lead.ContactName)</strong>
+                                                <small>@lead.Email</small>
+                                                @if (!string.IsNullOrWhiteSpace(leadMeta))
+                                                {
+                                                    <em>@leadMeta</em>
+                                                }
+                                            </span>
+                                        </label>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </div>
-                    <span asp-validation-for="Input.CrmLeadFilter" class="text-danger"></span>
-                    <span asp-validation-for="Input.CrmLeadLimit" class="text-danger"></span>
+                    <span asp-validation-for="Input.SelectedCrmLeadIds" class="text-danger"></span>
                 </section>
             </div>
             <div class="col-12">

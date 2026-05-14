@@ -62,11 +62,13 @@ public class IndexModel : PageModel
     public CompanyLearningProfile CompanyLearning { get; private set; } = CompanyLearningProfile.Empty();
     public int CrmLeadCount { get; private set; }
     public int CrmLeadEmails { get; private set; }
+    public List<CrmLeadOption> AvailableCrmLeads { get; private set; } = new();
 
     [TempData]
     public string? StatusMessage { get; set; }
 
     public record PlanRow(int Id, string ProductName, string Platforms, string Location, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
+    public record CrmLeadOption(int Id, string ContactName, string Email, string? CompanyName, string? Role, string? Industry, string? Country, string? City, string? Stage);
 
     public class PlannerInput
     {
@@ -142,6 +144,9 @@ public class IndexModel : PageModel
 
         [Display(Name = "Use imported CRM leads")]
         public bool UseCrmLeads { get; set; }
+
+        [Display(Name = "Selected CRM leads")]
+        public List<int> SelectedCrmLeadIds { get; set; } = new();
 
         [Display(Name = "CRM lead filter")]
         [StringLength(240)]
@@ -347,9 +352,27 @@ public class IndexModel : PageModel
 
         var latitude = ParseCoordinate(Input.AudienceLatitude, -90, 90);
         var longitude = ParseCoordinate(Input.AudienceLongitude, -180, 180);
-        var crmLeadEmails = Input.UseCrmLeads
-            ? await LoadMatchingCrmLeadEmailsAsync(userId, Input.CrmLeadFilter, Input.CrmLeadLimit)
-            : [];
+        var crmLeadEmails = new List<string>();
+        if (Input.UseCrmLeads)
+        {
+            if (Input.SelectedCrmLeadIds.Count == 0)
+            {
+                ModelState.AddModelError("Input.SelectedCrmLeadIds", "Select at least one imported CRM lead for this campaign.");
+            }
+            else
+            {
+                crmLeadEmails = await LoadSelectedCrmLeadEmailsAsync(userId, Input.SelectedCrmLeadIds);
+                if (crmLeadEmails.Count == 0)
+                    ModelState.AddModelError("Input.SelectedCrmLeadIds", "The selected CRM leads are no longer available for campaigns.");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await LoadPlansAsync();
+            return Page();
+        }
+
         var emailAudience = Input.UseCrmLeads && crmLeadEmails.Count > 0
             ? MergeEmailAudience(Input.EmailAudience, crmLeadEmails)
             : Input.EmailAudience;
@@ -381,7 +404,7 @@ public class IndexModel : PageModel
             StartDate = Input.StartDate,
             EndDate = endDate,
             EmailAudience = Clean(emailAudience),
-            CrmLeadFilter = Input.UseCrmLeads ? Clean(Input.CrmLeadFilter) : null,
+            CrmLeadFilter = Input.UseCrmLeads ? "selected CRM leads" : null,
             CrmLeadSourceCount = crmLeadEmails.Count,
             Status = "Draft"
         };
@@ -486,8 +509,30 @@ public class IndexModel : PageModel
         CrmLeadEmails = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
             x.UserId == userId &&
             x.Email != "" &&
+            x.Status == "Imported" &&
             x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
             x.ConsentStatus != CrmConsentPolicy.Suppressed);
+        AvailableCrmLeads = await _db.CrmLeads
+            .AsNoTracking()
+            .Where(x =>
+                x.UserId == userId &&
+                x.Email != "" &&
+                x.Status == "Imported" &&
+                x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
+                x.ConsentStatus != CrmConsentPolicy.Suppressed)
+            .OrderByDescending(x => x.UpdatedAtUtc)
+            .Take(80)
+            .Select(x => new CrmLeadOption(
+                x.Id,
+                x.ContactName,
+                x.Email,
+                x.CompanyName,
+                x.Role,
+                x.Industry,
+                x.Country,
+                x.City,
+                x.Stage))
+            .ToListAsync();
         CompanyLearning = await _companyLearning.BuildAsync(
             userId,
             Input.ProductName,
@@ -520,6 +565,11 @@ public class IndexModel : PageModel
         Input.CrmLeadFilter = Clean(Input.CrmLeadFilter);
         Input.DetectedApplicationType = Clean(Input.DetectedApplicationType);
         Input.CrmLeadLimit = Math.Clamp(Input.CrmLeadLimit, 1, 500);
+        Input.SelectedCrmLeadIds = Input.SelectedCrmLeadIds
+            .Where(id => id > 0)
+            .Distinct()
+            .Take(500)
+            .ToList();
 
         Input.Platforms = Input.Platforms
             .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
@@ -569,8 +619,11 @@ public class IndexModel : PageModel
         SuggestionMessage = "Next campaign prepared from the previous campaign report and captured leads.";
     }
 
-    private async Task<List<string>> LoadMatchingCrmLeadEmailsAsync(string userId, string? filter, int limit)
+    private async Task<List<string>> LoadSelectedCrmLeadEmailsAsync(string userId, IReadOnlyCollection<int> selectedIds)
     {
+        if (selectedIds.Count == 0)
+            return [];
+
         var query = _db.CrmLeads
             .AsNoTracking()
             .Where(x =>
@@ -578,25 +631,11 @@ public class IndexModel : PageModel
                 x.Email != "" &&
                 x.Status == "Imported" &&
                 x.ConsentStatus != CrmConsentPolicy.Unsubscribed &&
-                x.ConsentStatus != CrmConsentPolicy.Suppressed);
-
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            var term = filter.Trim();
-            query = query.Where(x =>
-                (x.CompanyName != null && x.CompanyName.Contains(term)) ||
-                (x.ContactName != null && x.ContactName.Contains(term)) ||
-                (x.Role != null && x.Role.Contains(term)) ||
-                (x.Industry != null && x.Industry.Contains(term)) ||
-                (x.Country != null && x.Country.Contains(term)) ||
-                (x.City != null && x.City.Contains(term)) ||
-                (x.Stage != null && x.Stage.Contains(term)) ||
-                (x.Tags != null && x.Tags.Contains(term)));
-        }
+                x.ConsentStatus != CrmConsentPolicy.Suppressed &&
+                selectedIds.Contains(x.Id));
 
         return await query
             .OrderByDescending(x => x.UpdatedAtUtc)
-            .Take(limit)
             .Select(x => x.Email)
             .ToListAsync();
     }
