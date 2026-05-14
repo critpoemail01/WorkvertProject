@@ -104,7 +104,12 @@ public class CreateAlertModel : PageModel
         public string? AudienceList { get; set; }
     }
 
-    public async Task OnGetAsync(MarketType? marketType = null, string? symbol = null, AlertRuleType? ruleType = null, string? timeframe = null, decimal? threshold = null)
+    public IActionResult OnGet(MarketType? marketType = null, string? symbol = null, AlertRuleType? ruleType = null, string? timeframe = null, decimal? threshold = null)
+    {
+        return RedirectToPage("/App/Planner/Index");
+    }
+
+    public async Task LoadManualFormAsync(MarketType? marketType = null, string? symbol = null, AlertRuleType? ruleType = null, string? timeframe = null, decimal? threshold = null)
     {
         LoadSelectLists();
 
