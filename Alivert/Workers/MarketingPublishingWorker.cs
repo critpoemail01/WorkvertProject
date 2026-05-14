@@ -1,5 +1,6 @@
 using Alivert.Data;
 using Alivert.Models;
+using Alivert.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Alivert.Workers;
@@ -8,11 +9,16 @@ public sealed class MarketingPublishingWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MarketingPublishingWorker> _logger;
+    private readonly IIntegrationAuthorizationService _authorization;
 
-    public MarketingPublishingWorker(IServiceScopeFactory scopeFactory, ILogger<MarketingPublishingWorker> logger)
+    public MarketingPublishingWorker(
+        IServiceScopeFactory scopeFactory,
+        ILogger<MarketingPublishingWorker> logger,
+        IIntegrationAuthorizationService authorization)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _authorization = authorization;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,6 +34,7 @@ public sealed class MarketingPublishingWorker : BackgroundService
                 var now = DateTime.UtcNow;
 
                 var duePosts = await db.MarketingPostSuggestions
+                    .Include(x => x.MarketingPlan)
                     .Where(x => x.Status == "Scheduled" && x.ScheduledForUtc <= now)
                     .OrderBy(x => x.ScheduledForUtc)
                     .Take(50)
@@ -35,11 +42,21 @@ public sealed class MarketingPublishingWorker : BackgroundService
 
                 foreach (var post in duePosts)
                 {
-                    post.Status = "Published";
-                    post.PublishedAtUtc = now;
+                    var settings = await LoadSettingsAsync(db, post.MarketingPlan!.UserId, stoppingToken);
+                    var authorization = _authorization.GetPostAuthorization(settings, post.Platform);
+                    if (authorization.IsAuthorized)
+                    {
+                        post.Status = "Published";
+                        post.PublishedAtUtc = now;
+                    }
+                    else
+                    {
+                        post.Status = "NeedsAuthorization";
+                    }
                 }
 
                 var dueEmails = await db.MarketingEmailSuggestions
+                    .Include(x => x.MarketingPlan)
                     .Where(x => x.Status == "Scheduled" && x.ScheduledForUtc <= now)
                     .OrderBy(x => x.ScheduledForUtc)
                     .Take(50)
@@ -47,8 +64,17 @@ public sealed class MarketingPublishingWorker : BackgroundService
 
                 foreach (var email in dueEmails)
                 {
-                    email.Status = "Sent";
-                    email.SentAtUtc = now;
+                    var settings = await LoadSettingsAsync(db, email.MarketingPlan!.UserId, stoppingToken);
+                    var authorization = _authorization.GetEmailAuthorization(settings);
+                    if (authorization.IsAuthorized)
+                    {
+                        email.Status = "Sent";
+                        email.SentAtUtc = now;
+                    }
+                    else
+                    {
+                        email.Status = "NeedsAuthorization";
+                    }
                 }
 
                 var scheduledPlanIds = duePosts.Select(x => x.MarketingPlanId)
@@ -70,7 +96,7 @@ public sealed class MarketingPublishingWorker : BackgroundService
                 if (duePosts.Count > 0 || dueEmails.Count > 0 || dueLandingPages.Count > 0)
                 {
                     await db.SaveChangesAsync(stoppingToken);
-                    _logger.LogInformation("Published {PostCount} post(s), sent {EmailCount} email sequence item(s) and opened {LandingCount} landing page(s).", duePosts.Count, dueEmails.Count, dueLandingPages.Count);
+                    _logger.LogInformation("Processed {PostCount} post(s), {EmailCount} email sequence item(s) and opened {LandingCount} landing page(s).", duePosts.Count, dueEmails.Count, dueLandingPages.Count);
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -84,5 +110,12 @@ public sealed class MarketingPublishingWorker : BackgroundService
 
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
+    }
+
+    private static async Task<UserNotificationSettings?> LoadSettingsAsync(ApplicationDbContext db, string userId, CancellationToken ct)
+    {
+        return await db.UserNotificationSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId, ct);
     }
 }

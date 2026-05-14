@@ -25,6 +25,62 @@ public class UserNotificationSettings
     [StringLength(80)]
     public string? TelegramChatId { get; set; }
 
+    public bool LinkedInAuthorized { get; set; }
+
+    [StringLength(120)]
+    public string? LinkedInOrganizationId { get; set; }
+
+    [StringLength(160)]
+    public string? LinkedInOrganizationName { get; set; }
+
+    [StringLength(240)]
+    public string? LinkedInScopes { get; set; }
+
+    public DateTime? LinkedInAuthorizedAtUtc { get; set; }
+
+    public bool InstagramAuthorized { get; set; }
+
+    [StringLength(120)]
+    public string? InstagramBusinessAccountId { get; set; }
+
+    [StringLength(160)]
+    public string? InstagramBusinessAccountName { get; set; }
+
+    [StringLength(240)]
+    public string? InstagramScopes { get; set; }
+
+    public DateTime? InstagramAuthorizedAtUtc { get; set; }
+
+    public bool FacebookAuthorized { get; set; }
+
+    [StringLength(120)]
+    public string? FacebookPageId { get; set; }
+
+    [StringLength(160)]
+    public string? FacebookPageName { get; set; }
+
+    [StringLength(240)]
+    public string? FacebookScopes { get; set; }
+
+    public DateTime? FacebookAuthorizedAtUtc { get; set; }
+
+    public bool GoogleBusinessAuthorized { get; set; }
+
+    [StringLength(160)]
+    public string? GoogleBusinessProfileName { get; set; }
+
+    public DateTime? GoogleBusinessAuthorizedAtUtc { get; set; }
+
+    [StringLength(80)]
+    public string? EmailProvider { get; set; }
+
+    public bool WhatsAppAuthorized { get; set; }
+
+    [StringLength(120)]
+    public string? WhatsAppProviderName { get; set; }
+
+    public DateTime? WhatsAppAuthorizedAtUtc { get; set; }
+
     public bool AlertScheduleEnabled { get; set; }
 
     [StringLength(5)]

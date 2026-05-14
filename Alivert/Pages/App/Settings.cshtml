@@ -23,6 +23,153 @@
         <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
 
         <section class="account-section mt-4">
+            <div class="account-section-title">Official publishing integrations</div>
+            <div class="official-integration-intro">
+                <div>
+                    <span class="tag">Authorized publishing only</span>
+                    <h2>Publish only through official OAuth connections</h2>
+                    <p>Promovert only marks social content as published when the account, page or provider is authorized. LinkedIn, Instagram and Facebook require official page/account permissions; unsupported networks stay as creative briefs until a provider is connected.</p>
+                </div>
+                <a class="btn btn-outline-secondary" asp-page="/App/Planner/Index"><i class="bi bi-calendar-check me-1"></i>Review campaigns</a>
+            </div>
+
+            <div class="official-integration-grid">
+                <article class="official-integration-card priority">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-linkedin"></i></span>
+                        <div>
+                            <h3>LinkedIn Company Page</h3>
+                            <p>Organic and sponsored B2B posts require an authorized organization and page role.</p>
+                        </div>
+                        <strong class="notification-channel-status @(Model.Input.LinkedInAuthorized ? "ready" : "setup")">@(Model.Input.LinkedInAuthorized ? "Authorized" : "OAuth required")</strong>
+                    </div>
+                    <label class="notification-channel-switch">
+                        <span>
+                            <strong>Official OAuth completed</strong>
+                            <small>Use only organization pages the user can administer or publish to.</small>
+                        </span>
+                        <span class="form-check form-switch m-0">
+                            <input class="form-check-input" asp-for="Input.LinkedInAuthorized" />
+                        </span>
+                    </label>
+                    <div class="official-integration-fields">
+                        <label><span>Organization ID</span><input asp-for="Input.LinkedInOrganizationId" class="form-control" placeholder="urn/li organization id" /></label>
+                        <label><span>Organization name</span><input asp-for="Input.LinkedInOrganizationName" class="form-control" placeholder="Company Page name" /></label>
+                        <label class="wide"><span>Scopes</span><input asp-for="Input.LinkedInScopes" class="form-control" /></label>
+                    </div>
+                    <span asp-validation-for="Input.LinkedInOrganizationId" class="text-danger"></span>
+                </article>
+
+                <article class="official-integration-card priority">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-instagram"></i></span>
+                        <div>
+                            <h3>Instagram Business</h3>
+                            <p>Publishing must use a connected Instagram Business or Creator account through Meta authorization.</p>
+                        </div>
+                        <strong class="notification-channel-status @(Model.Input.InstagramAuthorized ? "ready" : "setup")">@(Model.Input.InstagramAuthorized ? "Authorized" : "OAuth required")</strong>
+                    </div>
+                    <label class="notification-channel-switch">
+                        <span>
+                            <strong>Official Meta OAuth completed</strong>
+                            <small>Respect provider publishing limits and only publish to authorized accounts.</small>
+                        </span>
+                        <span class="form-check form-switch m-0">
+                            <input class="form-check-input" asp-for="Input.InstagramAuthorized" />
+                        </span>
+                    </label>
+                    <div class="official-integration-fields">
+                        <label><span>Business account ID</span><input asp-for="Input.InstagramBusinessAccountId" class="form-control" placeholder="Instagram Business account ID" /></label>
+                        <label><span>Account name</span><input asp-for="Input.InstagramBusinessAccountName" class="form-control" placeholder="@("@brand")" /></label>
+                        <label class="wide"><span>Scopes</span><input asp-for="Input.InstagramScopes" class="form-control" /></label>
+                    </div>
+                    <span asp-validation-for="Input.InstagramBusinessAccountId" class="text-danger"></span>
+                </article>
+
+                <article class="official-integration-card priority">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-facebook"></i></span>
+                        <div>
+                            <h3>Facebook Page</h3>
+                            <p>Posts are allowed only for Facebook Pages authorized through Meta page permissions.</p>
+                        </div>
+                        <strong class="notification-channel-status @(Model.Input.FacebookAuthorized ? "ready" : "setup")">@(Model.Input.FacebookAuthorized ? "Authorized" : "OAuth required")</strong>
+                    </div>
+                    <label class="notification-channel-switch">
+                        <span>
+                            <strong>Official Meta OAuth completed</strong>
+                            <small>Use only pages explicitly selected during authorization.</small>
+                        </span>
+                        <span class="form-check form-switch m-0">
+                            <input class="form-check-input" asp-for="Input.FacebookAuthorized" />
+                        </span>
+                    </label>
+                    <div class="official-integration-fields">
+                        <label><span>Page ID</span><input asp-for="Input.FacebookPageId" class="form-control" placeholder="Facebook Page ID" /></label>
+                        <label><span>Page name</span><input asp-for="Input.FacebookPageName" class="form-control" placeholder="Page name" /></label>
+                        <label class="wide"><span>Scopes</span><input asp-for="Input.FacebookScopes" class="form-control" /></label>
+                    </div>
+                    <span asp-validation-for="Input.FacebookPageId" class="text-danger"></span>
+                </article>
+
+                <article class="official-integration-card">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-envelope-check"></i></span>
+                        <div>
+                            <h3>Email provider</h3>
+                            <p>Use Brevo, Mailchimp, SendGrid, Amazon SES or verified SMTP sender profiles.</p>
+                        </div>
+                        <strong class="notification-channel-status @(Model.EmailTransportConfigured ? "ready" : "setup")">@(Model.EmailTransportConfigured ? "Ready" : "Setup")</strong>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Provider name</span>
+                        <input asp-for="Input.EmailProvider" class="form-control" placeholder="Brevo, SendGrid, Amazon SES..." />
+                    </label>
+                </article>
+
+                <article class="official-integration-card">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-google"></i></span>
+                        <div>
+                            <h3>Google Business Profile</h3>
+                            <p>Optional local campaign channel for authorized business profiles.</p>
+                        </div>
+                        <strong class="notification-channel-status @(Model.Input.GoogleBusinessAuthorized ? "ready" : "setup")">@(Model.Input.GoogleBusinessAuthorized ? "Authorized" : "Planned")</strong>
+                    </div>
+                    <label class="notification-channel-switch">
+                        <span><strong>Authorized profile available</strong><small>Useful for local campaign updates.</small></span>
+                        <span class="form-check form-switch m-0"><input class="form-check-input" asp-for="Input.GoogleBusinessAuthorized" /></span>
+                    </label>
+                    <label class="notification-channel-field">
+                        <span>Profile name</span>
+                        <input asp-for="Input.GoogleBusinessProfileName" class="form-control" placeholder="Business profile name" />
+                    </label>
+                    <span asp-validation-for="Input.GoogleBusinessProfileName" class="text-danger"></span>
+                </article>
+
+                <article class="official-integration-card">
+                    <div class="official-integration-head">
+                        <span><i class="bi bi-whatsapp"></i></span>
+                        <div>
+                            <h3>WhatsApp provider</h3>
+                            <p>Use only a business messaging provider authorized for the account.</p>
+                        </div>
+                        <strong class="notification-channel-status @(Model.Input.WhatsAppAuthorized ? "ready" : "setup")">@(Model.Input.WhatsAppAuthorized ? "Authorized" : "Planned")</strong>
+                    </div>
+                    <label class="notification-channel-switch">
+                        <span><strong>Authorized provider available</strong><small>Message templates must still be approved by the provider.</small></span>
+                        <span class="form-check form-switch m-0"><input class="form-check-input" asp-for="Input.WhatsAppAuthorized" /></span>
+                    </label>
+                    <label class="notification-channel-field">
+                        <span>Provider name</span>
+                        <input asp-for="Input.WhatsAppProviderName" class="form-control" placeholder="WhatsApp Business provider" />
+                    </label>
+                    <span asp-validation-for="Input.WhatsAppProviderName" class="text-danger"></span>
+                </article>
+            </div>
+        </section>
+
+        <section class="account-section mt-4">
             <div class="account-section-title">Campaign delivery preferences</div>
             <div class="notification-channel-intro">
                 <div>

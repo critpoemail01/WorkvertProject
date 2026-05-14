@@ -16,22 +16,26 @@ public class DetailsModel : PageModel
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserAccountService _accounts;
     private readonly ICampaignLibraryService _campaignLibrary;
+    private readonly IIntegrationAuthorizationService _authorization;
 
     public DetailsModel(
         ApplicationDbContext db,
         UserManager<IdentityUser> userManager,
         IUserAccountService accounts,
-        ICampaignLibraryService campaignLibrary)
+        ICampaignLibraryService campaignLibrary,
+        IIntegrationAuthorizationService authorization)
     {
         _db = db;
         _userManager = userManager;
         _accounts = accounts;
         _campaignLibrary = campaignLibrary;
+        _authorization = authorization;
     }
 
     public MarketingPlan Plan { get; private set; } = default!;
     public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
     public IReadOnlyList<SectorCampaignRecommendation> NextCampaignRecommendations { get; private set; } = [];
+    public IReadOnlyList<PublicationAuthorization> PublicationAuthorizations { get; private set; } = [];
     public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
     [TempData]
     public string? StatusMessage { get; set; }
@@ -306,10 +310,10 @@ public class DetailsModel : PageModel
             }
         }
 
-        foreach (var post in Plan.Posts.Where(x => x.Status == "Approved"))
+        foreach (var post in Plan.Posts.Where(x => x.Status is "Approved" or "NeedsAuthorization"))
             post.Status = "Scheduled";
 
-        foreach (var email in Plan.Emails.Where(x => x.Status == "Approved"))
+        foreach (var email in Plan.Emails.Where(x => x.Status is "Approved" or "NeedsAuthorization"))
             email.Status = "Scheduled";
 
         if (Plan.LandingPage is not null && Plan.LandingPage.Status == "Approved")
@@ -330,19 +334,40 @@ public class DetailsModel : PageModel
         if (!loaded) return NotFound();
 
         var now = DateTime.UtcNow;
+        var settings = await LoadSettingsAsync(Plan.UserId);
         foreach (var post in Plan.Posts.Where(x => x.Status == "Scheduled" && x.ScheduledForUtc <= now))
         {
-            post.Status = "Published";
-            post.PublishedAtUtc = now;
+            var authorization = _authorization.GetPostAuthorization(settings, post.Platform);
+            if (authorization.IsAuthorized)
+            {
+                post.Status = "Published";
+                post.PublishedAtUtc = now;
+            }
+            else
+            {
+                post.Status = "NeedsAuthorization";
+                StatusMessage = "Some items need official publishing authorization before they can go live.";
+            }
         }
 
         foreach (var email in Plan.Emails.Where(x => x.Status == "Scheduled" && x.ScheduledForUtc <= now))
         {
-            email.Status = "Sent";
-            email.SentAtUtc = now;
+            var authorization = _authorization.GetEmailAuthorization(settings);
+            if (authorization.IsAuthorized)
+            {
+                email.Status = "Sent";
+                email.SentAtUtc = now;
+            }
+            else
+            {
+                email.Status = "NeedsAuthorization";
+                StatusMessage = "Some items need official publishing authorization before they can go live.";
+            }
         }
 
-        Plan.Status = Plan.Posts.Any(x => x.Status == "Scheduled") || Plan.Emails.Any(x => x.Status == "Scheduled")
+        Plan.Status = Plan.Posts.Any(x => x.Status == "NeedsAuthorization") || Plan.Emails.Any(x => x.Status == "NeedsAuthorization")
+            ? "NeedsAuthorization"
+            : Plan.Posts.Any(x => x.Status == "Scheduled") || Plan.Emails.Any(x => x.Status == "Scheduled")
             ? "Scheduled"
             : "Published";
         await _db.SaveChangesAsync();
@@ -378,6 +403,8 @@ public class DetailsModel : PageModel
 
         Plan = plan;
         Metrics = BuildMetrics(plan);
+        var settings = await LoadSettingsAsync(plan.UserId);
+        PublicationAuthorizations = BuildPublicationAuthorizations(plan, settings);
         NextCampaignRecommendations = _campaignLibrary.Recommend(new CampaignLibraryRequest(
             plan.ProductName,
             plan.CompanyOrIdea,
@@ -386,6 +413,27 @@ public class DetailsModel : PageModel
             plan.CampaignGoal,
             plan.BusinessDna), 3);
         return true;
+    }
+
+    private async Task<UserNotificationSettings?> LoadSettingsAsync(string userId)
+    {
+        return await _db.UserNotificationSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+    }
+
+    private IReadOnlyList<PublicationAuthorization> BuildPublicationAuthorizations(MarketingPlan plan, UserNotificationSettings? settings)
+    {
+        var items = plan.Platforms
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(platform => _authorization.GetPostAuthorization(settings, platform))
+            .ToList();
+
+        if (plan.Emails.Any())
+            items.Add(_authorization.GetEmailAuthorization(settings));
+
+        items.Add(new PublicationAuthorization(true, "Landing pages", "Landing pages are published inside Promovert after campaign approval."));
+        return items;
     }
 
     private static MetricsSummary BuildMetrics(MarketingPlan plan)
