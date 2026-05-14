@@ -74,6 +74,39 @@
         <strong>Business DNA</strong>
         <p>@(string.IsNullOrWhiteSpace(Model.Plan.BusinessDna) ? "Business DNA will be generated for new campaigns." : Model.Plan.BusinessDna)</p>
     </div>
+
+    <div class="campaign-structure-grid mt-3">
+        <article>
+            <h3>Structured campaign brief</h3>
+            <dl class="campaign-brief-list">
+                <div><dt>Objetivo</dt><dd>@Model.Plan.CampaignGoal</dd></div>
+                <div><dt>Duração</dt><dd>@(Model.Plan.EndDate.DayNumber - Model.Plan.StartDate.DayNumber + 1) dias</dd></div>
+                <div><dt>Público-alvo</dt><dd>@Model.Plan.TargetAudience</dd></div>
+                <div><dt>Oferta</dt><dd>@Model.Plan.ValueProposition</dd></div>
+                <div><dt>Canais</dt><dd>@Model.Plan.Platforms.Replace(",", " + ") + Email</dd></div>
+                <div><dt>Landing page</dt><dd>@(Model.Plan.LandingPage is null ? "não" : "sim")</dd></div>
+                <div><dt>Formulário</dt><dd>@(Model.Plan.LandingPage is null ? "não" : "sim")</dd></div>
+                <div><dt>Follow-up automático</dt><dd>@(Model.Plan.Emails.Any() ? "sim" : "não")</dd></div>
+                <div><dt>Relatório</dt><dd>sim</dd></div>
+            </dl>
+        </article>
+
+        <article>
+            <h3>Campaign assets</h3>
+            <div class="campaign-asset-list">
+                <span><i class="bi bi-check2"></i>Estratégia</span>
+                <span><i class="bi bi-check2"></i>Calendário</span>
+                <span><i class="bi bi-check2"></i>Posts</span>
+                <span><i class="bi bi-check2"></i>Emails</span>
+                <span><i class="bi bi-check2"></i>Landing page</span>
+                <span><i class="bi bi-check2"></i>Criativos</span>
+                <span><i class="bi bi-check2"></i>Formulário</span>
+                <span><i class="bi bi-check2"></i>UTMs</span>
+                <span><i class="bi bi-check2"></i>Automação</span>
+                <span><i class="bi bi-check2"></i>Relatório</span>
+            </div>
+        </article>
+    </div>
 </section>
 
 <div class="dashboard-stat-grid mt-4">
@@ -219,6 +252,20 @@
                 </table>
             </div>
         }
+
+        <div class="utm-grid mt-3">
+            <div>
+                <h3>UTM links</h3>
+                <p class="muted mb-0">Use these links in posts, emails and ads so captured leads keep their source in the report.</p>
+            </div>
+            <div class="utm-link-list">
+                @foreach (var platform in Model.Plan.Platforms.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    <code>@BuildUtmUrl(Model.Plan.LandingPage.Slug, platform, "social")</code>
+                }
+                <code>@BuildUtmUrl(Model.Plan.LandingPage.Slug, "email", "email")</code>
+            </div>
+        </div>
     </section>
 }
 
@@ -492,5 +539,12 @@
         }
 
         return "Worldwide";
+    }
+
+    private string BuildUtmUrl(string slug, string source, string medium)
+    {
+        var baseUrl = Url.Page("/Campaign", new { slug }) ?? $"/campaign/{slug}";
+        var campaign = Model.Plan.ProductName.ToLowerInvariant().Replace(" ", "-", StringComparison.Ordinal);
+        return $"{baseUrl}?utm_source={Uri.EscapeDataString(source.ToLowerInvariant())}&utm_medium={Uri.EscapeDataString(medium)}&utm_campaign={Uri.EscapeDataString(campaign)}";
     }
 }

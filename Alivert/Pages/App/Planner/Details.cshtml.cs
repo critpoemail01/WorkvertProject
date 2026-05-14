@@ -33,8 +33,16 @@ public class DetailsModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
-        var loaded = await LoadPlanAsync(id);
-        return loaded ? Page() : NotFound();
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        if (EnsureCampaignArtifacts())
+        {
+            await _db.SaveChangesAsync();
+            Metrics = BuildMetrics(Plan);
+        }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostApprovePostAsync(int id, int postId)
@@ -389,6 +397,43 @@ public class DetailsModel : PageModel
             capturedLeads);
     }
 
+    private bool EnsureCampaignArtifacts()
+    {
+        var changed = false;
+
+        if (string.IsNullOrWhiteSpace(Plan.BusinessDna))
+        {
+            Plan.BusinessDna = Clip(
+                $"Product: {Plan.ProductName}. Market: {Plan.TargetAudience}. Promise: {Plan.ValueProposition}. " +
+                $"Goal: {Plan.CampaignGoal}. Tone: {Plan.Tone}. Region: {BuildLocationLabel(Plan)}. Source: {Plan.ProductUrl ?? Plan.CompanyOrIdea}.",
+                1000);
+            changed = true;
+        }
+
+        if (Plan.LandingPage is null)
+        {
+            Plan.LandingPage = new MarketingLandingPage
+            {
+                MarketingPlanId = Plan.Id,
+                Slug = $"campaign-{Plan.Id}-{Slugify(Plan.ProductName)}",
+                Headline = Clip($"{Plan.ProductName} for {Plan.TargetAudience}", 180),
+                Subheadline = Clip($"A focused landing page for {Plan.CampaignGoal.ToLowerInvariant()} with {Plan.ValueProposition}.", 260),
+                Body = Clip(
+                    $"Business DNA: {Plan.BusinessDna}\n\n" +
+                    $"This campaign connects social posts, email follow-up and a dedicated form so every visit can become a measurable lead.",
+                    1600),
+                PrimaryCallToAction = Clip($"Request {Plan.ProductName}", 120),
+                FormTitle = Clip($"Talk to {Plan.ProductName}", 160),
+                FormIntro = Clip("Leave your details and the team will follow up with the most relevant next step.", 260),
+                ThankYouMessage = Clip("Thank you. Your request was captured and added to the campaign report.", 260),
+                Status = "Draft"
+            };
+            changed = true;
+        }
+
+        return changed;
+    }
+
     private static bool CanEditDraft(string status)
     {
         return status is "Draft" or "Approved";
@@ -432,5 +477,33 @@ public class DetailsModel : PageModel
             return value;
 
         return value[..Math.Max(0, maxLength - 3)].TrimEnd() + "...";
+    }
+
+    private static string Slugify(string value)
+    {
+        var chars = value
+            .Trim()
+            .ToLowerInvariant()
+            .Select(ch => char.IsLetterOrDigit(ch) ? ch : '-')
+            .ToArray();
+        var slug = string.Join("-", new string(chars).Split('-', StringSplitOptions.RemoveEmptyEntries));
+        return string.IsNullOrWhiteSpace(slug) ? "campaign" : Clip(slug, 48);
+    }
+
+    private static string BuildLocationLabel(MarketingPlan plan)
+    {
+        if (plan.AudienceLocationScope.Equals("Country", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(plan.AudienceCountry))
+            return plan.AudienceCountry;
+
+        if (plan.AudienceLocationScope.Equals("City", StringComparison.OrdinalIgnoreCase))
+        {
+            var place = string.Join(", ", new[] { plan.AudienceCity, plan.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            if (string.IsNullOrWhiteSpace(place))
+                place = "Selected city";
+
+            return plan.AudienceRadiusKm is > 0 ? $"{place} + {plan.AudienceRadiusKm} km" : place;
+        }
+
+        return "Worldwide";
     }
 }
