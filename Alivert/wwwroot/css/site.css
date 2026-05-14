@@ -5930,6 +5930,17 @@ a { text-decoration: none; }
   margin-top: 3px;
 }
 
+.campaign-row-actions {
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.campaign-row-actions form {
+  margin: 0;
+}
+
 .campaign-agency-footer {
   display: grid;
   gap: 4px;

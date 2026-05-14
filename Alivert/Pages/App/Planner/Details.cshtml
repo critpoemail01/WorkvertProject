@@ -16,6 +16,9 @@
         <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
             <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all</button>
         </form>
+        <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Plan.Id" onsubmit="return confirm('Delete this campaign and all generated posts, emails, landing page and captured leads?');">
+            <button class="btn btn-outline-danger btn-lg" type="submit"><i class="bi bi-trash3 me-1"></i>Delete</button>
+        </form>
     </div>
 </section>
 

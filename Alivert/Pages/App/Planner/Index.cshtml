@@ -30,6 +30,12 @@
                 <i class="bi bi-building-add me-1"></i>@Model.LeadDiscoveryMessage
             </div>
         }
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <div class="alert alert-info mb-3">
+                <i class="bi bi-info-circle me-1"></i>@Model.StatusMessage
+            </div>
+        }
         <div class="app-panel-header">
             <div>
                 <h2>Campaign intelligence</h2>
@@ -477,7 +483,12 @@
                         <td>@plan.Posts posts / @plan.Emails emails / landing page</td>
                         <td><span class="badge text-bg-secondary">@plan.Status</span></td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Open</a>
+                            <div class="campaign-row-actions">
+                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Open</a>
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@plan.Id" onsubmit="return confirm('Delete this campaign and all generated posts, emails, landing page and captured leads?');">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

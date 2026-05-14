@@ -387,6 +387,25 @@ public class DetailsModel : PageModel
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var userId = _userManager.GetUserId(User) ?? string.Empty;
+        var plan = await _db.MarketingPlans.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+        if (plan is null)
+        {
+            StatusMessage = "Campaign not found or already deleted.";
+            return RedirectToPage("/App/Planner/Index");
+        }
+
+        var productName = plan.ProductName;
+        _db.MarketingPlans.Remove(plan);
+        await _db.SaveChangesAsync();
+
+        StatusMessage = $"Campaign '{productName}' deleted.";
+        return RedirectToPage("/App/Planner/Index");
+    }
+
     private async Task<bool> LoadPlanAsync(int id, bool tracked = false)
     {
         var userId = _userManager.GetUserId(User) ?? string.Empty;

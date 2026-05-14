@@ -63,6 +63,9 @@ public class IndexModel : PageModel
     public int CrmLeadCount { get; private set; }
     public int CrmLeadEmails { get; private set; }
 
+    [TempData]
+    public string? StatusMessage { get; set; }
+
     public record PlanRow(int Id, string ProductName, string Platforms, string Location, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
 
     public class PlannerInput
@@ -409,6 +412,25 @@ public class IndexModel : PageModel
         await _db.SaveChangesAsync();
 
         return RedirectToPage("/App/Planner/Details", new { id = plan.Id });
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var userId = _userManager.GetUserId(User) ?? string.Empty;
+        var plan = await _db.MarketingPlans.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+        if (plan is null)
+        {
+            StatusMessage = "Campaign not found or already deleted.";
+            return RedirectToPage();
+        }
+
+        var productName = plan.ProductName;
+        _db.MarketingPlans.Remove(plan);
+        await _db.SaveChangesAsync();
+
+        StatusMessage = $"Campaign '{productName}' deleted.";
+        return RedirectToPage();
     }
 
     private async Task LoadPlansAsync()
