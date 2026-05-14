@@ -374,13 +374,6 @@
                     <div class="form-text">One email per line. Suggested emails are added here for review before generating the campaign.</div>
                     <span asp-validation-for="Input.EmailAudience" class="text-danger"></span>
 
-                    <details class="lead-source-details mt-3">
-                        <summary>Optional: add known company websites or contact pages</summary>
-                        <p class="form-text mb-2">If you already know possible companies, paste their public websites here. The same button extracts visible emails from them and merges them with the manual list.</p>
-                        <textarea asp-for="Input.LeadCompanyUrls" class="form-control" rows="4" placeholder="https://empresa.pt&#10;https://example.com/contact"></textarea>
-                        <span asp-validation-for="Input.LeadCompanyUrls" class="text-danger"></span>
-                    </details>
-
                     @if (Model.LeadSearchQueries.Any() || Model.DiscoveredLeadEmails.Any() || Model.LeadDiscoveryWarnings.Any())
                     {
                         <div class="lead-discovery-results">

@@ -159,9 +159,6 @@ public class IndexModel : PageModel
         [StringLength(120)]
         public string? DetectedApplicationType { get; set; }
 
-        [Display(Name = "Company websites to scan")]
-        [StringLength(3000)]
-        public string? LeadCompanyUrls { get; set; }
     }
 
     public async Task OnGetAsync(int? sourcePlanId = null, string? templateKey = null)
@@ -307,7 +304,7 @@ public class IndexModel : PageModel
             string.IsNullOrWhiteSpace(Input.TargetAudience) ? Input.CompanyOrIdea : Input.TargetAudience,
             Input.CampaignGoal,
             BuildInputLocationSummary(),
-            Input.LeadCompanyUrls,
+            null,
             BuildLeadDiscoveryProductContext(),
             searchOnline),
             cancellationToken);

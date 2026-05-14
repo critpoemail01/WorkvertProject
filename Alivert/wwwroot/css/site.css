@@ -3666,23 +3666,6 @@ a { text-decoration: none; }
   white-space: nowrap;
 }
 
-.lead-source-details {
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.09);
-  background: rgba(7,11,20,0.28);
-}
-
-.lead-source-details summary {
-  color: rgba(232,238,255,0.84);
-  cursor: pointer;
-  font-weight: 850;
-}
-
-.lead-source-details[open] summary {
-  margin-bottom: 10px;
-}
-
 .lead-discovery-results {
   display: grid;
   gap: 14px;
