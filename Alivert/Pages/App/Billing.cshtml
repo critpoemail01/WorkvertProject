@@ -120,7 +120,7 @@
             <div class="subscription-choice">
                 <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexible</div>
                 <h2 class="h3 fw-bold mb-1">Unlimited monthly</h2>
-                <div class="plan-price">@Model.UnlimitedMonthlyCurrency @Model.UnlimitedMonthlyAmount.ToString("0")<span class="fs-6 muted">/month</span></div>
+                <div class="plan-price">@Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)<span class="fs-6 muted">/month</span></div>
                 <p class="muted mt-2">Unlimited campaigns, all channels and all cadences with 30-day access.</p>
                 <ul class="muted">
                     <li>No long-term commitment</li>
@@ -137,7 +137,7 @@
                             data-checkout-plan="monthly"
                             data-checkout-pack=""
                             data-checkout-title="Unlimited monthly"
-                            data-checkout-price="@($"{Model.UnlimitedMonthlyCurrency} {Model.UnlimitedMonthlyAmount:0}/month")"
+                            data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)}/month")"
                             data-checkout-detail="Unlimited active campaigns for 30 days. Best when you want to keep every channel active month to month.">
                         <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
                     </button>
@@ -147,8 +147,8 @@
             <div class="subscription-choice subscription-choice-highlight">
                 <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Best value</div>
                 <h2 class="h3 fw-bold mb-1">Unlimited annual</h2>
-                <div class="plan-price">@Model.UnlimitedAnnualCurrency @Model.UnlimitedAnnualAmount.ToString("0")<span class="fs-6 muted">/year</span></div>
-                <p class="muted mt-2">One year of unlimited campaigns and a EUR 300 saving versus paying monthly.</p>
+                <div class="plan-price">@Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)<span class="fs-6 muted">/year</span></div>
+                <p class="muted mt-2">One year of unlimited campaigns with more than 50% saved versus paying monthly.</p>
                 <ul class="muted">
                     <li>Unlimited active campaigns for 1 year</li>
                     <li>Best option for active growth workflows</li>
@@ -164,7 +164,7 @@
                             data-checkout-plan="annual"
                             data-checkout-pack=""
                             data-checkout-title="Unlimited annual"
-                            data-checkout-price="@($"{Model.UnlimitedAnnualCurrency} {Model.UnlimitedAnnualAmount:0}/year")"
+                            data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)}/year")"
                             data-checkout-detail="One year of unlimited campaigns with the best committed-growth price.">
                         <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
                     </button>
@@ -187,7 +187,7 @@
                                 <div class="muted small">Adds @pack.Credits active campaign slots for @Model.CreditPackValidityDays days</div>
                             </div>
                             <div class="text-end">
-                                <div class="fw-bold">@pack.Currency @pack.Amount.ToString("0")</div>
+                                <div class="fw-bold">@Model.FormatMoney(pack.Amount, pack.Currency)</div>
                                 <div class="muted small">@pack.Currency @((pack.Amount / pack.Credits).ToString("0.00"))/credit</div>
                             </div>
                         </div>
@@ -205,7 +205,7 @@
                                     data-checkout-plan=""
                                     data-checkout-pack="@pack.Id"
                                     data-checkout-title="@($"{pack.Credits} credits")"
-                                    data-checkout-price="@($"{pack.Currency} {pack.Amount:0}")"
+                                    data-checkout-price="@Model.FormatMoney(pack.Amount, pack.Currency)"
                                     data-checkout-detail="@($"Adds {pack.Credits} active campaign slots for {Model.CreditPackValidityDays} days after payment confirmation.")">
                                 <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
                             </button>

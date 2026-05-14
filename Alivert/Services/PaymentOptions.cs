@@ -3,9 +3,9 @@ namespace Alivert.Services;
 public sealed class PaymentOptions
 {
     public bool AllowManualPaymentConfirmation { get; set; }
-    public decimal UnlimitedMonthlyAmount { get; set; } = 50;
+    public decimal UnlimitedMonthlyAmount { get; set; } = 49.99m;
     public string UnlimitedMonthlyCurrency { get; set; } = "EUR";
-    public decimal UnlimitedAnnualAmount { get; set; } = 300;
+    public decimal UnlimitedAnnualAmount { get; set; } = 299m;
     public string UnlimitedAnnualCurrency { get; set; } = "EUR";
     public string? CreditCardSetupUrl { get; set; }
     public List<CreditPackOptions> CreditPacks { get; set; } = new();

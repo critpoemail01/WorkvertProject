@@ -32,7 +32,7 @@ public class AlertsIndexModel : PageModel
     public bool IsUnlimitedPlan { get; private set; }
     public bool IsAnnualUnlimitedPlan { get; private set; }
     public string PlanPromoTitle { get; private set; } = "Unlock unlimited campaigns";
-    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 300 and covers every campaign, channel and cadence without counting credits.";
+    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 299 and covers every campaign, channel and cadence without counting credits.";
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -304,7 +304,7 @@ public class AlertsIndexModel : PageModel
         if (IsUnlimitedPlan)
         {
             PlanPromoTitle = "Switch to annual and save";
-            PlanPromoText = "You already have unlimited campaigns. Annual billing is EUR 300/year and saves EUR 300 versus paying monthly.";
+            PlanPromoText = "You already have unlimited campaigns. Annual billing is EUR 299/year and saves more than 50% versus paying monthly.";
         }
     }
 }

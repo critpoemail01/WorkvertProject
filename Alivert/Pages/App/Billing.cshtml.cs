@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace Alivert.Pages.App;
 
@@ -61,6 +62,7 @@ public class BillingModel : PageModel
     public List<CreditPurchase> Purchases { get; private set; } = new();
     public List<CreditTransaction> Transactions { get; private set; } = new();
     public int CreditPackValidityDays => CreditPackAccessDays;
+    public string FormatMoney(decimal amount, string currency) => $"{currency} {FormatAmount(amount)}";
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -281,11 +283,11 @@ public class BillingModel : PageModel
         RemainingSlots = limits.RemainingSlots;
         IsUnlimited = limits.IsUnlimited;
         CanManuallyConfirm = AllowsBillingTestActions();
-        UnlimitedMonthlyAmount = _payments.CurrentValue.UnlimitedMonthlyAmount > 0 ? _payments.CurrentValue.UnlimitedMonthlyAmount : 50;
+        UnlimitedMonthlyAmount = _payments.CurrentValue.UnlimitedMonthlyAmount > 0 ? _payments.CurrentValue.UnlimitedMonthlyAmount : 49.99m;
         UnlimitedMonthlyCurrency = string.IsNullOrWhiteSpace(_payments.CurrentValue.UnlimitedMonthlyCurrency)
             ? "EUR"
             : _payments.CurrentValue.UnlimitedMonthlyCurrency;
-        UnlimitedAnnualAmount = _payments.CurrentValue.UnlimitedAnnualAmount > 0 ? _payments.CurrentValue.UnlimitedAnnualAmount : 300;
+        UnlimitedAnnualAmount = _payments.CurrentValue.UnlimitedAnnualAmount > 0 ? _payments.CurrentValue.UnlimitedAnnualAmount : 299;
         UnlimitedAnnualCurrency = string.IsNullOrWhiteSpace(_payments.CurrentValue.UnlimitedAnnualCurrency)
             ? "EUR"
             : _payments.CurrentValue.UnlimitedAnnualCurrency;
@@ -422,10 +424,17 @@ public class BillingModel : PageModel
     {
         return
         [
-            new CreditPackOptions { Id = "starter", Credits = 25, Amount = 25, Currency = "EUR" },
-            new CreditPackOptions { Id = "growth", Credits = 50, Amount = 35, Currency = "EUR" },
-            new CreditPackOptions { Id = "pro", Credits = 100, Amount = 50, Currency = "EUR" }
+            new CreditPackOptions { Id = "starter", Credits = 25, Amount = 24.99m, Currency = "EUR" },
+            new CreditPackOptions { Id = "growth", Credits = 50, Amount = 34.99m, Currency = "EUR" },
+            new CreditPackOptions { Id = "pro", Credits = 100, Amount = 49.99m, Currency = "EUR" }
         ];
+    }
+
+    private static string FormatAmount(decimal amount)
+    {
+        return amount == decimal.Truncate(amount)
+            ? amount.ToString("0", CultureInfo.InvariantCulture)
+            : amount.ToString("0.00", CultureInfo.InvariantCulture);
     }
 
     private UnlimitedPlan? GetUnlimitedPlan(string? plan)
