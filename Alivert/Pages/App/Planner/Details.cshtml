@@ -18,6 +18,11 @@
     </div>
 </section>
 
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info mt-4 mb-0">@Model.StatusMessage</div>
+}
+
 <section class="surface dashboard-plan-card mt-4">
     <div class="dashboard-plan-main">
         <span class="app-stat-icon dashboard-plan-icon"><i class="bi bi-stars"></i></span>
@@ -103,6 +108,46 @@
                             <p>@post.Caption</p>
                             <small>@post.CreativeBrief</small>
                             <div class="planner-tags">@post.Hashtags</div>
+                            @if (post.Status is "Draft" or "Approved")
+                            {
+                                <details class="planner-editor">
+                                    <summary><i class="bi bi-pencil-square"></i>Edit</summary>
+                                    <form method="post" asp-page-handler="UpdatePost" asp-route-id="@Model.Plan.Id" class="planner-editor-form">
+                                        <input type="hidden" name="postId" value="@post.Id" />
+                                        <div class="planner-editor-grid">
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Title</span>
+                                                <input class="form-control" name="title" maxlength="140" value="@post.Title" />
+                                            </label>
+                                            <label class="planner-editor-field">
+                                                <span>Publish date</span>
+                                                <input class="form-control" type="datetime-local" name="scheduledForLocal" value="@post.ScheduledForUtc.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")" />
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Hook</span>
+                                                <textarea class="form-control" name="hook" maxlength="300" rows="2">@post.Hook</textarea>
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Caption</span>
+                                                <textarea class="form-control" name="caption" maxlength="1600" rows="5">@post.Caption</textarea>
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Creative brief</span>
+                                                <textarea class="form-control" name="creativeBrief" maxlength="900" rows="3">@post.CreativeBrief</textarea>
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Hashtags</span>
+                                                <input class="form-control" name="hashtags" maxlength="300" value="@post.Hashtags" />
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>CTA</span>
+                                                <input class="form-control" name="callToAction" maxlength="180" value="@post.CallToAction" />
+                                            </label>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-save2 me-1"></i>Save changes</button>
+                                    </form>
+                                </details>
+                            }
                             <div class="planner-card-footer">
                                 <span>@post.EstimatedReach reach · @post.EstimatedInteractions interactions · @post.EstimatedConversions conversions</span>
                                 @if (post.Status == "Draft")
@@ -141,6 +186,38 @@
                     <h3>@email.Subject</h3>
                     <p class="muted">@email.PreviewText</p>
                     <pre>@email.Body</pre>
+                    @if (email.Status is "Draft" or "Approved")
+                    {
+                        <details class="planner-editor">
+                            <summary><i class="bi bi-pencil-square"></i>Edit</summary>
+                            <form method="post" asp-page-handler="UpdateEmail" asp-route-id="@Model.Plan.Id" class="planner-editor-form">
+                                <input type="hidden" name="emailId" value="@email.Id" />
+                                <div class="planner-editor-grid">
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Subject</span>
+                                        <input class="form-control" name="subject" maxlength="160" value="@email.Subject" />
+                                    </label>
+                                    <label class="planner-editor-field">
+                                        <span>Send date</span>
+                                        <input class="form-control" type="datetime-local" name="scheduledForLocal" value="@email.ScheduledForUtc.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")" />
+                                    </label>
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Preview text</span>
+                                        <textarea class="form-control" name="previewText" maxlength="220" rows="2">@email.PreviewText</textarea>
+                                    </label>
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Email body</span>
+                                        <textarea class="form-control" name="body" maxlength="4000" rows="9">@email.Body</textarea>
+                                    </label>
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Audience segment</span>
+                                        <input class="form-control" name="audienceSegment" maxlength="160" value="@email.AudienceSegment" />
+                                    </label>
+                                </div>
+                                <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-save2 me-1"></i>Save changes</button>
+                            </form>
+                        </details>
+                    }
                     <div class="planner-card-footer">
                         <span>@email.EstimatedReach reach · @email.EstimatedInteractions interactions · @email.EstimatedConversions conversions</span>
                         @if (email.Status == "Draft")
@@ -176,6 +253,38 @@
                     <p><strong>Role:</strong> @lead.ContactRole</p>
                     <p><strong>Email search:</strong> @lead.EmailSearchHint</p>
                     <p class="muted">@lead.Reason</p>
+                    @if (lead.Status is "Suggested" or "Accepted")
+                    {
+                        <details class="planner-editor">
+                            <summary><i class="bi bi-pencil-square"></i>Edit</summary>
+                            <form method="post" asp-page-handler="UpdateLead" asp-route-id="@Model.Plan.Id" class="planner-editor-form">
+                                <input type="hidden" name="leadId" value="@lead.Id" />
+                                <div class="planner-editor-grid">
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Company profile</span>
+                                        <input class="form-control" name="companyProfile" maxlength="160" value="@lead.CompanyProfile" />
+                                    </label>
+                                    <label class="planner-editor-field">
+                                        <span>Industry</span>
+                                        <input class="form-control" name="industry" maxlength="120" value="@lead.Industry" />
+                                    </label>
+                                    <label class="planner-editor-field">
+                                        <span>Contact role</span>
+                                        <input class="form-control" name="contactRole" maxlength="120" value="@lead.ContactRole" />
+                                    </label>
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Email search</span>
+                                        <input class="form-control" name="emailSearchHint" maxlength="180" value="@lead.EmailSearchHint" />
+                                    </label>
+                                    <label class="planner-editor-field planner-editor-field-full">
+                                        <span>Reason</span>
+                                        <textarea class="form-control" name="reason" maxlength="500" rows="3">@lead.Reason</textarea>
+                                    </label>
+                                </div>
+                                <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-save2 me-1"></i>Save changes</button>
+                            </form>
+                        </details>
+                    }
                     @if (lead.Status == "Suggested")
                     {
                         <form method="post" asp-page-handler="ApproveLead" asp-route-id="@Model.Plan.Id">

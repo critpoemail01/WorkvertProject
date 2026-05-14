@@ -22,7 +22,8 @@ public class DetailsModel : PageModel
 
     public MarketingPlan Plan { get; private set; } = default!;
     public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0);
-    public string? StatusMessage { get; private set; }
+    [TempData]
+    public string? StatusMessage { get; set; }
 
     public record MetricsSummary(int Drafts, int Approved, int Scheduled, int Published, int Reach, int Interactions, int Conversions);
 
@@ -74,6 +75,112 @@ public class DetailsModel : PageModel
 
         lead.Status = "Accepted";
         Plan.Status = "Review";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostUpdatePostAsync(
+        int id,
+        int postId,
+        string? title,
+        string? hook,
+        string? caption,
+        string? creativeBrief,
+        string? hashtags,
+        string? callToAction,
+        DateTime? scheduledForLocal)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        var post = Plan.Posts.FirstOrDefault(x => x.Id == postId);
+        if (post is null) return NotFound();
+
+        if (!CanEditDraft(post.Status))
+        {
+            StatusMessage = "This post is already locked because it is scheduled or live.";
+            return RedirectToPage(new { id });
+        }
+
+        post.Title = RequiredText(title, post.Title, 140);
+        post.Hook = RequiredText(hook, post.Hook, 300);
+        post.Caption = RequiredText(caption, post.Caption, 1600);
+        post.CreativeBrief = RequiredText(creativeBrief, post.CreativeBrief, 900);
+        post.Hashtags = OptionalText(hashtags, 300);
+        post.CallToAction = RequiredText(callToAction, post.CallToAction, 180);
+        ApplyLocalSchedule(scheduledForLocal, value => post.ScheduledForUtc = value);
+        ResetApproval(post);
+        Plan.Status = "Review";
+        StatusMessage = "Post updated. Review it again before approving.";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostUpdateEmailAsync(
+        int id,
+        int emailId,
+        string? subject,
+        string? previewText,
+        string? body,
+        string? audienceSegment,
+        DateTime? scheduledForLocal)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        var email = Plan.Emails.FirstOrDefault(x => x.Id == emailId);
+        if (email is null) return NotFound();
+
+        if (!CanEditDraft(email.Status))
+        {
+            StatusMessage = "This email is already locked because it is scheduled or sent.";
+            return RedirectToPage(new { id });
+        }
+
+        email.Subject = RequiredText(subject, email.Subject, 160);
+        email.PreviewText = RequiredText(previewText, email.PreviewText, 220);
+        email.Body = RequiredText(body, email.Body, 4000);
+        email.AudienceSegment = RequiredText(audienceSegment, email.AudienceSegment, 160);
+        ApplyLocalSchedule(scheduledForLocal, value => email.ScheduledForUtc = value);
+        ResetApproval(email);
+        Plan.Status = "Review";
+        StatusMessage = "Email updated. Review it again before approving.";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostUpdateLeadAsync(
+        int id,
+        int leadId,
+        string? companyProfile,
+        string? industry,
+        string? contactRole,
+        string? emailSearchHint,
+        string? reason)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        var lead = Plan.Leads.FirstOrDefault(x => x.Id == leadId);
+        if (lead is null) return NotFound();
+
+        if (lead.Status != "Suggested" && lead.Status != "Accepted")
+        {
+            StatusMessage = "This lead can no longer be edited.";
+            return RedirectToPage(new { id });
+        }
+
+        lead.CompanyProfile = RequiredText(companyProfile, lead.CompanyProfile, 160);
+        lead.Industry = RequiredText(industry, lead.Industry, 120);
+        lead.ContactRole = RequiredText(contactRole, lead.ContactRole, 120);
+        lead.EmailSearchHint = RequiredText(emailSearchHint, lead.EmailSearchHint, 180);
+        lead.Reason = RequiredText(reason, lead.Reason, 500);
+        lead.Status = "Suggested";
+        Plan.Status = "Review";
+        StatusMessage = "Lead target updated. Accept it again if it is ready.";
         await _db.SaveChangesAsync();
 
         return RedirectToPage(new { id });
@@ -192,5 +299,50 @@ public class DetailsModel : PageModel
             livePosts.Sum(x => x.EstimatedReach) + sentEmails.Sum(x => x.EstimatedReach),
             livePosts.Sum(x => x.EstimatedInteractions) + sentEmails.Sum(x => x.EstimatedInteractions),
             livePosts.Sum(x => x.EstimatedConversions) + sentEmails.Sum(x => x.EstimatedConversions));
+    }
+
+    private static bool CanEditDraft(string status)
+    {
+        return status is "Draft" or "Approved";
+    }
+
+    private static void ResetApproval(MarketingPostSuggestion post)
+    {
+        post.Status = "Draft";
+        post.ApprovedAtUtc = null;
+    }
+
+    private static void ResetApproval(MarketingEmailSuggestion email)
+    {
+        email.Status = "Draft";
+        email.ApprovedAtUtc = null;
+    }
+
+    private static void ApplyLocalSchedule(DateTime? scheduledForLocal, Action<DateTime> apply)
+    {
+        if (scheduledForLocal is null)
+            return;
+
+        var local = DateTime.SpecifyKind(scheduledForLocal.Value, DateTimeKind.Local);
+        apply(local.ToUniversalTime());
+    }
+
+    private static string RequiredText(string? value, string fallback, int maxLength)
+    {
+        var text = string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+        return Clip(text, maxLength);
+    }
+
+    private static string? OptionalText(string? value, int maxLength)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : Clip(value.Trim(), maxLength);
+    }
+
+    private static string Clip(string value, int maxLength)
+    {
+        if (value.Length <= maxLength)
+            return value;
+
+        return value[..Math.Max(0, maxLength - 3)].TrimEnd() + "...";
     }
 }

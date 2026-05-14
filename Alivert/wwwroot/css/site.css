@@ -3597,6 +3597,71 @@ a { text-decoration: none; }
   font-size: 0.86rem;
 }
 
+.planner-editor {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 10px;
+}
+
+.planner-editor summary {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.045);
+  color: rgba(232,238,255,0.86);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 850;
+  list-style: none;
+}
+
+.planner-editor summary::-webkit-details-marker {
+  display: none;
+}
+
+.planner-editor[open] summary {
+  color: #ffffff;
+  border-color: rgba(52,211,153,0.34);
+  background: rgba(52,211,153,0.08);
+}
+
+.planner-editor-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.planner-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.planner-editor-field {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.planner-editor-field-full {
+  grid-column: 1 / -1;
+}
+
+.planner-editor-field span {
+  color: rgba(232,238,255,0.72);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.planner-editor textarea.form-control {
+  resize: vertical;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .alivert-nav {
@@ -4188,6 +4253,7 @@ a { text-decoration: none; }
   }
 
   .planner-post-grid,
+  .planner-editor-grid,
   .planner-metric-strip,
   .dashboard-ai-strip {
     grid-template-columns: 1fr;
