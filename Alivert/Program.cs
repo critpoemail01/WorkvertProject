@@ -79,6 +79,12 @@ builder.Services.AddHttpClient<IUrlCampaignBriefSuggester, UrlCampaignBriefSugge
     client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PromovertUrlAnalyzer/1.0)");
     client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
 });
+builder.Services.AddHttpClient<ILeadDiscoveryService, LeadDiscoveryService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(12);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PromovertLeadDiscovery/1.0)");
+    client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
+});
 
 builder.Services.AddRateLimiter(options =>
 {

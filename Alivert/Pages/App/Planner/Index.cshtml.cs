@@ -22,17 +22,20 @@ public class IndexModel : PageModel
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IAiMarketingPlannerService _planner;
     private readonly IUrlCampaignBriefSuggester _urlSuggester;
+    private readonly ILeadDiscoveryService _leadDiscovery;
 
     public IndexModel(
         ApplicationDbContext db,
         UserManager<IdentityUser> userManager,
         IAiMarketingPlannerService planner,
-        IUrlCampaignBriefSuggester urlSuggester)
+        IUrlCampaignBriefSuggester urlSuggester,
+        ILeadDiscoveryService leadDiscovery)
     {
         _db = db;
         _userManager = userManager;
         _planner = planner;
         _urlSuggester = urlSuggester;
+        _leadDiscovery = leadDiscovery;
     }
 
     [BindProperty]
@@ -43,6 +46,10 @@ public class IndexModel : PageModel
     public IReadOnlyList<string> LocationScopeOptions => SupportedLocationScopes;
     public List<PlanRow> RecentPlans { get; private set; } = new();
     public string? SuggestionMessage { get; private set; }
+    public string? LeadDiscoveryMessage { get; private set; }
+    public IReadOnlyList<LeadSearchQuery> LeadSearchQueries { get; private set; } = [];
+    public IReadOnlyList<DiscoveredLeadEmail> DiscoveredLeadEmails { get; private set; } = [];
+    public IReadOnlyList<string> LeadDiscoveryWarnings { get; private set; } = [];
 
     public record PlanRow(int Id, string ProductName, string Platforms, string Location, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
 
@@ -117,6 +124,10 @@ public class IndexModel : PageModel
         [Display(Name = "Potential-client emails")]
         [StringLength(4000)]
         public string? EmailAudience { get; set; }
+
+        [Display(Name = "Company websites to scan")]
+        [StringLength(3000)]
+        public string? LeadCompanyUrls { get; set; }
     }
 
     public async Task OnGetAsync()
@@ -168,6 +179,44 @@ public class IndexModel : PageModel
                 : ex.Message);
         }
 
+        await LoadPlansAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostDiscoverLeadsAsync(CancellationToken cancellationToken)
+    {
+        NormalizeInput();
+        ModelState.Clear();
+
+        if (string.IsNullOrWhiteSpace(Input.TargetAudience))
+        {
+            ModelState.AddModelError("Input.TargetAudience", "Add the target audience before discovering potential clients.");
+            await LoadPlansAsync();
+            return Page();
+        }
+
+        var result = await _leadDiscovery.DiscoverAsync(new LeadDiscoveryRequest(
+            Input.TargetAudience,
+            Input.CampaignGoal,
+            BuildInputLocationSummary(),
+            Input.LeadCompanyUrls),
+            cancellationToken);
+
+        LeadSearchQueries = result.SearchQueries;
+        DiscoveredLeadEmails = result.Emails;
+        LeadDiscoveryWarnings = result.Warnings;
+
+        if (result.Emails.Count > 0)
+        {
+            Input.EmailAudience = MergeEmailAudience(Input.EmailAudience, result.Emails.Select(x => x.Email));
+            LeadDiscoveryMessage = $"{result.Emails.Count} public email address{(result.Emails.Count == 1 ? "" : "es")} found and added to the potential-client list for review.";
+        }
+        else
+        {
+            LeadDiscoveryMessage = "Prospecting searches were prepared. Add company websites or contact-page URLs to extract public emails.";
+        }
+
+        ModelState.Clear();
         await LoadPlansAsync();
         return Page();
     }
@@ -351,6 +400,45 @@ public class IndexModel : PageModel
         }
 
         return "Worldwide";
+    }
+
+    private string BuildInputLocationSummary()
+    {
+        return BuildLocationLabel(
+            Input.AudienceLocationScope,
+            Input.AudienceCountry,
+            Input.AudienceCity,
+            Input.AudienceRadiusKm);
+    }
+
+    private static string MergeEmailAudience(string? existingAudience, IEnumerable<string> discoveredEmails)
+    {
+        var emails = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var totalLength = 0;
+
+        foreach (var value in SplitAudience(existingAudience).Concat(discoveredEmails))
+        {
+            var cleaned = value.Trim();
+            if (!cleaned.Contains('@') || !seen.Add(cleaned))
+                continue;
+
+            var projectedLength = totalLength + cleaned.Length + (emails.Count == 0 ? 0 : Environment.NewLine.Length);
+            if (projectedLength > 4000)
+                break;
+
+            emails.Add(cleaned);
+            totalLength = projectedLength;
+        }
+
+        return string.Join(Environment.NewLine, emails);
+    }
+
+    private static IEnumerable<string> SplitAudience(string? audience)
+    {
+        return string.IsNullOrWhiteSpace(audience)
+            ? []
+            : audience.Split(new[] { '\r', '\n', ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     private static string? Clean(string? value)

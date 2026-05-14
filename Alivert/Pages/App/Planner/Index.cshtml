@@ -24,6 +24,12 @@
                 <i class="bi bi-magic me-1"></i>@Model.SuggestionMessage
             </div>
         }
+        @if (!string.IsNullOrWhiteSpace(Model.LeadDiscoveryMessage))
+        {
+            <div class="alert alert-info mb-3">
+                <i class="bi bi-building-add me-1"></i>@Model.LeadDiscoveryMessage
+            </div>
+        }
         <div class="app-panel-header">
             <div>
                 <h2>Campaign intelligence</h2>
@@ -179,6 +185,62 @@
                 <textarea asp-for="Input.EmailAudience" class="form-control" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;marketing@empresa.pt"></textarea>
                 <div class="form-text">One email per line. Promovert generates a multi-day sequence and estimates reach, replies/interactions and conversions.</div>
                 <span asp-validation-for="Input.EmailAudience" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <section class="lead-discovery-panel">
+                    <div class="lead-discovery-head">
+                        <div>
+                            <label asp-for="Input.LeadCompanyUrls" class="form-label mb-1"></label>
+                            <p class="form-text mb-0">Paste public company websites or contact pages, one per line. Promovert extracts visible contact emails and adds them above for review.</p>
+                        </div>
+                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=DiscoverLeads" formnovalidate>
+                            <i class="bi bi-search me-1"></i>Find potential clients
+                        </button>
+                    </div>
+                    <textarea asp-for="Input.LeadCompanyUrls" class="form-control mt-3" rows="4" placeholder="https://empresa.pt&#10;https://example.com/contact"></textarea>
+                    <span asp-validation-for="Input.LeadCompanyUrls" class="text-danger"></span>
+
+                    @if (Model.LeadSearchQueries.Any() || Model.DiscoveredLeadEmails.Any() || Model.LeadDiscoveryWarnings.Any())
+                    {
+                        <div class="lead-discovery-results">
+                            @if (Model.LeadSearchQueries.Any())
+                            {
+                                <div>
+                                    <strong>Prospecting searches</strong>
+                                    <div class="lead-query-list">
+                                        @foreach (var query in Model.LeadSearchQueries)
+                                        {
+                                            <a href="@query.Url" target="_blank" rel="noopener">@query.Label <i class="bi bi-box-arrow-up-right"></i></a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.DiscoveredLeadEmails.Any())
+                            {
+                                <div>
+                                    <strong>Public emails found</strong>
+                                    <div class="lead-email-list">
+                                        @foreach (var leadEmail in Model.DiscoveredLeadEmails)
+                                        {
+                                            <span>@leadEmail.Email <small>@leadEmail.SourceHost</small></span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.LeadDiscoveryWarnings.Any())
+                            {
+                                <div class="lead-discovery-warnings">
+                                    @foreach (var warning in Model.LeadDiscoveryWarnings)
+                                    {
+                                        <span><i class="bi bi-info-circle"></i>@warning</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </section>
             </div>
         </div>
 
