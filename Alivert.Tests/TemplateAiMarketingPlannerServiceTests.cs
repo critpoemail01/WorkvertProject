@@ -23,7 +23,8 @@ public class TemplateAiMarketingPlannerServiceTests
             new DateOnly(2026, 5, 13),
             new DateOnly(2026, 6, 12),
             "Daily",
-            "ana@example.com\njoao@example.com"));
+            "ana@example.com\njoao@example.com",
+            new AiAudienceLocation("City", "Portugal", "Lisbon", 38.7223, -9.1393, 35)));
 
         Assert.NotEmpty(draft.Posts);
         Assert.NotEmpty(draft.Emails);
@@ -55,6 +56,7 @@ public class TemplateAiMarketingPlannerServiceTests
             Assert.True(lead.ContactRole.Length <= 120);
             Assert.True(lead.EmailSearchHint.Length <= 180);
             Assert.True(lead.Reason.Length <= 500);
+            Assert.Contains("Lisbon", lead.Reason);
         });
     }
 }

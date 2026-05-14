@@ -19,7 +19,37 @@ public sealed record AiMarketingPlanRequest(
     DateOnly StartDate,
     DateOnly EndDate,
     string Frequency,
-    string? EmailAudience);
+    string? EmailAudience,
+    AiAudienceLocation Location);
+
+public sealed record AiAudienceLocation(
+    string Scope,
+    string? Country,
+    string? City,
+    double? Latitude,
+    double? Longitude,
+    int? RadiusKm)
+{
+    public string Summary
+    {
+        get
+        {
+            if (Scope.Equals("Country", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(Country))
+                return Country.Trim();
+
+            if (Scope.Equals("City", StringComparison.OrdinalIgnoreCase))
+            {
+                var place = string.Join(", ", new[] { City, Country }.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x!.Trim()));
+                if (string.IsNullOrWhiteSpace(place))
+                    place = "selected city";
+
+                return RadiusKm is > 0 ? $"{place}, within {RadiusKm} km" : place;
+            }
+
+            return "worldwide";
+        }
+    }
+}
 
 public sealed record AiMarketingPlanDraft(
     IReadOnlyList<MarketingPostSuggestion> Posts,

@@ -49,7 +49,7 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
 
                 var angle = Angles[(dayIndex + platform.Length) % Angles.Length];
                 var scheduledAt = date.ToDateTime(new TimeOnly(DefaultHourFor(profile.Name), 0), DateTimeKind.Utc);
-                var reach = profile.BaseReach + (dayIndex * 37) + (request.ProductName.Length * 11);
+                var reach = ScaleReach(profile.BaseReach + (dayIndex * 37) + (request.ProductName.Length * 11), request.Location);
                 var interactions = Math.Max(1, (int)Math.Round(reach * profile.InteractionRate));
                 var conversions = Math.Max(0, (int)Math.Round(interactions * profile.ConversionRate));
 
@@ -120,9 +120,9 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
                 continue;
 
             var theme = themes[i];
-            var reach = Math.Max(1, CountAudienceContacts(request.EmailAudience));
-            if (reach == 1)
-                reach = 80 + (i * 16);
+                var reach = Math.Max(1, CountAudienceContacts(request.EmailAudience));
+                if (reach == 1)
+                reach = ScaleReach(80 + (i * 16), request.Location);
 
             emails.Add(new MarketingEmailSuggestion
             {
@@ -162,7 +162,7 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
                 Industry = Clip(industries[i], 120),
                 ContactRole = Clip(roles[i % roles.Length], 120),
                 EmailSearchHint = Clip($"Search '{industries[i]} {roles[i % roles.Length]} email' or LinkedIn company pages", 180),
-                Reason = Clip($"{request.ProductName} can be positioned around '{request.ValueProposition}' for this segment.", 500),
+                Reason = Clip($"{request.ProductName} can be positioned around '{request.ValueProposition}' for this segment in {request.Location.Summary}.", 500),
                 Status = "Suggested"
             });
         }
@@ -189,12 +189,13 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
 
     private static string HookFor(PlatformProfile profile, AiMarketingPlanRequest request, string angle)
     {
+        var location = LocationPhrase(request.Location);
         return profile.Name switch
         {
-            "TikTok" => $"Most {request.TargetAudience} lose time here: {request.ValueProposition}.",
-            "Instagram" => $"A simple way to make {request.CampaignGoal.ToLowerInvariant()} feel less random.",
-            "Facebook" => $"Question for {request.TargetAudience}: what would change if this workflow was automatic?",
-            "LinkedIn" => $"{request.ProductName} turns a common {request.TargetAudience} problem into a measurable workflow.",
+            "TikTok" => $"Most {request.TargetAudience}{location} lose time here: {request.ValueProposition}.",
+            "Instagram" => $"A simple way to make {request.CampaignGoal.ToLowerInvariant()} feel less random{location}.",
+            "Facebook" => $"Question for {request.TargetAudience}{location}: what would change if this workflow was automatic?",
+            "LinkedIn" => $"{request.ProductName} turns a common {request.TargetAudience} problem{location} into a measurable workflow.",
             "X" => $"The underrated growth move: make {request.ValueProposition.ToLowerInvariant()} obvious.",
             "YouTube Shorts" => $"Watch {request.ProductName} solve this in under 30 seconds.",
             _ => $"{request.ProductName}: {TitleForAngle(angle)}."
@@ -204,24 +205,25 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
     private static string CaptionFor(PlatformProfile profile, AiMarketingPlanRequest request, string angle)
     {
         var urlLine = string.IsNullOrWhiteSpace(request.ProductUrl) ? "" : $"\n\nTry it: {request.ProductUrl}";
+        var locationLine = LocationSentence(request.Location);
         return profile.Name switch
         {
             "LinkedIn" =>
-                $"{request.TargetAudience} do not need more busywork. They need a repeatable way to get {request.CampaignGoal.ToLowerInvariant()}.\n\n{request.ProductName} focuses on {request.ValueProposition}.\n\nThe angle for today: {TitleForAngle(angle)}.{urlLine}",
+                $"{request.TargetAudience} do not need more busywork. They need a repeatable way to get {request.CampaignGoal.ToLowerInvariant()}.{locationLine}\n\n{request.ProductName} focuses on {request.ValueProposition}.\n\nThe angle for today: {TitleForAngle(angle)}.{urlLine}",
             "TikTok" =>
-                $"Hook the problem in the first 2 seconds, show {request.ProductName}, then make the outcome concrete: {request.ValueProposition}.{urlLine}",
+                $"Hook the problem in the first 2 seconds, show {request.ProductName}, then make the outcome concrete for {request.Location.Summary}: {request.ValueProposition}.{urlLine}",
             "Instagram" =>
-                $"Turn this into a {profile.Format}: problem, product moment, result, CTA. {request.ProductName} helps {request.TargetAudience} get {request.CampaignGoal.ToLowerInvariant()}.{urlLine}",
+                $"Turn this into a {profile.Format}: problem, product moment, result, CTA. {request.ProductName} helps {request.TargetAudience} get {request.CampaignGoal.ToLowerInvariant()} in {request.Location.Summary}.{urlLine}",
             "Facebook" =>
-                $"{request.TargetAudience} often know the problem, but delay fixing it. Position {request.ProductName} as the practical next step: {request.ValueProposition}.{urlLine}",
+                $"{request.TargetAudience}{LocationPhrase(request.Location)} often know the problem, but delay fixing it. Position {request.ProductName} as the practical next step: {request.ValueProposition}.{urlLine}",
             _ =>
-                $"{request.ProductName} helps {request.TargetAudience} with {request.ValueProposition}. Focus this post on {TitleForAngle(angle)}.{urlLine}"
+                $"{request.ProductName} helps {request.TargetAudience} in {request.Location.Summary} with {request.ValueProposition}. Focus this post on {TitleForAngle(angle)}.{urlLine}"
         };
     }
 
     private static string CreativeBriefFor(PlatformProfile profile, AiMarketingPlanRequest request, string angle)
     {
-        return $"Format: {profile.Format}. Style: {profile.Style}. Show the product context, the audience problem, and one measurable next step. Angle: {TitleForAngle(angle)}. Tone: {request.Tone}.";
+        return $"Format: {profile.Format}. Style: {profile.Style}. Show the product context, the audience problem in {request.Location.Summary}, and one measurable next step. Angle: {TitleForAngle(angle)}. Tone: {request.Tone}.";
     }
 
     private static string CallToActionFor(AiMarketingPlanRequest request)
@@ -253,11 +255,11 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         return theme switch
         {
             "Quick intro" =>
-                $"Hi {{FirstName}},\n\nI noticed teams like yours often need a clearer way to reach {request.CampaignGoal.ToLowerInvariant()}.\n\n{request.ProductName} helps {request.TargetAudience} with {request.ValueProposition}.\n\n{cta}",
+                $"Hi {{FirstName}},\n\nI noticed teams like yours in {request.Location.Summary} often need a clearer way to reach {request.CampaignGoal.ToLowerInvariant()}.\n\n{request.ProductName} helps {request.TargetAudience} with {request.ValueProposition}.\n\n{cta}",
             "Pain and cost" =>
                 $"Hi {{FirstName}},\n\nThe expensive part is not just the task itself. It is the delay, manual follow-up and missed opportunities around it.\n\nThat is where {request.ProductName} can help: {request.ValueProposition}.\n\n{cta}",
             "Use case" =>
-                $"Hi {{FirstName}},\n\nOne practical use case: take a recurring acquisition workflow, define the audience, and let {request.ProductName} keep the next action moving.\n\nFor {request.TargetAudience}, that means a clearer path to {request.CampaignGoal.ToLowerInvariant()}.\n\n{cta}",
+                $"Hi {{FirstName}},\n\nOne practical use case: take a recurring acquisition workflow, define the audience and region, and let {request.ProductName} keep the next action moving.\n\nFor {request.TargetAudience} in {request.Location.Summary}, that means a clearer path to {request.CampaignGoal.ToLowerInvariant()}.\n\n{cta}",
             "Proof and trust" =>
                 $"Hi {{FirstName}},\n\nThe goal is not more tools. It is a repeatable process that can be measured.\n\n{request.ProductName} keeps the focus on {request.CampaignGoal.ToLowerInvariant()}, with messaging built around {request.ValueProposition}.\n\n{cta}",
             "Offer" =>
@@ -288,6 +290,32 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         return audience
             .Split(new[] { '\r', '\n', ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Count(contact => !string.IsNullOrWhiteSpace(contact));
+    }
+
+    private static int ScaleReach(int reach, AiAudienceLocation location)
+    {
+        var multiplier = location.Scope switch
+        {
+            "City" => 0.58m,
+            "Country" => 0.82m,
+            _ => 1.0m
+        };
+
+        return Math.Max(1, (int)Math.Round(reach * multiplier));
+    }
+
+    private static string LocationPhrase(AiAudienceLocation location)
+    {
+        return location.Scope.Equals("World", StringComparison.OrdinalIgnoreCase)
+            ? string.Empty
+            : $" in {location.Summary}";
+    }
+
+    private static string LocationSentence(AiAudienceLocation location)
+    {
+        return location.Scope.Equals("World", StringComparison.OrdinalIgnoreCase)
+            ? string.Empty
+            : $" Focus the message on {location.Summary}.";
     }
 
     private static string Clip(string value, int maxLength)

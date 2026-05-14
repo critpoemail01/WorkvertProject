@@ -29,6 +29,7 @@
         <div>
             <div class="app-stat-label">Plan status</div>
             <h2>@Model.Plan.Status</h2>
+            <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>@LocationLabel()</p>
             <p>@Model.Plan.StartDate.ToString("MMM d, yyyy") - @Model.Plan.EndDate.ToString("MMM d, yyyy") · @Model.Plan.Platforms.Replace(",", ", ") · @FrequencyLabel(Model.Plan.Frequency)</p>
         </div>
     </div>
@@ -332,5 +333,22 @@
             "YouTube Shorts" => "YT",
             _ => "#"
         };
+    }
+
+    private string LocationLabel()
+    {
+        if (Model.Plan.AudienceLocationScope.Equals("Country", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(Model.Plan.AudienceCountry))
+            return Model.Plan.AudienceCountry;
+
+        if (Model.Plan.AudienceLocationScope.Equals("City", StringComparison.OrdinalIgnoreCase))
+        {
+            var place = string.Join(", ", new[] { Model.Plan.AudienceCity, Model.Plan.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            if (string.IsNullOrWhiteSpace(place))
+                place = "Selected city";
+
+            return Model.Plan.AudienceRadiusKm is > 0 ? $"{place} + {Model.Plan.AudienceRadiusKm} km" : place;
+        }
+
+        return "Worldwide";
     }
 }

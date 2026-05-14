@@ -52,6 +52,7 @@
                         <tr>
                             <th>Campaign</th>
                             <th>Period</th>
+                            <th>Region</th>
                             <th>Channels</th>
                             <th>Output</th>
                             <th>Funnel</th>
@@ -81,6 +82,7 @@
                                 </div>
                             </td>
                             <td>@campaign.StartDate.ToString("MMM d") - @campaign.EndDate.ToString("MMM d")</td>
+                            <td>@AiLocationLabel(campaign)</td>
                             <td>@campaign.Platforms.Replace(",", ", ")</td>
                             <td>@campaign.Posts.Count posts / @campaign.Emails.Count emails / @campaign.Leads.Count leads</td>
                             <td>
@@ -428,6 +430,23 @@
             "Approved" or "Review" => "text-bg-primary",
             _ => "text-bg-secondary"
         };
+    }
+
+    private static string AiLocationLabel(MarketingPlan campaign)
+    {
+        if (campaign.AudienceLocationScope.Equals("Country", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(campaign.AudienceCountry))
+            return campaign.AudienceCountry;
+
+        if (campaign.AudienceLocationScope.Equals("City", StringComparison.OrdinalIgnoreCase))
+        {
+            var place = string.Join(", ", new[] { campaign.AudienceCity, campaign.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            if (string.IsNullOrWhiteSpace(place))
+                place = "Selected city";
+
+            return campaign.AudienceRadiusKm is > 0 ? $"{place} + {campaign.AudienceRadiusKm} km" : place;
+        }
+
+        return "Worldwide";
     }
 
     private bool DayChecked(string day)

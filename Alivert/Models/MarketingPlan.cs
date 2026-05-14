@@ -33,6 +33,21 @@ public class MarketingPlan
     [Required, StringLength(300)]
     public string Platforms { get; set; } = "TikTok,Instagram,Facebook,LinkedIn";
 
+    [Required, StringLength(16)]
+    public string AudienceLocationScope { get; set; } = "World";
+
+    [StringLength(120)]
+    public string? AudienceCountry { get; set; }
+
+    [StringLength(160)]
+    public string? AudienceCity { get; set; }
+
+    public double? AudienceLatitude { get; set; }
+
+    public double? AudienceLongitude { get; set; }
+
+    public int? AudienceRadiusKm { get; set; }
+
     [Required, StringLength(32)]
     public string Frequency { get; set; } = "Daily";
 

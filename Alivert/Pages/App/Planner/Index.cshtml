@@ -51,6 +51,68 @@
                 <textarea asp-for="Input.ValueProposition" class="form-control" rows="4" placeholder="The main result, pain solved and why people should care"></textarea>
                 <span asp-validation-for="Input.ValueProposition" class="text-danger"></span>
             </div>
+            <div class="col-12">
+                <section class="planner-location" data-location-targeting>
+                    <div class="planner-location-head">
+                        <div>
+                            <label class="form-label mb-1">Audience region</label>
+                            <p class="form-text mb-0">Choose whether this campaign targets the world, a country, or a city with a radius.</p>
+                        </div>
+                        <span class="planner-location-summary" data-location-summary>Worldwide campaign</span>
+                    </div>
+
+                    <div class="planner-location-modes" role="radiogroup" aria-label="Audience region">
+                        <label>
+                            <input type="radio" name="Input.AudienceLocationScope" value="World" checked="@(Model.Input.AudienceLocationScope == "World")" />
+                            <span><i class="bi bi-globe2"></i>World</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="Input.AudienceLocationScope" value="Country" checked="@(Model.Input.AudienceLocationScope == "Country")" />
+                            <span><i class="bi bi-flag"></i>Country</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="Input.AudienceLocationScope" value="City" checked="@(Model.Input.AudienceLocationScope == "City")" />
+                            <span><i class="bi bi-geo-alt"></i>City radius</span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Input.AudienceLocationScope" class="text-danger"></span>
+
+                    <div class="planner-location-grid mt-3">
+                        <div class="planner-location-country" data-location-panel="country">
+                            <label asp-for="Input.AudienceCountry" class="form-label"></label>
+                            <input asp-for="Input.AudienceCountry" class="form-control" placeholder="Portugal, Spain, United States..." data-location-country />
+                            <span asp-validation-for="Input.AudienceCountry" class="text-danger"></span>
+                        </div>
+                        <div class="planner-location-city" data-location-panel="city">
+                            <label asp-for="Input.AudienceCity" class="form-label"></label>
+                            <input asp-for="Input.AudienceCity" class="form-control" placeholder="Lisbon, Porto, Madrid..." data-location-city />
+                            <span asp-validation-for="Input.AudienceCity" class="text-danger"></span>
+                        </div>
+                        <div class="planner-location-city" data-location-panel="city">
+                            <label asp-for="Input.AudienceRadiusKm" class="form-label"></label>
+                            <div class="planner-radius-row">
+                                <input asp-for="Input.AudienceRadiusKm" class="form-control" type="number" min="1" max="1000" step="1" data-location-radius />
+                                <span>km</span>
+                            </div>
+                            <input class="form-range mt-2" type="range" min="1" max="250" step="1" value="@Math.Min(Model.Input.AudienceRadiusKm, 250)" data-location-radius-range />
+                            <span asp-validation-for="Input.AudienceRadiusKm" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="planner-map-wrap mt-3" data-location-panel="city">
+                        <div class="planner-map" data-location-map></div>
+                        <div class="planner-map-meta">
+                            <span>Click the map to set the campaign center.</span>
+                            <span data-location-coordinates>No point selected yet.</span>
+                        </div>
+                    </div>
+
+                    <input asp-for="Input.AudienceLatitude" type="hidden" data-location-lat />
+                    <input asp-for="Input.AudienceLongitude" type="hidden" data-location-lng />
+                    <span asp-validation-for="Input.AudienceLatitude" class="text-danger"></span>
+                    <span asp-validation-for="Input.AudienceLongitude" class="text-danger"></span>
+                </section>
+            </div>
             <div class="col-md-4">
                 <label asp-for="Input.CampaignGoal" class="form-label"></label>
                 <input asp-for="Input.CampaignGoal" class="form-control" placeholder="subscriptions, demos, purchases..." />
@@ -170,6 +232,7 @@
                     <tr>
                         <th>Product</th>
                         <th>Period</th>
+                        <th>Region</th>
                         <th>Platforms</th>
                         <th>Output</th>
                         <th>Status</th>
@@ -182,6 +245,7 @@
                     <tr>
                         <td>@plan.ProductName</td>
                         <td>@plan.StartDate.ToString("MMM d") - @plan.EndDate.ToString("MMM d")</td>
+                        <td>@plan.Location</td>
                         <td>@plan.Platforms.Replace(",", ", ")</td>
                         <td>@plan.Posts posts / @plan.Emails emails</td>
                         <td><span class="badge text-bg-secondary">@plan.Status</span></td>
@@ -196,6 +260,12 @@
     }
 </section>
 
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+}
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/alivert-location-targeting.js" asp-append-version="true"></script>
 }

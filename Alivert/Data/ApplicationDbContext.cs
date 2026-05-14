@@ -206,6 +206,10 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         builder.Entity<MarketingPlan>()
             .HasIndex(x => new { x.UserId, x.Status });
 
+        builder.Entity<MarketingPlan>()
+            .Property(x => x.AudienceLocationScope)
+            .HasDefaultValue("World");
+
         builder.Entity<MarketingPostSuggestion>()
             .HasIndex(x => new { x.MarketingPlanId, x.ScheduledForUtc });
 

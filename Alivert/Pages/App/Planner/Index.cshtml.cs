@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace Alivert.Pages.App.Planner;
 
@@ -15,6 +16,7 @@ public class IndexModel : PageModel
 {
     private static readonly string[] SupportedPlatforms = ["TikTok", "Instagram", "Facebook", "LinkedIn", "X", "YouTube Shorts"];
     private static readonly string[] SupportedFrequencies = ["Daily", "Weekdays", "ThreePerWeek", "Weekly"];
+    private static readonly string[] SupportedLocationScopes = ["World", "Country", "City"];
 
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
@@ -32,9 +34,10 @@ public class IndexModel : PageModel
 
     public IReadOnlyList<string> PlatformOptions => SupportedPlatforms;
     public IReadOnlyList<string> FrequencyOptions => SupportedFrequencies;
+    public IReadOnlyList<string> LocationScopeOptions => SupportedLocationScopes;
     public List<PlanRow> RecentPlans { get; private set; } = new();
 
-    public record PlanRow(int Id, string ProductName, string Platforms, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
+    public record PlanRow(int Id, string ProductName, string Platforms, string Location, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
 
     public class PlannerInput
     {
@@ -68,6 +71,30 @@ public class IndexModel : PageModel
 
         [Display(Name = "Platforms")]
         public List<string> Platforms { get; set; } = ["TikTok", "Instagram", "Facebook", "LinkedIn"];
+
+        [Display(Name = "Audience region")]
+        [Required, StringLength(16)]
+        public string AudienceLocationScope { get; set; } = "World";
+
+        [Display(Name = "Country")]
+        [StringLength(120)]
+        public string? AudienceCountry { get; set; }
+
+        [Display(Name = "City")]
+        [StringLength(160)]
+        public string? AudienceCity { get; set; }
+
+        [Display(Name = "Latitude")]
+        [StringLength(32)]
+        public string? AudienceLatitude { get; set; }
+
+        [Display(Name = "Longitude")]
+        [StringLength(32)]
+        public string? AudienceLongitude { get; set; }
+
+        [Display(Name = "Radius")]
+        [Range(1, 1000)]
+        public int AudienceRadiusKm { get; set; } = 25;
 
         [Display(Name = "Start date")]
         public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
@@ -114,6 +141,16 @@ public class IndexModel : PageModel
             return Page();
         }
 
+        ValidateLocation();
+        if (!ModelState.IsValid)
+        {
+            await LoadPlansAsync();
+            return Page();
+        }
+
+        var latitude = ParseCoordinate(Input.AudienceLatitude, -90, 90);
+        var longitude = ParseCoordinate(Input.AudienceLongitude, -180, 180);
+
         var plan = new MarketingPlan
         {
             UserId = userId,
@@ -125,6 +162,12 @@ public class IndexModel : PageModel
             CampaignGoal = Input.CampaignGoal.Trim(),
             Tone = Input.Tone.Trim(),
             Platforms = string.Join(",", platforms),
+            AudienceLocationScope = Input.AudienceLocationScope,
+            AudienceCountry = Input.AudienceLocationScope is "Country" or "City" ? Clean(Input.AudienceCountry) : null,
+            AudienceCity = Input.AudienceLocationScope == "City" ? Clean(Input.AudienceCity) : null,
+            AudienceLatitude = Input.AudienceLocationScope == "City" ? latitude : null,
+            AudienceLongitude = Input.AudienceLocationScope == "City" ? longitude : null,
+            AudienceRadiusKm = Input.AudienceLocationScope == "City" ? Input.AudienceRadiusKm : null,
             Frequency = Input.Frequency,
             StartDate = Input.StartDate,
             EndDate = endDate,
@@ -144,7 +187,14 @@ public class IndexModel : PageModel
             plan.StartDate,
             plan.EndDate,
             plan.Frequency,
-            plan.EmailAudience));
+            plan.EmailAudience,
+            new AiAudienceLocation(
+                plan.AudienceLocationScope,
+                plan.AudienceCountry,
+                plan.AudienceCity,
+                plan.AudienceLatitude,
+                plan.AudienceLongitude,
+                plan.AudienceRadiusKm)));
 
         plan.Posts.AddRange(draft.Posts);
         plan.Emails.AddRange(draft.Emails);
@@ -159,21 +209,40 @@ public class IndexModel : PageModel
     private async Task LoadPlansAsync()
     {
         var userId = _userManager.GetUserId(User) ?? string.Empty;
-        RecentPlans = await _db.MarketingPlans
+        var plans = await _db.MarketingPlans
             .AsNoTracking()
             .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAtUtc)
             .Take(12)
+            .Select(x => new
+            {
+                x.Id,
+                x.ProductName,
+                x.Platforms,
+                x.AudienceLocationScope,
+                x.AudienceCountry,
+                x.AudienceCity,
+                x.AudienceRadiusKm,
+                x.Status,
+                x.StartDate,
+                x.EndDate,
+                Posts = x.Posts.Count,
+                Emails = x.Emails.Count
+            })
+            .ToListAsync();
+
+        RecentPlans = plans
             .Select(x => new PlanRow(
                 x.Id,
                 x.ProductName,
                 x.Platforms,
+                BuildLocationLabel(x.AudienceLocationScope, x.AudienceCountry, x.AudienceCity, x.AudienceRadiusKm),
                 x.Status,
                 x.StartDate,
                 x.EndDate,
-                x.Posts.Count,
-                x.Emails.Count))
-            .ToListAsync();
+                x.Posts,
+                x.Emails))
+            .ToList();
     }
 
     private void NormalizeInput()
@@ -181,14 +250,69 @@ public class IndexModel : PageModel
         if (!SupportedFrequencies.Contains(Input.Frequency, StringComparer.OrdinalIgnoreCase))
             Input.Frequency = "Daily";
 
+        if (!SupportedLocationScopes.Contains(Input.AudienceLocationScope, StringComparer.OrdinalIgnoreCase))
+            Input.AudienceLocationScope = "World";
+
+        Input.AudienceLocationScope = SupportedLocationScopes
+            .First(scope => scope.Equals(Input.AudienceLocationScope, StringComparison.OrdinalIgnoreCase));
+
+        Input.AudienceCountry = Clean(Input.AudienceCountry);
+        Input.AudienceCity = Clean(Input.AudienceCity);
+        Input.AudienceRadiusKm = Math.Clamp(Input.AudienceRadiusKm, 1, 1000);
+
         Input.Platforms = Input.Platforms
             .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 
+    private void ValidateLocation()
+    {
+        if (Input.AudienceLocationScope == "Country" && string.IsNullOrWhiteSpace(Input.AudienceCountry))
+            ModelState.AddModelError("Input.AudienceCountry", "Add the country for this campaign audience.");
+
+        if (Input.AudienceLocationScope != "City")
+            return;
+
+        if (string.IsNullOrWhiteSpace(Input.AudienceCity))
+            ModelState.AddModelError("Input.AudienceCity", "Add the city or click the map to set the campaign center.");
+
+        if (Input.AudienceRadiusKm < 1 || Input.AudienceRadiusKm > 1000)
+            ModelState.AddModelError("Input.AudienceRadiusKm", "Use a radius between 1 and 1000 km.");
+    }
+
+    private static string BuildLocationLabel(string scope, string? country, string? city, int? radiusKm)
+    {
+        if (scope.Equals("Country", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(country))
+            return country;
+
+        if (scope.Equals("City", StringComparison.OrdinalIgnoreCase))
+        {
+            var place = string.Join(", ", new[] { city, country }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            if (string.IsNullOrWhiteSpace(place))
+                place = "Selected city";
+
+            return radiusKm is > 0 ? $"{place} + {radiusKm} km" : place;
+        }
+
+        return "Worldwide";
+    }
+
     private static string? Clean(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static double? ParseCoordinate(string? value, double min, double max)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        var normalized = value.Trim().Replace(',', '.');
+        return double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) &&
+            parsed >= min &&
+            parsed <= max
+                ? parsed
+                : null;
     }
 }

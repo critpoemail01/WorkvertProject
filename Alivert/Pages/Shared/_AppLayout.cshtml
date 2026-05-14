@@ -21,6 +21,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="~/assets/brand/alivert_favicon_32.png" asp-append-version="true" />
     <link rel="apple-touch-icon" sizes="512x512" href="~/assets/brand/alivert_icon_512_clean.png" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
