@@ -3457,6 +3457,17 @@ a { text-decoration: none; }
   accent-color: var(--alivert-accent);
 }
 
+.planner-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.planner-url-row .btn {
+  white-space: nowrap;
+}
+
 .planner-location {
   padding: 16px;
   border-radius: 14px;
@@ -4425,6 +4436,7 @@ a { text-decoration: none; }
   .planner-editor-grid,
   .planner-location-grid,
   .planner-location-modes,
+  .planner-url-row,
   .planner-metric-strip,
   .dashboard-ai-strip {
     grid-template-columns: 1fr;

@@ -1,0 +1,43 @@
+using Alivert.Services;
+
+namespace Alivert.Tests;
+
+public class UrlCampaignBriefSuggesterTests
+{
+    [Fact]
+    public void SuggestFromPage_DetectsApplicationTypeAndBuildsEditableBrief()
+    {
+        var metadata = new UrlCampaignBriefSuggester.PageMetadata(
+            "Acme Growth CRM - Campaign automation",
+            "AI campaign software for growth teams, email outreach, social posts and conversion tracking.",
+            "",
+            "",
+            "");
+
+        var suggestion = UrlCampaignBriefSuggester.SuggestFromPage(new Uri("https://acme.example.com"), metadata);
+
+        Assert.Equal("Acme Growth CRM", suggestion.ProductName);
+        Assert.Equal("Marketing / growth tool", suggestion.DetectedApplicationType);
+        Assert.Contains("founders", suggestion.TargetAudience, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("campaign", suggestion.ValueProposition, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("LinkedIn", suggestion.Platforms);
+    }
+
+    [Fact]
+    public void ExtractMetadata_ReadsTitleAndMetaDescription()
+    {
+        const string html = """
+            <html>
+              <head>
+                <title>SBI Flow | Industrial automation</title>
+                <meta content="Automate sales and operations workflows for industrial SMEs." name="description">
+              </head>
+            </html>
+            """;
+
+        var metadata = UrlCampaignBriefSuggester.ExtractMetadata(html);
+
+        Assert.Equal("SBI Flow | Industrial automation", metadata.Title);
+        Assert.Equal("Automate sales and operations workflows for industrial SMEs.", metadata.Description);
+    }
+}

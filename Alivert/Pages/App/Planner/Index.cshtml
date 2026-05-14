@@ -18,10 +18,16 @@
 <div class="planner-layout mt-4">
     <form method="post" asp-page-handler="Generate" class="surface app-panel planner-form">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (!string.IsNullOrWhiteSpace(Model.SuggestionMessage))
+        {
+            <div class="alert alert-success mb-3">
+                <i class="bi bi-magic me-1"></i>@Model.SuggestionMessage
+            </div>
+        }
         <div class="app-panel-header">
             <div>
                 <h2>Campaign intelligence</h2>
-                <p>These inputs become the LLM brief for every post, video script, email and lead suggestion.</p>
+                <p>Add a URL and let Promovert suggest the brief, then adjust anything before generating posts, emails and leads.</p>
             </div>
         </div>
 
@@ -33,7 +39,13 @@
             </div>
             <div class="col-md-6">
                 <label asp-for="Input.ProductUrl" class="form-label"></label>
-                <input asp-for="Input.ProductUrl" class="form-control" placeholder="https://app.example.com" />
+                <div class="planner-url-row">
+                    <input asp-for="Input.ProductUrl" class="form-control" placeholder="https://app.example.com" />
+                    <button class="btn btn-outline-secondary" type="submit" formaction="?handler=Suggest" formnovalidate>
+                        <i class="bi bi-magic me-1"></i>Suggest from URL
+                    </button>
+                </div>
+                <div class="form-text">Use this to auto-fill the campaign brief from the application website.</div>
                 <span asp-validation-for="Input.ProductUrl" class="text-danger"></span>
             </div>
             <div class="col-12">

@@ -73,6 +73,12 @@ builder.Services.AddHttpClient("market-data", client =>
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 });
 builder.Services.AddHttpClient("notifications");
+builder.Services.AddHttpClient<IUrlCampaignBriefSuggester, UrlCampaignBriefSuggester>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(12);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PromovertUrlAnalyzer/1.0)");
+    client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
+});
 
 builder.Services.AddRateLimiter(options =>
 {

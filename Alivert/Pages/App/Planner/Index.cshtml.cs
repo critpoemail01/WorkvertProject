@@ -21,12 +21,18 @@ public class IndexModel : PageModel
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IAiMarketingPlannerService _planner;
+    private readonly IUrlCampaignBriefSuggester _urlSuggester;
 
-    public IndexModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IAiMarketingPlannerService planner)
+    public IndexModel(
+        ApplicationDbContext db,
+        UserManager<IdentityUser> userManager,
+        IAiMarketingPlannerService planner,
+        IUrlCampaignBriefSuggester urlSuggester)
     {
         _db = db;
         _userManager = userManager;
         _planner = planner;
+        _urlSuggester = urlSuggester;
     }
 
     [BindProperty]
@@ -36,6 +42,7 @@ public class IndexModel : PageModel
     public IReadOnlyList<string> FrequencyOptions => SupportedFrequencies;
     public IReadOnlyList<string> LocationScopeOptions => SupportedLocationScopes;
     public List<PlanRow> RecentPlans { get; private set; } = new();
+    public string? SuggestionMessage { get; private set; }
 
     public record PlanRow(int Id, string ProductName, string Platforms, string Location, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
 
@@ -115,6 +122,54 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         await LoadPlansAsync();
+    }
+
+    public async Task<IActionResult> OnPostSuggestAsync(CancellationToken cancellationToken)
+    {
+        NormalizeInput();
+
+        if (string.IsNullOrWhiteSpace(Input.ProductUrl))
+        {
+            ModelState.Clear();
+            ModelState.AddModelError("Input.ProductUrl", "Add the application URL first.");
+            await LoadPlansAsync();
+            return Page();
+        }
+
+        try
+        {
+            var suggestion = await _urlSuggester.SuggestAsync(Input.ProductUrl, cancellationToken);
+            Input.ProductUrl = suggestion.SourceUrl;
+            Input.ProductName = suggestion.ProductName;
+            Input.CompanyOrIdea = suggestion.CompanyOrIdea;
+            Input.TargetAudience = suggestion.TargetAudience;
+            Input.ValueProposition = suggestion.ValueProposition;
+            Input.CampaignGoal = suggestion.CampaignGoal;
+            Input.Tone = suggestion.Tone;
+            Input.Platforms = suggestion.Platforms
+                .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            Input.AudienceLocationScope = "World";
+            Input.AudienceCountry = null;
+            Input.AudienceCity = null;
+            Input.AudienceLatitude = null;
+            Input.AudienceLongitude = null;
+            Input.AudienceRadiusKm = 25;
+
+            SuggestionMessage = $"Detected {suggestion.DetectedApplicationType}. Review the suggested brief before generating the plan.";
+            ModelState.Clear();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or TaskCanceledException)
+        {
+            ModelState.Clear();
+            ModelState.AddModelError("Input.ProductUrl", ex is TaskCanceledException
+                ? "The URL took too long to respond."
+                : ex.Message);
+        }
+
+        await LoadPlansAsync();
+        return Page();
     }
 
     public async Task<IActionResult> OnPostGenerateAsync()
