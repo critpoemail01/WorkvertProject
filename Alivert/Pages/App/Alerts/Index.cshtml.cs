@@ -25,6 +25,7 @@ public class AlertsIndexModel : PageModel
 
     public List<Alert> Alerts { get; private set; } = new();
     public List<AlertGroup> AlertGroups { get; private set; } = new();
+    public List<MarketingPlan> AiCampaigns { get; private set; } = new();
     public UserNotificationSettings? ScheduleSettings { get; private set; }
     public IReadOnlyList<ScheduleTimeZoneChoice> ScheduleTimeZones { get; private set; } = TimeZoneCatalog.GetScheduleChoices(DateTime.UtcNow);
     public string SelectedScheduleTimeZone { get; private set; } = TimeZoneCatalog.DefaultTimeZoneId;
@@ -220,6 +221,16 @@ public class AlertsIndexModel : PageModel
             .OrderBy(g => g.MarketType)
             .ThenBy(g => g.Symbol)
             .ToList();
+
+        AiCampaigns = await _db.MarketingPlans
+            .AsNoTracking()
+            .Include(x => x.Posts)
+            .Include(x => x.Emails)
+            .Include(x => x.Leads)
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.UpdatedAtUtc)
+            .ThenByDescending(x => x.CreatedAtUtc)
+            .ToListAsync();
 
         ScheduleSettings = await _db.UserNotificationSettings
             .AsNoTracking()

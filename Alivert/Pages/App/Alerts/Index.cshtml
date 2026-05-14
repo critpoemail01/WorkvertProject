@@ -16,6 +16,9 @@
             <p class="muted mb-0">Create, organize and measure campaigns for applications, companies and business ideas.</p>
         </div>
         <div class="alerts-actions">
+            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index">
+                <i class="bi bi-stars me-1"></i> AI planner
+            </a>
             <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create">
                 <i class="bi bi-plus-lg me-1"></i> New campaign
             </a>
@@ -31,6 +34,79 @@
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
         <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    @if (Model.AiCampaigns.Any())
+    {
+        <section class="alerts-group ai-campaigns-panel mt-4">
+            <div class="alerts-group-title">
+                <div>
+                    <span>AI-generated campaigns</span>
+                    <div class="small muted">Plans created by the AI planner, ready to review, approve and schedule.</div>
+                </div>
+                <div class="alerts-group-title-actions">
+                    <span class="muted small">@Model.AiCampaigns.Count campaign@(Model.AiCampaigns.Count == 1 ? "" : "s")</span>
+                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index">Generate another</a>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle alerts-table ai-campaigns-table">
+                    <thead>
+                        <tr>
+                            <th>Campaign</th>
+                            <th>Period</th>
+                            <th>Channels</th>
+                            <th>Output</th>
+                            <th>Funnel</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var campaign in Model.AiCampaigns)
+                    {
+                        var publishedPosts = campaign.Posts.Count(x => x.Status == "Published");
+                        var sentEmails = campaign.Emails.Count(x => x.Status == "Sent");
+                        var reach = campaign.Posts.Where(x => x.Status == "Published").Sum(x => x.EstimatedReach) +
+                            campaign.Emails.Where(x => x.Status == "Sent").Sum(x => x.EstimatedReach);
+                        var interactions = campaign.Posts.Where(x => x.Status == "Published").Sum(x => x.EstimatedInteractions) +
+                            campaign.Emails.Where(x => x.Status == "Sent").Sum(x => x.EstimatedInteractions);
+                        var conversions = campaign.Posts.Where(x => x.Status == "Published").Sum(x => x.EstimatedConversions) +
+                            campaign.Emails.Where(x => x.Status == "Sent").Sum(x => x.EstimatedConversions);
+                        <tr>
+                            <td>
+                                <div class="ai-campaign-title">
+                                    <i class="bi bi-stars text-success"></i>
+                                    <div>
+                                        <strong>@campaign.ProductName</strong>
+                                        <span>@campaign.CampaignGoal</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@campaign.StartDate.ToString("MMM d") - @campaign.EndDate.ToString("MMM d")</td>
+                            <td>@campaign.Platforms.Replace(",", ", ")</td>
+                            <td>@campaign.Posts.Count posts / @campaign.Emails.Count emails / @campaign.Leads.Count leads</td>
+                            <td>
+                                <span class="ai-campaign-funnel">@reach reached</span>
+                                <span class="ai-campaign-funnel">@interactions interactions</span>
+                                <span class="ai-campaign-funnel">@conversions conversions</span>
+                            </td>
+                            <td>
+                                <span class="badge @AiStatusClass(campaign.Status)">@campaign.Status</span>
+                                @if (publishedPosts + sentEmails > 0)
+                                {
+                                    <div class="small muted">@publishedPosts live posts / @sentEmails sent emails</div>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@campaign.Id">Open</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
     }
 
     @if (primaryGroup is not null)
@@ -343,6 +419,17 @@
             "2wk" => "Biweekly",
             "1mo" => "Monthly",
             _ => timeframe
+        };
+    }
+
+    private static string AiStatusClass(string status)
+    {
+        return status switch
+        {
+            "Published" => "text-bg-success",
+            "Scheduled" => "text-bg-info",
+            "Approved" or "Review" => "text-bg-primary",
+            _ => "text-bg-secondary"
         };
     }
 

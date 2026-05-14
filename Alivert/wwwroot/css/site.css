@@ -2656,6 +2656,50 @@ a { text-decoration: none; }
   border-color: rgba(255,255,255,0.09);
 }
 
+.ai-campaigns-panel {
+  border-color: rgba(52,211,153,0.20);
+  background:
+    linear-gradient(135deg, rgba(52,211,153,0.06), transparent 42%),
+    rgba(255,255,255,0.035);
+}
+
+.ai-campaigns-table td {
+  vertical-align: middle;
+}
+
+.ai-campaign-title {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.ai-campaign-title i {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(52,211,153,0.10);
+  border: 1px solid rgba(52,211,153,0.18);
+}
+
+.ai-campaign-title strong,
+.ai-campaign-title span,
+.ai-campaign-funnel {
+  display: block;
+}
+
+.ai-campaign-title strong {
+  color: #ffffff;
+}
+
+.ai-campaign-title span,
+.ai-campaign-funnel {
+  color: var(--alivert-text-muted);
+  font-size: 0.82rem;
+}
+
 .alerts-promo-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
