@@ -60,6 +60,54 @@
                 <textarea asp-for="Input.CompanyOrIdea" class="form-control" rows="3" placeholder="What the company/app does, business model and current stage"></textarea>
                 <span asp-validation-for="Input.CompanyOrIdea" class="text-danger"></span>
             </div>
+            @if (Model.CompanyLearning.HasData)
+            {
+                <div class="col-12">
+                    <section class="company-learning-panel">
+                        <div class="company-learning-head">
+                            <span><i class="bi bi-graph-up-arrow"></i></span>
+                            <div>
+                                <h3>Company learning</h3>
+                                <p>@Model.CompanyLearning.Summary</p>
+                            </div>
+                        </div>
+                        <div class="company-learning-grid">
+                            <article>
+                                <strong>@Model.CompanyLearning.CampaignsAnalyzed</strong>
+                                <span>campaigns learned</span>
+                            </article>
+                            <article>
+                                <strong>@Model.CompanyLearning.LeadsGenerated</strong>
+                                <span>leads attributed</span>
+                            </article>
+                            <article>
+                                <strong>@string.Join(", ", Model.CompanyLearning.PreferredPlatforms)</strong>
+                                <span>preferred channels</span>
+                            </article>
+                        </div>
+                        <div class="company-learning-columns">
+                            <div>
+                                <strong>This company converts better with</strong>
+                                @foreach (var pattern in Model.CompanyLearning.WinningPatterns)
+                                {
+                                    <span><i class="bi bi-check2"></i>@pattern</span>
+                                }
+                            </div>
+                            <div>
+                                <strong>Next campaign adaptation</strong>
+                                @foreach (var adaptation in Model.CompanyLearning.RecommendedAdaptations)
+                                {
+                                    <span><i class="bi bi-arrow-repeat"></i>@adaptation</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="company-learning-recommendation">
+                            <i class="bi bi-stars"></i>
+                            <span>@Model.CompanyLearning.RecommendedCampaignBrief</span>
+                        </div>
+                    </section>
+                </div>
+            }
             @if (Model.CampaignRecommendations.Any())
             {
                 <div class="col-12">

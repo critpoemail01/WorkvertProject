@@ -31,9 +31,11 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
     public AiMarketingPlanDraft Generate(AiMarketingPlanRequest request)
     {
         var schedule = BuildSchedule(request.StartDate, request.EndDate, request.Frequency).ToList();
+        var learning = request.CompanyLearning?.HasData == true ? request.CompanyLearning : null;
         var platforms = request.Platforms.Count == 0
             ? new List<string> { "TikTok", "Instagram", "Facebook", "LinkedIn" }
             : request.Platforms.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        platforms = OrderPlatforms(platforms, learning).ToList();
 
         var posts = new List<MarketingPostSuggestion>();
         var dayIndex = 0;
@@ -47,11 +49,16 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
                     ? configured
                     : new PlatformProfile(platform, "social post", "clear hook, proof, CTA", "#growth #marketing", 1200, 0.045m, 0.008m);
 
-                var angle = Angles[(dayIndex + platform.Length) % Angles.Length];
+                var angle = SelectAngle(dayIndex, platform, learning);
                 var scheduledAt = date.ToDateTime(new TimeOnly(DefaultHourFor(profile.Name), 0), DateTimeKind.Utc);
                 var reach = ScaleReach(profile.BaseReach + (dayIndex * 37) + (request.ProductName.Length * 11), request.Location);
+                var isPreferredPlatform = learning?.PreferredPlatforms.Contains(profile.Name, StringComparer.OrdinalIgnoreCase) == true;
+                if (isPreferredPlatform)
+                    reach = Math.Max(1, (int)Math.Round(reach * 1.08m));
+
                 var interactions = Math.Max(1, (int)Math.Round(reach * profile.InteractionRate));
-                var conversions = Math.Max(0, (int)Math.Round(interactions * profile.ConversionRate));
+                var conversionRate = isPreferredPlatform ? profile.ConversionRate + 0.006m : profile.ConversionRate;
+                var conversions = Math.Max(0, (int)Math.Round(interactions * conversionRate));
 
                 posts.Add(new MarketingPostSuggestion
                 {
@@ -80,6 +87,49 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         return new AiMarketingPlanDraft(posts, emails, leads, landingPage, businessDna);
     }
 
+    private static IEnumerable<string> OrderPlatforms(IReadOnlyList<string> platforms, CompanyLearningProfile? learning)
+    {
+        if (learning is null || learning.PreferredPlatforms.Count == 0)
+            return platforms;
+
+        var originalOrder = platforms
+            .Select((platform, index) => new { platform, index })
+            .ToDictionary(x => x.platform, x => x.index, StringComparer.OrdinalIgnoreCase);
+
+        return platforms
+            .OrderBy(platform =>
+            {
+                var index = learning.PreferredPlatforms
+                    .Select((value, i) => new { value, i })
+                    .FirstOrDefault(x => x.value.Equals(platform, StringComparison.OrdinalIgnoreCase))
+                    ?.i;
+
+                return index ?? int.MaxValue;
+            })
+            .ThenBy(platform => originalOrder[platform]);
+    }
+
+    private static string SelectAngle(int dayIndex, string platform, CompanyLearningProfile? learning)
+    {
+        if (learning is not null)
+        {
+            var style = learning.PreferredPostStyle.ToLowerInvariant();
+            if (style.Contains("case"))
+                return dayIndex % 2 == 0 ? "social proof" : "use case";
+
+            if (style.Contains("educational"))
+                return dayIndex % 2 == 0 ? "use case" : "quick win";
+
+            if (style.Contains("demo"))
+                return "product demo";
+
+            if (style.Contains("before"))
+                return "before and after";
+        }
+
+        return Angles[(dayIndex + platform.Length) % Angles.Length];
+    }
+
     private static IEnumerable<DateOnly> BuildSchedule(DateOnly startDate, DateOnly endDate, string frequency)
     {
         for (var date = startDate; date <= endDate; date = date.AddDays(1))
@@ -103,6 +153,8 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         if (schedule.Count == 0)
             return new List<MarketingEmailSuggestion>();
 
+        var learnedShortEmail = request.CompanyLearning?.HasData == true &&
+            request.CompanyLearning.EmailStyle.Contains("short", StringComparison.OrdinalIgnoreCase);
         var offsets = new[] { 0, 3, 7, 14, 21, 28 };
         var themes = new[]
         {
@@ -131,8 +183,8 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
                 ScheduledForUtc = date.ToDateTime(new TimeOnly(9, 30), DateTimeKind.Utc),
                 DayNumber = offsets[i] + 1,
                 Subject = Clip(SubjectFor(request, theme.Item1), 160),
-                PreviewText = Clip(theme.Item2, 220),
-                Body = Clip(EmailBodyFor(request, theme.Item1), 4000),
+                PreviewText = Clip(learnedShortEmail ? $"Short follow-up adapted from previous {request.ProductName} results." : theme.Item2, 220),
+                Body = Clip(EmailBodyFor(request, theme.Item1, learnedShortEmail), 4000),
                 AudienceSegment = Clip(string.IsNullOrWhiteSpace(request.EmailAudience) ? "Suggested outbound audience" : "Provided potential-client list", 160),
                 Status = "Draft",
                 EstimatedReach = reach,
@@ -175,6 +227,13 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
     private static MarketingLandingPage BuildLandingPage(AiMarketingPlanRequest request)
     {
         var slug = $"{Slugify(request.ProductName)}-{Guid.NewGuid():N}";
+        var learnedFormIntro = request.CompanyLearning?.HasData == true
+            ? $"{request.CompanyLearning.LandingPageAdvice}. Leave your details and the team will follow up with the most relevant next step."
+            : "Leave your details and the team will follow up with the most relevant next step.";
+        var primaryCta = request.CompanyLearning?.HasData == true
+            ? request.CompanyLearning.PreferredCta
+            : string.IsNullOrWhiteSpace(request.ProductUrl) ? $"Request {request.ProductName}" : $"Start with {request.ProductName}";
+
         return new MarketingLandingPage
         {
             Slug = slug.Length <= 72 ? slug : slug[..72],
@@ -185,9 +244,9 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
                 $"Business DNA: {BuildBusinessDna(request)}\n\n" +
                 $"Why now: {request.TargetAudience} need a simpler path to {request.ValueProposition.ToLowerInvariant()}.",
                 1600),
-            PrimaryCallToAction = Clip(string.IsNullOrWhiteSpace(request.ProductUrl) ? $"Request {request.ProductName}" : $"Start with {request.ProductName}", 120),
+            PrimaryCallToAction = Clip(primaryCta, 120),
             FormTitle = Clip($"Talk to {request.ProductName}", 160),
-            FormIntro = Clip("Leave your details and the team will follow up with the most relevant next step.", 260),
+            FormIntro = Clip(learnedFormIntro, 260),
             ThankYouMessage = Clip("Thank you. Your request was captured and added to the campaign report.", 260),
             Status = "Draft"
         };
@@ -198,7 +257,8 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         return Clip(
             $"Product: {request.ProductName}. Market: {request.TargetAudience}. Promise: {request.ValueProposition}. " +
             $"Goal: {request.CampaignGoal}. Tone: {request.Tone}. Region: {request.Location.Summary}. " +
-            $"Source: {(string.IsNullOrWhiteSpace(request.ProductUrl) ? request.CompanyOrIdea : request.ProductUrl)}",
+            $"Source: {(string.IsNullOrWhiteSpace(request.ProductUrl) ? request.CompanyOrIdea : request.ProductUrl)}" +
+            (request.CompanyLearning?.HasData == true ? $". Learning: {request.CompanyLearning.Summary}" : string.Empty),
             1000);
     }
 
@@ -238,28 +298,37 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
     {
         var urlLine = string.IsNullOrWhiteSpace(request.ProductUrl) ? "" : $"\n\nTry it: {request.ProductUrl}";
         var locationLine = LocationSentence(request.Location);
+        var learningLine = request.CompanyLearning?.HasData == true
+            ? $"\n\nPrevious campaign learning: {request.CompanyLearning.PreferredPostStyle}; primary CTA should be '{request.CompanyLearning.PreferredCta}'."
+            : string.Empty;
         return profile.Name switch
         {
             "LinkedIn" =>
-                $"{request.TargetAudience} do not need more busywork. They need a repeatable way to get {request.CampaignGoal.ToLowerInvariant()}.{locationLine}\n\n{request.ProductName} focuses on {request.ValueProposition}.\n\nThe angle for today: {TitleForAngle(angle)}.{urlLine}",
+                $"{request.TargetAudience} do not need more busywork. They need a repeatable way to get {request.CampaignGoal.ToLowerInvariant()}.{locationLine}\n\n{request.ProductName} focuses on {request.ValueProposition}.\n\nThe angle for today: {TitleForAngle(angle)}.{learningLine}{urlLine}",
             "TikTok" =>
-                $"Hook the problem in the first 2 seconds, show {request.ProductName}, then make the outcome concrete for {request.Location.Summary}: {request.ValueProposition}.{urlLine}",
+                $"Hook the problem in the first 2 seconds, show {request.ProductName}, then make the outcome concrete for {request.Location.Summary}: {request.ValueProposition}.{learningLine}{urlLine}",
             "Instagram" =>
-                $"Turn this into a {profile.Format}: problem, product moment, result, CTA. {request.ProductName} helps {request.TargetAudience} get {request.CampaignGoal.ToLowerInvariant()} in {request.Location.Summary}.{urlLine}",
+                $"Turn this into a {profile.Format}: problem, product moment, result, CTA. {request.ProductName} helps {request.TargetAudience} get {request.CampaignGoal.ToLowerInvariant()} in {request.Location.Summary}.{learningLine}{urlLine}",
             "Facebook" =>
-                $"{request.TargetAudience}{LocationPhrase(request.Location)} often know the problem, but delay fixing it. Position {request.ProductName} as the practical next step: {request.ValueProposition}.{urlLine}",
+                $"{request.TargetAudience}{LocationPhrase(request.Location)} often know the problem, but delay fixing it. Position {request.ProductName} as the practical next step: {request.ValueProposition}.{learningLine}{urlLine}",
             _ =>
-                $"{request.ProductName} helps {request.TargetAudience} in {request.Location.Summary} with {request.ValueProposition}. Focus this post on {TitleForAngle(angle)}.{urlLine}"
+                $"{request.ProductName} helps {request.TargetAudience} in {request.Location.Summary} with {request.ValueProposition}. Focus this post on {TitleForAngle(angle)}.{learningLine}{urlLine}"
         };
     }
 
     private static string CreativeBriefFor(PlatformProfile profile, AiMarketingPlanRequest request, string angle)
     {
-        return $"Format: {profile.Format}. Style: {profile.Style}. Show the product context, the audience problem in {request.Location.Summary}, and one measurable next step. Angle: {TitleForAngle(angle)}. Tone: {request.Tone}.";
+        var learning = request.CompanyLearning?.HasData == true
+            ? $" Reuse what converted before: {request.CompanyLearning.RecommendedCampaignBrief}"
+            : string.Empty;
+        return $"Format: {profile.Format}. Style: {profile.Style}. Show the product context, the audience problem in {request.Location.Summary}, and one measurable next step. Angle: {TitleForAngle(angle)}. Tone: {request.Tone}.{learning}";
     }
 
     private static string CallToActionFor(AiMarketingPlanRequest request)
     {
+        if (request.CompanyLearning?.HasData == true && !string.IsNullOrWhiteSpace(request.CompanyLearning.PreferredCta))
+            return request.CompanyLearning.PreferredCta;
+
         return string.IsNullOrWhiteSpace(request.ProductUrl)
             ? $"Ask for a demo of {request.ProductName}"
             : $"Visit {request.ProductUrl}";
@@ -278,11 +347,16 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         };
     }
 
-    private static string EmailBodyFor(AiMarketingPlanRequest request, string theme)
+    private static string EmailBodyFor(AiMarketingPlanRequest request, string theme, bool learnedShortEmail)
     {
         var cta = string.IsNullOrWhiteSpace(request.ProductUrl)
             ? "Would it make sense to send you a quick walkthrough?"
             : $"You can review it here: {request.ProductUrl}";
+
+        if (learnedShortEmail)
+        {
+            return $"Hi {{FirstName}},\n\nBased on the results we are seeing, the clearest next step is simple: {request.CompanyLearning?.PreferredCta ?? CallToActionFor(request)}.\n\n{request.ProductName} helps {request.TargetAudience} with {request.ValueProposition}.\n\n{cta}";
+        }
 
         return theme switch
         {

@@ -24,6 +24,7 @@ public class IndexModel : PageModel
     private readonly IUrlCampaignBriefSuggester _urlSuggester;
     private readonly ILeadDiscoveryService _leadDiscovery;
     private readonly ICampaignLibraryService _campaignLibrary;
+    private readonly ICompanyCampaignLearningService _companyLearning;
 
     public IndexModel(
         ApplicationDbContext db,
@@ -31,7 +32,8 @@ public class IndexModel : PageModel
         IAiMarketingPlannerService planner,
         IUrlCampaignBriefSuggester urlSuggester,
         ILeadDiscoveryService leadDiscovery,
-        ICampaignLibraryService campaignLibrary)
+        ICampaignLibraryService campaignLibrary,
+        ICompanyCampaignLearningService companyLearning)
     {
         _db = db;
         _userManager = userManager;
@@ -39,6 +41,7 @@ public class IndexModel : PageModel
         _urlSuggester = urlSuggester;
         _leadDiscovery = leadDiscovery;
         _campaignLibrary = campaignLibrary;
+        _companyLearning = companyLearning;
     }
 
     [BindProperty]
@@ -54,6 +57,7 @@ public class IndexModel : PageModel
     public IReadOnlyList<DiscoveredLeadEmail> DiscoveredLeadEmails { get; private set; } = [];
     public IReadOnlyList<string> LeadDiscoveryWarnings { get; private set; } = [];
     public IReadOnlyList<SectorCampaignRecommendation> CampaignRecommendations { get; private set; } = [];
+    public CompanyLearningProfile CompanyLearning { get; private set; } = CompanyLearningProfile.Empty();
     public int CrmLeadCount { get; private set; }
     public int CrmLeadEmails { get; private set; }
 
@@ -313,6 +317,11 @@ public class IndexModel : PageModel
         var emailAudience = Input.UseCrmLeads && crmLeadEmails.Count > 0
             ? MergeEmailAudience(Input.EmailAudience, crmLeadEmails)
             : Input.EmailAudience;
+        var companyLearning = await _companyLearning.BuildAsync(
+            userId,
+            Input.ProductName,
+            Input.ProductUrl,
+            Input.CompanyOrIdea);
 
         var plan = new MarketingPlan
         {
@@ -360,15 +369,19 @@ public class IndexModel : PageModel
                 plan.AudienceCity,
                 plan.AudienceLatitude,
                 plan.AudienceLongitude,
-                plan.AudienceRadiusKm)));
+                plan.AudienceRadiusKm),
+            companyLearning));
 
         plan.Posts.AddRange(draft.Posts);
         plan.Emails.AddRange(draft.Emails);
         plan.Leads.AddRange(draft.Leads);
         plan.LandingPage = draft.LandingPage;
-        plan.BusinessDna = plan.CrmLeadSourceCount > 0
-            ? Clip($"{draft.BusinessDna} CRM focus: {plan.CrmLeadSourceCount} imported lead email{(plan.CrmLeadSourceCount == 1 ? "" : "s")} matching '{plan.CrmLeadFilter ?? "all CRM leads"}'.", 1000)
+        plan.BusinessDna = companyLearning.HasData
+            ? Clip($"{draft.BusinessDna} Learned adaptation: {companyLearning.RecommendedCampaignBrief}", 1000)
             : draft.BusinessDna;
+        plan.BusinessDna = plan.CrmLeadSourceCount > 0
+            ? Clip($"{plan.BusinessDna} CRM focus: {plan.CrmLeadSourceCount} imported lead email{(plan.CrmLeadSourceCount == 1 ? "" : "s")} matching '{plan.CrmLeadFilter ?? "all CRM leads"}'.", 1000)
+            : plan.BusinessDna;
 
         _db.MarketingPlans.Add(plan);
         await _db.SaveChangesAsync();
@@ -416,6 +429,11 @@ public class IndexModel : PageModel
 
         CrmLeadCount = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId);
         CrmLeadEmails = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Email != "");
+        CompanyLearning = await _companyLearning.BuildAsync(
+            userId,
+            Input.ProductName,
+            Input.ProductUrl,
+            Input.CompanyOrIdea);
         CampaignRecommendations = _campaignLibrary.Recommend(BuildCampaignLibraryRequest(), 3);
     }
 

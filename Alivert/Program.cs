@@ -108,6 +108,7 @@ builder.Services.AddSingleton<ICampaignLibraryService, CampaignLibraryService>()
 builder.Services.AddSingleton<IIntegrationAuthorizationService, IntegrationAuthorizationService>();
 builder.Services.AddSingleton<ICampaignBusinessAnalyticsService, CampaignBusinessAnalyticsService>();
 builder.Services.AddSingleton<CrmLeadImportService>();
+builder.Services.AddScoped<ICompanyCampaignLearningService, CompanyCampaignLearningService>();
 builder.Services.AddScoped<IAlertDispatcher, AlertDispatcher>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 

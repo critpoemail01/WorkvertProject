@@ -54,6 +54,56 @@
     </div>
 </section>
 
+@if (Model.CompanyLearning.HasData)
+{
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Company learning</h2>
+                <p>Promovert learns from this company results and adapts the next campaign.</p>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id"><i class="bi bi-arrow-repeat me-1"></i>Use learning in next campaign</a>
+        </div>
+
+        <div class="company-learning-grid">
+            <article>
+                <strong>@Model.CompanyLearning.CampaignsAnalyzed</strong>
+                <span>campaigns learned</span>
+            </article>
+            <article>
+                <strong>@Model.CompanyLearning.LeadsGenerated</strong>
+                <span>leads attributed</span>
+            </article>
+            <article>
+                <strong>@string.Join(", ", Model.CompanyLearning.PreferredPlatforms)</strong>
+                <span>preferred channels</span>
+            </article>
+        </div>
+
+        <div class="company-learning-columns mt-3">
+            <div>
+                <strong>This company converts better with</strong>
+                @foreach (var pattern in Model.CompanyLearning.WinningPatterns)
+                {
+                    <span><i class="bi bi-check2"></i>@pattern</span>
+                }
+            </div>
+            <div>
+                <strong>How the AI will adapt</strong>
+                @foreach (var adaptation in Model.CompanyLearning.RecommendedAdaptations)
+                {
+                    <span><i class="bi bi-arrow-repeat"></i>@adaptation</span>
+                }
+            </div>
+        </div>
+
+        <div class="company-learning-recommendation mt-3">
+            <i class="bi bi-stars"></i>
+            <span>@Model.CompanyLearning.RecommendedCampaignBrief</span>
+        </div>
+    </section>
+}
+
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>

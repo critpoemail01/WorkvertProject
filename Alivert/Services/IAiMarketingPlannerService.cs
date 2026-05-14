@@ -20,7 +20,8 @@ public sealed record AiMarketingPlanRequest(
     DateOnly EndDate,
     string Frequency,
     string? EmailAudience,
-    AiAudienceLocation Location);
+    AiAudienceLocation Location,
+    CompanyLearningProfile? CompanyLearning = null);
 
 public sealed record AiAudienceLocation(
     string Scope,

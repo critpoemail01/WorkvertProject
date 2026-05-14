@@ -18,6 +18,7 @@ public class DetailsModel : PageModel
     private readonly ICampaignLibraryService _campaignLibrary;
     private readonly IIntegrationAuthorizationService _authorization;
     private readonly ICampaignBusinessAnalyticsService _businessAnalytics;
+    private readonly ICompanyCampaignLearningService _companyLearning;
 
     public DetailsModel(
         ApplicationDbContext db,
@@ -25,7 +26,8 @@ public class DetailsModel : PageModel
         IUserAccountService accounts,
         ICampaignLibraryService campaignLibrary,
         IIntegrationAuthorizationService authorization,
-        ICampaignBusinessAnalyticsService businessAnalytics)
+        ICampaignBusinessAnalyticsService businessAnalytics,
+        ICompanyCampaignLearningService companyLearning)
     {
         _db = db;
         _userManager = userManager;
@@ -33,11 +35,13 @@ public class DetailsModel : PageModel
         _campaignLibrary = campaignLibrary;
         _authorization = authorization;
         _businessAnalytics = businessAnalytics;
+        _companyLearning = companyLearning;
     }
 
     public MarketingPlan Plan { get; private set; } = default!;
     public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
     public CampaignBusinessReport BusinessReport { get; private set; } = EmptyBusinessReport();
+    public CompanyLearningProfile CompanyLearning { get; private set; } = CompanyLearningProfile.Empty();
     public IReadOnlyList<SectorCampaignRecommendation> NextCampaignRecommendations { get; private set; } = [];
     public IReadOnlyList<PublicationAuthorization> PublicationAuthorizations { get; private set; } = [];
     public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
@@ -409,6 +413,7 @@ public class DetailsModel : PageModel
         Plan = plan;
         Metrics = BuildMetrics(plan);
         BusinessReport = _businessAnalytics.BuildCampaignReport(plan);
+        CompanyLearning = await _companyLearning.BuildAsync(plan.UserId, plan.ProductName, plan.ProductUrl, plan.CompanyOrIdea);
         var settings = await LoadSettingsAsync(plan.UserId);
         PublicationAuthorizations = BuildPublicationAuthorizations(plan, settings);
         NextCampaignRecommendations = _campaignLibrary.Recommend(new CampaignLibraryRequest(
