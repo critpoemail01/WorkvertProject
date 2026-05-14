@@ -25,9 +25,6 @@ public class IndexModel : PageModel
     }
 
     [BindProperty]
-    public IntegrationInput Integration { get; set; } = new();
-
-    [BindProperty]
     public ImportInput Import { get; set; } = new();
 
     public List<CrmLeadRow> Leads { get; private set; } = new();
@@ -42,30 +39,11 @@ public class IndexModel : PageModel
     [TempData]
     public string? StatusMessage { get; set; }
 
-    public class IntegrationInput
-    {
-        [Display(Name = "CRM provider")]
-        [Required, StringLength(80)]
-        public string Provider { get; set; } = "CSV / manual import";
-
-        [Display(Name = "Connection name")]
-        [Required, StringLength(120)]
-        public string DisplayName { get; set; } = "Prospecting CRM";
-
-        [Display(Name = "API base URL")]
-        [StringLength(500)]
-        public string? ApiBaseUrl { get; set; }
-
-        [Display(Name = "API key or private token")]
-        [StringLength(200)]
-        public string? ApiKey { get; set; }
-    }
-
     public class ImportInput
     {
         [Display(Name = "Lead source")]
         [StringLength(120)]
-        public string Source { get; set; } = "CRM import";
+        public string Source { get; set; } = "CSV import";
 
         [Display(Name = "Consent status")]
         [StringLength(24)]
@@ -113,47 +91,9 @@ public class IndexModel : PageModel
         await LoadAsync();
     }
 
-    public async Task<IActionResult> OnPostSaveIntegrationAsync()
-    {
-        var userId = _userManager.GetUserId(User) ?? string.Empty;
-        ModelState.Remove("Import.RawLeads");
-        ModelState.Remove("Import.Source");
-
-        if (!ModelState.IsValid)
-        {
-            await LoadAsync();
-            return Page();
-        }
-
-        var provider = Integration.Provider.Trim();
-        var integration = await _db.CrmIntegrations
-            .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == provider);
-
-        if (integration is null)
-        {
-            integration = new CrmIntegration { UserId = userId, Provider = provider };
-            _db.CrmIntegrations.Add(integration);
-        }
-
-        integration.DisplayName = Integration.DisplayName.Trim();
-        integration.ApiBaseUrl = Clean(Integration.ApiBaseUrl);
-        if (!string.IsNullOrWhiteSpace(Integration.ApiKey))
-        {
-            var apiKey = Integration.ApiKey.Trim();
-            integration.ApiKeyHint = $"Configured ending {apiKey[Math.Max(0, apiKey.Length - 4)..]}";
-        }
-        integration.Status = "Configured";
-
-        await _db.SaveChangesAsync();
-        StatusMessage = "CRM integration saved. Import a list from the CRM to use it in campaign targeting.";
-        return RedirectToPage();
-    }
-
     public async Task<IActionResult> OnPostImportLeadsAsync()
     {
         var userId = _userManager.GetUserId(User) ?? string.Empty;
-        ModelState.Remove("Integration.Provider");
-        ModelState.Remove("Integration.DisplayName");
 
         if (!ModelState.IsValid)
         {
@@ -207,10 +147,21 @@ public class IndexModel : PageModel
         }
 
         var integration = await _db.CrmIntegrations
-            .OrderByDescending(x => x.UpdatedAtUtc)
-            .FirstOrDefaultAsync(x => x.UserId == userId);
-        if (integration is not null)
-            integration.LastImportedAtUtc = DateTime.UtcNow;
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == "CSV import");
+        if (integration is null)
+        {
+            integration = new CrmIntegration
+            {
+                UserId = userId,
+                Provider = "CSV import",
+                DisplayName = "CSV import",
+                Status = "Configured"
+            };
+            _db.CrmIntegrations.Add(integration);
+        }
+
+        integration.LastImportedAtUtc = DateTime.UtcNow;
+        integration.UpdatedAtUtc = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
         StatusMessage = $"{imported} new lead{(imported == 1 ? "" : "s")} imported and {updated} updated. These leads can now be selected in the campaign builder.";
@@ -248,23 +199,6 @@ public class IndexModel : PageModel
     private async Task LoadAsync()
     {
         var userId = _userManager.GetUserId(User) ?? string.Empty;
-        var integration = await _db.CrmIntegrations
-            .AsNoTracking()
-            .Where(x => x.UserId == userId)
-            .OrderByDescending(x => x.UpdatedAtUtc)
-            .FirstOrDefaultAsync();
-
-        if (integration is not null)
-        {
-            Integration = new IntegrationInput
-            {
-                Provider = integration.Provider,
-                DisplayName = integration.DisplayName,
-                ApiBaseUrl = integration.ApiBaseUrl
-            };
-            Import.Source = integration.Provider;
-        }
-
         TotalLeads = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId);
         LeadsWithEmail = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Email != "");
         ReadyForCampaign = await _db.CrmLeads.AsNoTracking().CountAsync(x =>
