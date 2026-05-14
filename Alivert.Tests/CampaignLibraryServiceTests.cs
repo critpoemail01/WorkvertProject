@@ -5,7 +5,7 @@ namespace Alivert.Tests;
 public class CampaignLibraryServiceTests
 {
     [Fact]
-    public void Recommend_ReturnsB2BSoftwareCampaignsForIndustrialSoftware()
+    public void Recommend_ReturnsMixedSectorCampaignsForIndustrialSoftware()
     {
         var service = new CampaignLibraryService();
 
@@ -17,8 +17,9 @@ public class CampaignLibraryServiceTests
             "gerar leads",
             "B2B SaaS / automation"));
 
+        Assert.Contains(recommendations, x => x.Key == "industrial-efficiency");
         Assert.Contains(recommendations, x => x.Key == "b2b-demo");
-        Assert.All(recommendations, x => Assert.Equal("Software B2B", x.Sector));
+        Assert.True(recommendations.Select(x => x.Sector).Distinct().Count() > 1);
     }
 
     [Fact]
@@ -48,5 +49,22 @@ public class CampaignLibraryServiceTests
         Assert.NotNull(template);
         Assert.Equal("Construcao e obras", template!.Sector);
         Assert.Contains("orcamento", template.Goal, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Recommend_ReturnsGeneralCampaignsWhenSectorIsUnknown()
+    {
+        var service = new CampaignLibraryService();
+
+        var recommendations = service.Recommend(new CampaignLibraryRequest(
+            "Nova Marca",
+            "ideia de negocio ainda sem setor definido",
+            "clientes potenciais",
+            "proposta clara",
+            "gerar leads",
+            null));
+
+        Assert.All(recommendations, x => Assert.Equal("Geral / crescimento", x.Sector));
+        Assert.Contains(recommendations, x => x.Key == "general-lead-capture");
     }
 }

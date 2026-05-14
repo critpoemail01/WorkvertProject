@@ -8,7 +8,14 @@ public sealed class UrlCampaignBriefSuggester : IUrlCampaignBriefSuggester
 {
     private static readonly AppTypeRule[] Rules =
     [
-        new("B2B SaaS / automation", ["crm", "automation", "workflow", "pipeline", "operations", "sales", "dashboard", "saas", "b2b"],
+        new("Industrial / manufacturing", ["industrial", "industry", "factory", "fabrica", "manufacturing", "production", "producao", "operations", "operacoes", "maintenance", "manutencao", "metalomecanica", "energia", "planeamento"],
+            "industrial SMEs, factories, production managers, maintenance teams and operations directors",
+            "turn operational problems into measurable improvements in production, maintenance, planning or costs",
+            "qualified industrial leads and diagnostic requests",
+            "practical, concrete and results-focused",
+            ["LinkedIn", "Email", "Facebook", "Instagram"]),
+
+        new("B2B SaaS / automation", ["crm", "automation", "workflow", "pipeline", "dashboard", "saas", "b2b"],
             "B2B teams, founders, operations managers and sales teams that need repeatable processes",
             "reduce manual work, organize recurring workflows and make acquisition or operations measurable",
             "demo bookings and trial signups",

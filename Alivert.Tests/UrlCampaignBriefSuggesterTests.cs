@@ -40,4 +40,21 @@ public class UrlCampaignBriefSuggesterTests
         Assert.Equal("SBI Flow | Industrial automation", metadata.Title);
         Assert.Equal("Automate sales and operations workflows for industrial SMEs.", metadata.Description);
     }
+
+    [Fact]
+    public void SuggestFromPage_DetectsIndustrialCompanyWithoutForcingSoftware()
+    {
+        var metadata = new UrlCampaignBriefSuggester.PageMetadata(
+            "SBI Flow | Industrial operations",
+            "Planning, production, maintenance and energy control for industrial SMEs.",
+            "",
+            "",
+            "");
+
+        var suggestion = UrlCampaignBriefSuggester.SuggestFromPage(new Uri("https://sbiflow.example.com"), metadata);
+
+        Assert.Equal("Industrial / manufacturing", suggestion.DetectedApplicationType);
+        Assert.Contains("industrial", suggestion.TargetAudience, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("diagnostic", suggestion.CampaignGoal, StringComparison.OrdinalIgnoreCase);
+    }
 }
