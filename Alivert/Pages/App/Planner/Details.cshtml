@@ -16,9 +16,9 @@
         <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
             <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all</button>
         </form>
-        <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Plan.Id" onsubmit="return confirm('Delete this campaign and all generated posts, emails, landing page and captured leads?');">
-            <button class="btn btn-outline-danger btn-lg" type="submit"><i class="bi bi-trash3 me-1"></i>Delete</button>
-        </form>
+        <button class="btn btn-outline-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#deleteCampaignModal">
+            <i class="bi bi-trash3 me-1"></i>Eliminar
+        </button>
     </div>
 </section>
 
@@ -783,6 +783,41 @@
             }
         </div>
     </section>
+</div>
+
+<div class="modal fade" id="deleteCampaignModal" tabindex="-1" aria-labelledby="deleteCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal campaign-delete-modal">
+            <div class="modal-header border-0">
+                <div>
+                    <span class="tag">Eliminar campanha</span>
+                    <h2 class="modal-title h3 mt-2 mb-0" id="deleteCampaignModalLabel">Eliminar @Model.Plan.ProductName?</h2>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="campaign-delete-warning">
+                    <span><i class="bi bi-exclamation-triangle"></i></span>
+                    <div>
+                        <strong>Esta acao nao pode ser desfeita.</strong>
+                        <p>Vais apagar a campanha completa, incluindo posts, emails, landing page, leads captadas, sugestoes e historico associado a este plano.</p>
+                    </div>
+                </div>
+                <dl class="campaign-delete-summary">
+                    <div><dt>Estado</dt><dd>@Model.Plan.Status</dd></div>
+                    <div><dt>Periodo</dt><dd>@Model.Plan.StartDate.ToString("MMM d") - @Model.Plan.EndDate.ToString("MMM d")</dd></div>
+                    <div><dt>Conteudo</dt><dd>@Model.Plan.Posts.Count posts / @Model.Plan.Emails.Count emails</dd></div>
+                    <div><dt>Leads</dt><dd>@(Model.Plan.LandingPage?.Leads.Count ?? 0) captadas</dd></div>
+                </dl>
+            </div>
+            <div class="modal-footer border-0 campaign-delete-actions">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Plan.Id">
+                    <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Eliminar campanha</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @functions {

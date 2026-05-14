@@ -127,11 +127,16 @@
                 {
                     <a class="btn-clean" asp-page="/App/Alerts/Edit" asp-route-id="@primaryAlert.Id" title="Edit campaign" aria-label="Edit campaign"><i class="bi bi-pencil-square"></i></a>
                 }
-                <form class="alerts-inline-form" method="post" asp-page-handler="DeleteGroup" onsubmit="return confirm('Delete every campaign for this source?');">
-                    <input type="hidden" name="marketType" value="@primaryGroup.MarketType" />
-                    <input type="hidden" name="symbol" value="@primaryGroup.Symbol" />
-                    <button class="btn-clean danger" type="submit" title="Delete source" aria-label="Delete source"><i class="bi bi-x-lg"></i></button>
-                </form>
+                <button class="btn-clean danger" type="button" title="Delete source" aria-label="Delete source"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteLegacyCampaignModal"
+                        data-delete-handler="DeleteGroup"
+                        data-delete-kind="fonte"
+                        data-delete-title="@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)"
+                        data-delete-market="@primaryGroup.MarketType"
+                        data-delete-symbol="@primaryGroup.Symbol">
+                    <i class="bi bi-x-lg"></i>
+                </button>
                 <form class="alerts-inline-form" method="post" asp-page-handler="ToggleGroup">
                     <input type="hidden" name="marketType" value="@primaryGroup.MarketType" />
                     <input type="hidden" name="symbol" value="@primaryGroup.Symbol" />
@@ -198,11 +203,16 @@
                                     @(group.Alerts.Any(a => a.IsEnabled) ? "Pause source" : "Activate source")
                                 </button>
                             </form>
-                            <form class="alerts-inline-form" method="post" asp-page-handler="DeleteGroup" onsubmit="return confirm('Delete every campaign for this source?');">
-                                <input type="hidden" name="marketType" value="@group.MarketType" />
-                                <input type="hidden" name="symbol" value="@group.Symbol" />
-                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
-                            </form>
+                            <button class="btn btn-sm btn-outline-danger" type="button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteLegacyCampaignModal"
+                                    data-delete-handler="DeleteGroup"
+                                    data-delete-kind="fonte"
+                                    data-delete-title="@GroupTitle(group.MarketType, group.Symbol)"
+                                    data-delete-market="@group.MarketType"
+                                    data-delete-symbol="@group.Symbol">
+                                Eliminar
+                            </button>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -240,10 +250,15 @@
                                                 <input type="hidden" name="id" value="@alert.Id" />
                                                 <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pause" : "Activate")</button>
                                             </form>
-                                            <form class="alerts-inline-form" method="post" asp-page-handler="DeleteAlert" onsubmit="return confirm('Delete this campaign?');">
-                                                <input type="hidden" name="id" value="@alert.Id" />
-                                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
-                                            </form>
+                                            <button class="btn btn-sm btn-outline-danger" type="button"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteLegacyCampaignModal"
+                                                    data-delete-handler="DeleteAlert"
+                                                    data-delete-kind="campanha"
+                                                    data-delete-title="@RuleLabel(alert)"
+                                                    data-delete-id="@alert.Id">
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -289,6 +304,43 @@
                 <a class="btn btn-outline-secondary" asp-page="/App/Dashboard">Dashboard</a>
             </div>
         </article>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteLegacyCampaignModal" tabindex="-1" aria-labelledby="deleteLegacyCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal campaign-delete-modal">
+            <div class="modal-header border-0">
+                <div>
+                    <span class="tag">Eliminar campanha</span>
+                    <h2 class="modal-title h3 mt-2 mb-0" id="deleteLegacyCampaignModalLabel">Confirmar eliminacao</h2>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="campaign-delete-warning">
+                    <span><i class="bi bi-exclamation-triangle"></i></span>
+                    <div>
+                        <strong>Esta acao nao pode ser desfeita.</strong>
+                        <p data-delete-legacy-message>Vais apagar esta campanha e o historico associado.</p>
+                    </div>
+                </div>
+                <dl class="campaign-delete-summary">
+                    <div><dt>Tipo</dt><dd data-delete-legacy-kind>campanha</dd></div>
+                    <div><dt>Nome</dt><dd data-delete-legacy-title>Campanha</dd></div>
+                </dl>
+            </div>
+            <div class="modal-footer border-0 campaign-delete-actions">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteLegacyCampaignForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" data-delete-legacy-id />
+                    <input type="hidden" name="marketType" data-delete-legacy-market />
+                    <input type="hidden" name="symbol" data-delete-legacy-symbol />
+                    <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Eliminar</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -458,4 +510,39 @@
 
 @section Scripts {
     <script src="~/js/alivert-combos.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const modal = document.getElementById('deleteLegacyCampaignModal');
+            const form = document.getElementById('deleteLegacyCampaignForm');
+            if (!modal || !form) return;
+
+            const fields = {
+                id: form.querySelector('[data-delete-legacy-id]'),
+                market: form.querySelector('[data-delete-legacy-market]'),
+                symbol: form.querySelector('[data-delete-legacy-symbol]'),
+                title: modal.querySelector('[data-delete-legacy-title]'),
+                kind: modal.querySelector('[data-delete-legacy-kind]'),
+                message: modal.querySelector('[data-delete-legacy-message]')
+            };
+
+            modal.addEventListener('show.bs.modal', event => {
+                const trigger = event.relatedTarget;
+                if (!trigger) return;
+
+                const handler = trigger.getAttribute('data-delete-handler') || 'DeleteAlert';
+                const kind = trigger.getAttribute('data-delete-kind') || 'campanha';
+                const title = trigger.getAttribute('data-delete-title') || 'Campanha';
+
+                form.action = `${window.location.pathname}?handler=${encodeURIComponent(handler)}`;
+                fields.id.value = trigger.getAttribute('data-delete-id') || '';
+                fields.market.value = trigger.getAttribute('data-delete-market') || '';
+                fields.symbol.value = trigger.getAttribute('data-delete-symbol') || '';
+                fields.title.textContent = title;
+                fields.kind.textContent = kind;
+                fields.message.textContent = handler === 'DeleteGroup'
+                    ? 'Vais apagar todas as campanhas desta fonte e o historico associado.'
+                    : 'Vais apagar esta campanha e o historico associado.';
+            });
+        })();
+    </script>
 }
