@@ -56,7 +56,11 @@ public class DetailsModel : PageModel
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var loaded = await LoadPlanAsync(id, tracked: true);
-        if (!loaded) return NotFound();
+        if (!loaded)
+        {
+            StatusMessage = "Campaign not found for this account or it was already deleted.";
+            return RedirectToPage("/App/Planner/Index");
+        }
 
         if (EnsureCampaignArtifacts())
         {
