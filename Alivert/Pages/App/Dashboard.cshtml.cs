@@ -14,12 +14,18 @@ public class DashboardModel : PageModel
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserAccountService _accounts;
+    private readonly ICampaignBusinessAnalyticsService _businessAnalytics;
 
-    public DashboardModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts)
+    public DashboardModel(
+        ApplicationDbContext db,
+        UserManager<IdentityUser> userManager,
+        IUserAccountService accounts,
+        ICampaignBusinessAnalyticsService businessAnalytics)
     {
         _db = db;
         _userManager = userManager;
         _accounts = accounts;
+        _businessAnalytics = businessAnalytics;
     }
 
     public int TotalAlerts { get; private set; }
@@ -34,6 +40,7 @@ public class DashboardModel : PageModel
     public int ScheduledAiItems { get; private set; }
     public int PublishedAiItems { get; private set; }
     public string ConversionRateLabel { get; private set; } = "0.0%";
+    public CampaignPortfolioBusinessReport BusinessReport { get; private set; } = EmptyPortfolioReport();
     public bool IsUnlimitedPlan { get; private set; }
     public string PlanName { get; private set; } = "Basic (Free)";
     public string PlanDescription { get; private set; } = "Start with 5 free active platform credits.";
@@ -95,10 +102,17 @@ public class DashboardModel : PageModel
             .ToListAsync();
         var directAudienceContacts = audienceLists.Sum(CountAudienceContacts);
 
-        AiPlans = await _db.MarketingPlans
+        var businessPlans = await _db.MarketingPlans
             .AsNoTracking()
             .Where(x => x.UserId == userId)
-            .CountAsync();
+            .Include(x => x.Posts)
+            .Include(x => x.Emails)
+            .Include(x => x.LandingPage)
+            .ThenInclude(x => x!.Leads)
+            .ToListAsync();
+
+        BusinessReport = _businessAnalytics.BuildPortfolioReport(businessPlans);
+        AiPlans = businessPlans.Count;
 
         ScheduledAiItems =
             await _db.MarketingPostSuggestions.AsNoTracking().CountAsync(x => x.MarketingPlan!.UserId == userId && x.Status == "Scheduled") +
@@ -133,11 +147,16 @@ public class DashboardModel : PageModel
         aiInteractions += aiLandingMetrics.Sum(x => x.Leads);
         aiConversions += aiLandingMetrics.Sum(x => x.Leads);
 
-        UsersReached = (ActiveAlerts * 2500) + (successfulDeliveriesLast7Days * 350) + (TriggersLast7Days * 150) + directAudienceContacts + aiReach;
-        UsersInteracted = UsersReached == 0 ? 0 : Math.Max(1, (int)Math.Round(UsersReached * 0.12m));
-        UsersInteracted += aiInteractions;
-        UsersConverted = UsersInteracted == 0 ? 0 : Math.Max(0, (int)Math.Round(UsersInteracted * 0.18m)) + aiConversions;
-        ConversionRateLabel = UsersReached == 0
+        var legacyUsersReached = (ActiveAlerts * 2500) + (successfulDeliveriesLast7Days * 350) + (TriggersLast7Days * 150) + directAudienceContacts + aiReach;
+        var legacyUsersInteracted = legacyUsersReached == 0 ? 0 : Math.Max(1, (int)Math.Round(legacyUsersReached * 0.12m)) + aiInteractions;
+        var legacyUsersConverted = legacyUsersInteracted == 0 ? 0 : Math.Max(0, (int)Math.Round(legacyUsersInteracted * 0.18m)) + aiConversions;
+
+        UsersReached = BusinessReport.Reach > 0 ? BusinessReport.Reach : legacyUsersReached;
+        UsersInteracted = BusinessReport.Clicks > 0 ? BusinessReport.Clicks : legacyUsersInteracted;
+        UsersConverted = BusinessReport.Leads > 0 ? BusinessReport.Leads : legacyUsersConverted;
+        ConversionRateLabel = BusinessReport.Clicks > 0
+            ? BusinessReport.ConversionRateLabel
+            : UsersReached == 0
             ? "0.0%"
             : $"{(decimal)UsersConverted / UsersReached:P1}";
 
@@ -215,5 +234,26 @@ public class DashboardModel : PageModel
         return audienceList
             .Split(new[] { '\r', '\n', ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Count(contact => !string.IsNullOrWhiteSpace(contact));
+    }
+
+    private static CampaignPortfolioBusinessReport EmptyPortfolioReport()
+    {
+        return new CampaignPortfolioBusinessReport(
+            0,
+            0,
+            0,
+            "0.0%",
+            "No leads yet",
+            "No channel data yet",
+            0,
+            "No post performance yet",
+            "Approve and publish posts with UTM links.",
+            "No email performance yet",
+            "Send an approved email sequence to measure opens and clicks.",
+            "No profitable campaign yet",
+            "Capture at least one lead to calculate cost per lead.",
+            "Create the first campaign with posts, emails, landing page and UTM tracking.",
+            Array.Empty<BusinessChannelMetric>(),
+            Array.Empty<BusinessCampaignMetric>());
     }
 }

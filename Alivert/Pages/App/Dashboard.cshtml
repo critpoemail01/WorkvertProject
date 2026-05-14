@@ -81,6 +81,147 @@
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
+            <h2>Business analytics</h2>
+            <p>Clicks, leads, conversion rate, cost per lead and the next campaign action.</p>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index"><i class="bi bi-plus-lg me-1"></i>New campaign</a>
+    </div>
+
+    <div class="business-metric-grid">
+        <article>
+            <span><i class="bi bi-cursor"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.Clicks</strong>
+                <small>clicks</small>
+            </div>
+        </article>
+        <article>
+            <span><i class="bi bi-person-lines-fill"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.Leads</strong>
+                <small>leads</small>
+            </div>
+        </article>
+        <article>
+            <span><i class="bi bi-graph-up-arrow"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.ConversionRateLabel</strong>
+                <small>lead conversion</small>
+            </div>
+        </article>
+        <article>
+            <span><i class="bi bi-calculator"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.CostPerLeadLabel</strong>
+                <small>cost per lead</small>
+            </div>
+        </article>
+    </div>
+
+    <div class="business-insight-grid mt-3">
+        <article>
+            <span class="tag">Top channel</span>
+            <h3>@Model.BusinessReport.TopLeadChannel</h3>
+            <p>@Model.BusinessReport.TopLeadChannelLeads leads generated or projected.</p>
+        </article>
+        <article>
+            <span class="tag">Best post</span>
+            <h3>@Model.BusinessReport.TopLeadPost</h3>
+            <p>@Model.BusinessReport.TopLeadPostDetail</p>
+        </article>
+        <article>
+            <span class="tag">Best email</span>
+            <h3>@Model.BusinessReport.BestEmail</h3>
+            <p>@Model.BusinessReport.BestEmailDetail</p>
+        </article>
+        <article>
+            <span class="tag">Most profitable</span>
+            <h3>@Model.BusinessReport.MostProfitableCampaign</h3>
+            <p>@Model.BusinessReport.MostProfitableCampaignDetail</p>
+        </article>
+    </div>
+
+    <div class="business-next-action mt-3">
+        <span><i class="bi bi-lightning-charge-fill"></i></span>
+        <div>
+            <strong>Next recommended action</strong>
+            <p>@Model.BusinessReport.RecommendedNextAction</p>
+        </div>
+    </div>
+
+    @if (Model.BusinessReport.Channels.Any())
+    {
+        <div class="table-responsive mt-3">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Clicks</th>
+                        <th>Leads</th>
+                        <th>Conversion</th>
+                        <th>Signal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var channel in Model.BusinessReport.Channels)
+                {
+                    <tr>
+                        <td><strong>@channel.Channel</strong></td>
+                        <td>@channel.Clicks</td>
+                        <td>@channel.Leads</td>
+                        <td>@channel.ConversionRateLabel</td>
+                        <td class="text-muted">@channel.Signal</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.BusinessReport.Campaigns.Any())
+    {
+        <div class="table-responsive mt-3">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Campaign</th>
+                        <th>Clicks</th>
+                        <th>Leads</th>
+                        <th>Conversion</th>
+                        <th>Cost per lead</th>
+                        <th>Best channel</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var campaign in Model.BusinessReport.Campaigns)
+                {
+                    <tr>
+                        <td><strong>@campaign.Campaign</strong><div class="text-muted">@campaign.NextAction</div></td>
+                        <td>@campaign.Clicks</td>
+                        <td>@campaign.Leads</td>
+                        <td>@campaign.ConversionRateLabel</td>
+                        <td>@campaign.CostPerLeadLabel</td>
+                        <td>@campaign.BestChannel</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@campaign.Id">Open</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state compact mt-3">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>No business analytics yet. Generate and publish a campaign with a landing page to start measuring leads.</span>
+        </div>
+    }
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
             <h2>AI marketing engine</h2>
             <p>Planner output, scheduled work and published content feeding the reach report.</p>
         </div>

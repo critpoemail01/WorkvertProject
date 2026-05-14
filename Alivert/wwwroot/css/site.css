@@ -5491,8 +5491,109 @@ a { text-decoration: none; }
   line-height: 1.75;
 }
 
+.business-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.business-metric-grid article {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 96px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(8,13,24,0.58);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.business-metric-grid span,
+.business-next-action > span {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: rgba(151,211,6,0.12);
+  color: var(--alivert-positive);
+  border: 1px solid rgba(151,211,6,0.22);
+}
+
+.business-metric-grid strong {
+  display: block;
+  color: #fff;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.business-metric-grid small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(232,238,255,0.58);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.business-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.business-insight-grid article {
+  min-height: 168px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.business-insight-grid h3 {
+  margin: 12px 0 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.business-insight-grid p {
+  margin: 0;
+  color: rgba(232,238,255,0.66);
+  line-height: 1.55;
+}
+
+.business-next-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(151,211,6,0.12), rgba(255,122,0,0.10));
+  border: 1px solid rgba(151,211,6,0.22);
+}
+
+.business-next-action strong {
+  display: block;
+  color: #fff;
+  font-weight: 900;
+}
+
+.business-next-action p {
+  margin: 4px 0 0;
+  color: rgba(232,238,255,0.72);
+}
+
 @media (max-width: 1100px) {
   .campaign-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .business-metric-grid,
+  .business-insight-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .campaign-library-grid {
@@ -5516,7 +5617,9 @@ a { text-decoration: none; }
 @media (max-width: 767px) {
   .crm-focus-grid,
   .campaign-flow,
-  .campaign-brief-list {
+  .campaign-brief-list,
+  .business-metric-grid,
+  .business-insight-grid {
     grid-template-columns: 1fr;
   }
   .campaign-public-hero {

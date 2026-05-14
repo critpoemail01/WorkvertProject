@@ -17,23 +17,27 @@ public class DetailsModel : PageModel
     private readonly IUserAccountService _accounts;
     private readonly ICampaignLibraryService _campaignLibrary;
     private readonly IIntegrationAuthorizationService _authorization;
+    private readonly ICampaignBusinessAnalyticsService _businessAnalytics;
 
     public DetailsModel(
         ApplicationDbContext db,
         UserManager<IdentityUser> userManager,
         IUserAccountService accounts,
         ICampaignLibraryService campaignLibrary,
-        IIntegrationAuthorizationService authorization)
+        IIntegrationAuthorizationService authorization,
+        ICampaignBusinessAnalyticsService businessAnalytics)
     {
         _db = db;
         _userManager = userManager;
         _accounts = accounts;
         _campaignLibrary = campaignLibrary;
         _authorization = authorization;
+        _businessAnalytics = businessAnalytics;
     }
 
     public MarketingPlan Plan { get; private set; } = default!;
     public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public CampaignBusinessReport BusinessReport { get; private set; } = EmptyBusinessReport();
     public IReadOnlyList<SectorCampaignRecommendation> NextCampaignRecommendations { get; private set; } = [];
     public IReadOnlyList<PublicationAuthorization> PublicationAuthorizations { get; private set; } = [];
     public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
@@ -51,6 +55,7 @@ public class DetailsModel : PageModel
         {
             await _db.SaveChangesAsync();
             Metrics = BuildMetrics(Plan);
+            BusinessReport = _businessAnalytics.BuildCampaignReport(Plan);
         }
 
         return Page();
@@ -403,6 +408,7 @@ public class DetailsModel : PageModel
 
         Plan = plan;
         Metrics = BuildMetrics(plan);
+        BusinessReport = _businessAnalytics.BuildCampaignReport(plan);
         var settings = await LoadSettingsAsync(plan.UserId);
         PublicationAuthorizations = BuildPublicationAuthorizations(plan, settings);
         NextCampaignRecommendations = _campaignLibrary.Recommend(new CampaignLibraryRequest(
@@ -567,5 +573,24 @@ public class DetailsModel : PageModel
         }
 
         return "Worldwide";
+    }
+
+    private static CampaignBusinessReport EmptyBusinessReport()
+    {
+        return new CampaignBusinessReport(
+            0,
+            0,
+            0,
+            "0.0%",
+            "No leads yet",
+            "No channel data yet",
+            0,
+            "No post performance yet",
+            "Publish social content with UTM links to identify the winning post.",
+            "No email performance yet",
+            "Send an approved email sequence to measure opens and clicks.",
+            "No lead cost yet",
+            "Publish approved assets and send all traffic to the landing page.",
+            Array.Empty<BusinessChannelMetric>());
     }
 }

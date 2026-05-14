@@ -57,6 +57,108 @@
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
+            <h2>Business analytics</h2>
+            <p>Campaign report focused on clicks, leads, conversion, cost per lead and the next action.</p>
+        </div>
+    </div>
+
+    <div class="business-metric-grid">
+        <article>
+            <span><i class="bi bi-cursor"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.Clicks</strong>
+                <small>clicks</small>
+            </div>
+        </article>
+        <article>
+            <span><i class="bi bi-person-lines-fill"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.Leads</strong>
+                <small>leads</small>
+            </div>
+        </article>
+        <article>
+            <span><i class="bi bi-graph-up-arrow"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.ConversionRateLabel</strong>
+                <small>lead conversion</small>
+            </div>
+        </article>
+        <article>
+            <span><i class="bi bi-calculator"></i></span>
+            <div>
+                <strong>@Model.BusinessReport.CostPerLeadLabel</strong>
+                <small>cost per lead</small>
+            </div>
+        </article>
+    </div>
+
+    <div class="business-insight-grid mt-3">
+        <article>
+            <span class="tag">Top channel</span>
+            <h3>@Model.BusinessReport.TopLeadChannel</h3>
+            <p>@Model.BusinessReport.TopLeadChannelLeads leads generated or projected.</p>
+        </article>
+        <article>
+            <span class="tag">Best post</span>
+            <h3>@Model.BusinessReport.TopLeadPost</h3>
+            <p>@Model.BusinessReport.TopLeadPostDetail</p>
+        </article>
+        <article>
+            <span class="tag">Best email</span>
+            <h3>@Model.BusinessReport.BestEmail</h3>
+            <p>@Model.BusinessReport.BestEmailDetail</p>
+        </article>
+        <article>
+            <span class="tag">Profitability</span>
+            <h3>@Model.BusinessReport.MostProfitableSummary</h3>
+            <p>Lead volume is evaluated against active campaign-platform credits.</p>
+        </article>
+    </div>
+
+    <div class="business-next-action mt-3">
+        <span><i class="bi bi-lightning-charge-fill"></i></span>
+        <div>
+            <strong>Next recommended action</strong>
+            <p>@Model.BusinessReport.RecommendedNextAction</p>
+        </div>
+    </div>
+
+    @if (Model.BusinessReport.Channels.Any())
+    {
+        <div class="table-responsive mt-3">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Reach</th>
+                        <th>Clicks</th>
+                        <th>Leads</th>
+                        <th>Conversion</th>
+                        <th>Signal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var channel in Model.BusinessReport.Channels)
+                {
+                    <tr>
+                        <td><strong>@channel.Channel</strong></td>
+                        <td>@channel.Reach</td>
+                        <td>@channel.Clicks</td>
+                        <td>@channel.Leads</td>
+                        <td>@channel.ConversionRateLabel</td>
+                        <td class="text-muted">@channel.Signal</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
             <h2>Official publishing authorization</h2>
             <p>Social posts are published only through authorized accounts/pages. Channels without official authorization stay blocked instead of being marked live.</p>
         </div>

@@ -106,6 +106,7 @@ builder.Services.AddSingleton<IAlertRuleEngine, AlertRuleEngine>();
 builder.Services.AddSingleton<IAiMarketingPlannerService, TemplateAiMarketingPlannerService>();
 builder.Services.AddSingleton<ICampaignLibraryService, CampaignLibraryService>();
 builder.Services.AddSingleton<IIntegrationAuthorizationService, IntegrationAuthorizationService>();
+builder.Services.AddSingleton<ICampaignBusinessAnalyticsService, CampaignBusinessAnalyticsService>();
 builder.Services.AddSingleton<CrmLeadImportService>();
 builder.Services.AddScoped<IAlertDispatcher, AlertDispatcher>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
