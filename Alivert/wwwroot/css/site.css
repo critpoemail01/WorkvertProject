@@ -5025,3 +5025,183 @@ a { text-decoration: none; }
 .border-op {
   border-color: rgba(255,255,255,0.10) !important;
 }
+
+.crm-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 22px;
+}
+
+.crm-form .form-label,
+.crm-focus-grid .form-label {
+  color: rgba(232,238,255,0.82);
+  font-weight: 800;
+}
+
+.crm-import-box {
+  min-height: 240px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.crm-focus-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1.5fr) minmax(120px, 0.5fr);
+  gap: 14px;
+  align-items: end;
+}
+
+.crm-focus-toggle {
+  min-height: 52px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  font-weight: 800;
+}
+
+.campaign-flow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.campaign-flow span {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.11);
+  color: rgba(232,238,255,0.82);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.campaign-flow i {
+  color: var(--alivert-positive);
+}
+
+.business-dna-box,
+.landing-review-card,
+.campaign-public-dna {
+  padding: 18px;
+  border-radius: 10px;
+  background: rgba(8,13,24,0.58);
+  border: 1px solid rgba(255,255,255,0.11);
+}
+
+.business-dna-box strong,
+.campaign-public-dna strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.business-dna-box p,
+.campaign-public-dna span {
+  margin: 0;
+  color: rgba(232,238,255,0.68);
+  line-height: 1.6;
+}
+
+.landing-body-preview {
+  color: rgba(232,238,255,0.72);
+  line-height: 1.6;
+}
+
+.campaign-public-hero {
+  min-height: calc(100vh - 96px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+  gap: 32px;
+  align-items: center;
+  padding: 64px 0 32px;
+}
+
+.campaign-public-copy h1 {
+  max-width: 780px;
+  margin: 0 0 18px;
+  font-size: clamp(2.5rem, 6vw, 5.6rem);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.campaign-public-copy > p {
+  max-width: 720px;
+  color: rgba(232,238,255,0.72);
+  font-size: 1.16rem;
+  line-height: 1.65;
+}
+
+.campaign-public-form {
+  padding: 26px;
+  border-radius: 12px;
+  background: rgba(13,19,32,0.88);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.32);
+}
+
+.campaign-public-form h2,
+.campaign-thank-you h2 {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.campaign-public-form p {
+  color: rgba(232,238,255,0.66);
+}
+
+.campaign-thank-you {
+  display: grid;
+  gap: 12px;
+  min-height: 260px;
+  place-items: center;
+  text-align: center;
+}
+
+.campaign-thank-you i {
+  color: var(--alivert-positive);
+  font-size: 3rem;
+}
+
+.campaign-public-body {
+  max-width: 900px;
+  margin: 0 auto 64px;
+  padding: 28px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  color: rgba(232,238,255,0.76);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 1100px) {
+  .campaign-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .crm-layout,
+  .campaign-public-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .crm-focus-grid,
+  .campaign-flow {
+    grid-template-columns: 1fr;
+  }
+  .campaign-public-hero {
+    min-height: auto;
+    padding-top: 36px;
+  }
+  .campaign-public-form {
+    padding: 20px;
+  }
+}

@@ -1,4 +1,5 @@
 using Alivert.Data;
+using Alivert.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Alivert.Workers;
@@ -50,10 +51,26 @@ public sealed class MarketingPublishingWorker : BackgroundService
                     email.SentAtUtc = now;
                 }
 
-                if (duePosts.Count > 0 || dueEmails.Count > 0)
+                var scheduledPlanIds = duePosts.Select(x => x.MarketingPlanId)
+                    .Concat(dueEmails.Select(x => x.MarketingPlanId))
+                    .Distinct()
+                    .ToList();
+                var dueLandingPages = scheduledPlanIds.Count == 0
+                    ? new List<MarketingLandingPage>()
+                    : await db.MarketingLandingPages
+                        .Where(x => scheduledPlanIds.Contains(x.MarketingPlanId) && x.Status == "Approved")
+                        .ToListAsync(stoppingToken);
+
+                foreach (var landingPage in dueLandingPages)
+                {
+                    landingPage.Status = "Published";
+                    landingPage.PublishedAtUtc = now;
+                }
+
+                if (duePosts.Count > 0 || dueEmails.Count > 0 || dueLandingPages.Count > 0)
                 {
                     await db.SaveChangesAsync(stoppingToken);
-                    _logger.LogInformation("Published {PostCount} post(s) and sent {EmailCount} email sequence item(s).", duePosts.Count, dueEmails.Count);
+                    _logger.LogInformation("Published {PostCount} post(s), sent {EmailCount} email sequence item(s) and opened {LandingCount} landing page(s).", duePosts.Count, dueEmails.Count, dueLandingPages.Count);
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

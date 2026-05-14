@@ -59,6 +59,10 @@
                 <i class="bi bi-stars"></i>
                 <span>AI Planner</span>
             </a>
+            <a class="app-nav-link @(isActivePrefix("/App/Crm") ? "active" : "")" asp-page="/App/Crm/Index">
+                <i class="bi bi-database-add"></i>
+                <span>CRM leads</span>
+            </a>
             <a class="app-nav-link @(isActivePrefix("/App/Alerts") ? "active" : "")" asp-page="/App/Alerts/Index">
                 <i class="bi bi-bell-fill"></i>
                 <span>Campaigns</span>

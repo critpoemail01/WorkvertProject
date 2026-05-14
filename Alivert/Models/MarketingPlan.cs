@@ -18,6 +18,9 @@ public class MarketingPlan
     [Required, StringLength(400)]
     public string CompanyOrIdea { get; set; } = string.Empty;
 
+    [Required, StringLength(1000)]
+    public string BusinessDna { get; set; } = string.Empty;
+
     [Required, StringLength(700)]
     public string TargetAudience { get; set; } = string.Empty;
 
@@ -58,6 +61,11 @@ public class MarketingPlan
     [StringLength(4000)]
     public string? EmailAudience { get; set; }
 
+    [StringLength(240)]
+    public string? CrmLeadFilter { get; set; }
+
+    public int CrmLeadSourceCount { get; set; }
+
     [Required, StringLength(32)]
     public string Status { get; set; } = "Draft";
 
@@ -68,4 +76,5 @@ public class MarketingPlan
     public List<MarketingPostSuggestion> Posts { get; set; } = new();
     public List<MarketingEmailSuggestion> Emails { get; set; } = new();
     public List<MarketingLeadSuggestion> Leads { get; set; } = new();
+    public MarketingLandingPage? LandingPage { get; set; }
 }

@@ -1,0 +1,67 @@
+@page "/campaign/{slug}"
+@model Alivert.Pages.CampaignModel
+@{
+    ViewData["Title"] = Model.LandingPage.Headline;
+}
+
+<section class="campaign-public-hero">
+    <div class="campaign-public-copy">
+        <span class="tag mb-3">Campaign landing page</span>
+        <h1>@Model.LandingPage.Headline</h1>
+        <p>@Model.LandingPage.Subheadline</p>
+        <div class="campaign-public-dna">
+            <strong>Business DNA</strong>
+            <span>@Model.Plan.BusinessDna</span>
+        </div>
+    </div>
+
+    <aside class="campaign-public-form">
+        @if (Model.Submitted)
+        {
+            <div class="campaign-thank-you">
+                <i class="bi bi-check-circle"></i>
+                <h2>@Model.LandingPage.ThankYouMessage</h2>
+            </div>
+        }
+        else
+        {
+            <h2>@Model.LandingPage.FormTitle</h2>
+            <p>@Model.LandingPage.FormIntro</p>
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label class="form-label" asp-for="Input.Name"></label>
+                <input class="form-control" asp-for="Input.Name" placeholder="Your name" />
+                <span class="text-danger" asp-validation-for="Input.Name"></span>
+
+                <label class="form-label mt-3" asp-for="Input.Email"></label>
+                <input class="form-control" asp-for="Input.Email" placeholder="you@company.com" />
+                <span class="text-danger" asp-validation-for="Input.Email"></span>
+
+                <label class="form-label mt-3" asp-for="Input.Company"></label>
+                <input class="form-control" asp-for="Input.Company" placeholder="Company" />
+
+                <label class="form-label mt-3" asp-for="Input.Role"></label>
+                <input class="form-control" asp-for="Input.Role" placeholder="Role" />
+
+                <label class="form-label mt-3" asp-for="Input.Phone"></label>
+                <input class="form-control" asp-for="Input.Phone" placeholder="Optional" />
+
+                <label class="form-label mt-3" asp-for="Input.Message"></label>
+                <textarea class="form-control" asp-for="Input.Message" rows="4" placeholder="What are you trying to improve?"></textarea>
+
+                <button class="btn btn-primary w-100 mt-4" type="submit">@Model.LandingPage.PrimaryCallToAction</button>
+            </form>
+        }
+    </aside>
+</section>
+
+<section class="campaign-public-body">
+    @foreach (var paragraph in Model.LandingPage.Body.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        <p>@paragraph</p>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

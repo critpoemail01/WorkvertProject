@@ -120,9 +120,18 @@ public class DashboardModel : PageModel
             .Select(x => new { x.EstimatedReach, x.EstimatedInteractions, x.EstimatedConversions })
             .ToListAsync();
 
+        var aiLandingMetrics = await _db.MarketingLandingPages
+            .AsNoTracking()
+            .Where(x => x.MarketingPlan!.UserId == userId && x.Status == "Published")
+            .Select(x => new { x.ViewCount, Leads = x.Leads.Count })
+            .ToListAsync();
+
         var aiReach = aiPostMetrics.Sum(x => x.EstimatedReach) + aiEmailMetrics.Sum(x => x.EstimatedReach);
         var aiInteractions = aiPostMetrics.Sum(x => x.EstimatedInteractions) + aiEmailMetrics.Sum(x => x.EstimatedInteractions);
         var aiConversions = aiPostMetrics.Sum(x => x.EstimatedConversions) + aiEmailMetrics.Sum(x => x.EstimatedConversions);
+        aiReach += aiLandingMetrics.Sum(x => x.ViewCount);
+        aiInteractions += aiLandingMetrics.Sum(x => x.Leads);
+        aiConversions += aiLandingMetrics.Sum(x => x.Leads);
 
         UsersReached = (ActiveAlerts * 2500) + (successfulDeliveriesLast7Days * 350) + (TriggersLast7Days * 150) + directAudienceContacts + aiReach;
         UsersInteracted = UsersReached == 0 ? 0 : Math.Max(1, (int)Math.Round(UsersReached * 0.12m));

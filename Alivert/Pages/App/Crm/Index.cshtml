@@ -1,0 +1,180 @@
+@page
+@model Alivert.Pages.App.Crm.IndexModel
+@{
+    ViewData["Title"] = "CRM integration";
+}
+
+<section class="app-page-hero">
+    <div>
+        <span class="tag mb-3">CRM integration</span>
+        <h1 class="hero-title fw-bold mb-2">Use your prospecting team's leads in campaigns.</h1>
+        <p class="lead muted mb-0">Import customers and leads from an external CRM, then focus AI campaigns on those contacts inside the planner.</p>
+    </div>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-primary btn-lg" asp-page="/App/Planner/Index"><i class="bi bi-stars me-1"></i>Open planner</a>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info mt-4 mb-0">@Model.StatusMessage</div>
+}
+
+<div class="dashboard-stat-grid mt-4">
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-people"></i></span>
+        <div>
+            <div class="app-stat-label">CRM leads</div>
+            <div class="app-stat-value">@Model.TotalLeads</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-envelope-check"></i></span>
+        <div>
+            <div class="app-stat-label">With email</div>
+            <div class="app-stat-value">@Model.LeadsWithEmail</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-bullseye"></i></span>
+        <div>
+            <div class="app-stat-label">Campaign-ready</div>
+            <div class="app-stat-value">@Model.ReadyForCampaign</div>
+        </div>
+    </div>
+</div>
+
+<div class="crm-layout mt-4">
+    <section class="surface app-panel">
+        <div class="app-panel-header">
+            <div>
+                <h2>External CRM connection</h2>
+                <p>Save the provider context so imported leads keep their source and can be filtered later.</p>
+            </div>
+        </div>
+
+        <form method="post" asp-page-handler="SaveIntegration" class="crm-form">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Integration.Provider" class="form-label"></label>
+                    <select asp-for="Integration.Provider" class="form-select">
+                        <option>CSV / manual import</option>
+                        <option>HubSpot</option>
+                        <option>Salesforce</option>
+                        <option>Pipedrive</option>
+                        <option>Zoho CRM</option>
+                        <option>Custom CRM API</option>
+                    </select>
+                    <span asp-validation-for="Integration.Provider" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Integration.DisplayName" class="form-label"></label>
+                    <input asp-for="Integration.DisplayName" class="form-control" placeholder="Outbound team CRM" />
+                    <span asp-validation-for="Integration.DisplayName" class="text-danger"></span>
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="Integration.ApiBaseUrl" class="form-label"></label>
+                    <input asp-for="Integration.ApiBaseUrl" class="form-control" placeholder="https://api.crm.example.com" />
+                    <span asp-validation-for="Integration.ApiBaseUrl" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Integration.ApiKey" class="form-label"></label>
+                    <input asp-for="Integration.ApiKey" class="form-control" type="password" placeholder="Optional" />
+                    <span asp-validation-for="Integration.ApiKey" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="alert-form-actions mt-4">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-plug me-1"></i>Save CRM integration</button>
+                <span class="muted">API tokens are only summarized here; imported lead data is what campaigns use.</span>
+            </div>
+        </form>
+    </section>
+
+    <section class="surface app-panel">
+        <div class="app-panel-header">
+            <div>
+                <h2>Import customers and leads</h2>
+                <p>Paste a CSV export from your CRM. Supported headers include name, email, company, role, industry, country, city, stage and tags.</p>
+            </div>
+        </div>
+
+        <form method="post" asp-page-handler="ImportLeads" class="crm-form">
+            <label asp-for="Import.Source" class="form-label"></label>
+            <input asp-for="Import.Source" class="form-control" placeholder="HubSpot, SDR list, trade show..." />
+            <span asp-validation-for="Import.Source" class="text-danger"></span>
+
+            <label asp-for="Import.RawLeads" class="form-label mt-3"></label>
+            <textarea asp-for="Import.RawLeads" class="form-control crm-import-box" rows="10" placeholder="name,email,company,role,industry,country,city,stage,tags&#10;Ana Silva,ana@empresa.pt,Empresa SA,Operations Manager,Manufacturing,Portugal,Porto,Qualified,industrial"></textarea>
+            <span asp-validation-for="Import.RawLeads" class="text-danger"></span>
+
+            <div class="alert-form-actions mt-4">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-cloud-arrow-up me-1"></i>Import leads</button>
+                <span class="muted">The planner can use these emails instead of only discovered public contacts.</span>
+            </div>
+        </form>
+    </section>
+</div>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Imported CRM leads</h2>
+            <p>These contacts become a selectable campaign audience in the AI Planner.</p>
+        </div>
+    </div>
+
+    @if (!Model.Leads.Any())
+    {
+        <div class="empty-state compact">
+            <i class="bi bi-person-lines-fill"></i>
+            <span>No CRM leads imported yet.</span>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Contact</th>
+                        <th>Company</th>
+                        <th>Segment</th>
+                        <th>Location</th>
+                        <th>Stage</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var lead in Model.Leads)
+                {
+                    <tr>
+                        <td>
+                            <strong>@lead.ContactName</strong>
+                            <div class="text-muted">@lead.Email</div>
+                        </td>
+                        <td>
+                            <strong>@lead.CompanyName</strong>
+                            <div class="text-muted">@lead.Role</div>
+                        </td>
+                        <td>
+                            <span>@lead.Industry</span>
+                            <div class="text-muted">@lead.Tags</div>
+                        </td>
+                        <td>@string.Join(", ", new[] { lead.City, lead.Country }.Where(x => !string.IsNullOrWhiteSpace(x)))</td>
+                        <td><span class="badge text-bg-secondary">@lead.Stage</span></td>
+                        <td class="text-end">
+                            <form method="post" asp-page-handler="DeleteLead" asp-route-leadId="@lead.Id">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

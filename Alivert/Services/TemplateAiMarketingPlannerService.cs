@@ -74,8 +74,10 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
 
         var emails = BuildEmails(request, schedule);
         var leads = BuildLeadSuggestions(request);
+        var landingPage = BuildLandingPage(request);
+        var businessDna = BuildBusinessDna(request);
 
-        return new AiMarketingPlanDraft(posts, emails, leads);
+        return new AiMarketingPlanDraft(posts, emails, leads, landingPage, businessDna);
     }
 
     private static IEnumerable<DateOnly> BuildSchedule(DateOnly startDate, DateOnly endDate, string frequency)
@@ -168,6 +170,36 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
         }
 
         return leads;
+    }
+
+    private static MarketingLandingPage BuildLandingPage(AiMarketingPlanRequest request)
+    {
+        var slug = $"{Slugify(request.ProductName)}-{Guid.NewGuid():N}";
+        return new MarketingLandingPage
+        {
+            Slug = slug.Length <= 72 ? slug : slug[..72],
+            Headline = Clip($"{request.ProductName} for {request.TargetAudience}", 180),
+            Subheadline = Clip($"A focused campaign page built around {request.ValueProposition} for {request.Location.Summary}.", 260),
+            Body = Clip(
+                $"The campaign positions {request.ProductName} around one clear outcome: {request.CampaignGoal.ToLowerInvariant()}.\n\n" +
+                $"Business DNA: {BuildBusinessDna(request)}\n\n" +
+                $"Why now: {request.TargetAudience} need a simpler path to {request.ValueProposition.ToLowerInvariant()}.",
+                1600),
+            PrimaryCallToAction = Clip(string.IsNullOrWhiteSpace(request.ProductUrl) ? $"Request {request.ProductName}" : $"Start with {request.ProductName}", 120),
+            FormTitle = Clip($"Talk to {request.ProductName}", 160),
+            FormIntro = Clip("Leave your details and the team will follow up with the most relevant next step.", 260),
+            ThankYouMessage = Clip("Thank you. Your request was captured and added to the campaign report.", 260),
+            Status = "Draft"
+        };
+    }
+
+    private static string BuildBusinessDna(AiMarketingPlanRequest request)
+    {
+        return Clip(
+            $"Product: {request.ProductName}. Market: {request.TargetAudience}. Promise: {request.ValueProposition}. " +
+            $"Goal: {request.CampaignGoal}. Tone: {request.Tone}. Region: {request.Location.Summary}. " +
+            $"Source: {(string.IsNullOrWhiteSpace(request.ProductUrl) ? request.CompanyOrIdea : request.ProductUrl)}",
+            1000);
     }
 
     private static string TitleForAngle(string angle)
@@ -324,6 +356,18 @@ public sealed class TemplateAiMarketingPlannerService : IAiMarketingPlannerServi
             return value;
 
         return value[..Math.Max(0, maxLength - 3)].TrimEnd() + "...";
+    }
+
+    private static string Slugify(string value)
+    {
+        var chars = value
+            .Trim()
+            .ToLowerInvariant()
+            .Select(ch => char.IsLetterOrDigit(ch) ? ch : '-')
+            .ToArray();
+
+        var slug = string.Join("-", new string(chars).Split('-', StringSplitOptions.RemoveEmptyEntries));
+        return string.IsNullOrWhiteSpace(slug) ? "campaign" : Clip(slug, 40);
     }
 
     private sealed record PlatformProfile(

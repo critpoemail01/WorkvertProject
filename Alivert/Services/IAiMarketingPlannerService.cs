@@ -54,4 +54,6 @@ public sealed record AiAudienceLocation(
 public sealed record AiMarketingPlanDraft(
     IReadOnlyList<MarketingPostSuggestion> Posts,
     IReadOnlyList<MarketingEmailSuggestion> Emails,
-    IReadOnlyList<MarketingLeadSuggestion> Leads);
+    IReadOnlyList<MarketingLeadSuggestion> Leads,
+    MarketingLandingPage LandingPage,
+    string BusinessDna);

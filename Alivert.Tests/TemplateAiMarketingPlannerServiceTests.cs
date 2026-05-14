@@ -29,6 +29,13 @@ public class TemplateAiMarketingPlannerServiceTests
         Assert.NotEmpty(draft.Posts);
         Assert.NotEmpty(draft.Emails);
         Assert.NotEmpty(draft.Leads);
+        Assert.NotNull(draft.LandingPage);
+        Assert.False(string.IsNullOrWhiteSpace(draft.BusinessDna));
+        Assert.True(draft.BusinessDna.Length <= 1000);
+        Assert.True(draft.LandingPage.Headline.Length <= 180);
+        Assert.True(draft.LandingPage.Subheadline.Length <= 260);
+        Assert.True(draft.LandingPage.Body.Length <= 1600);
+        Assert.True(draft.LandingPage.PrimaryCallToAction.Length <= 120);
 
         Assert.All(draft.Posts, post =>
         {

@@ -24,12 +24,12 @@ public class DetailsModel : PageModel
     }
 
     public MarketingPlan Plan { get; private set; } = default!;
-    public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0);
+    public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
     public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
     [TempData]
     public string? StatusMessage { get; set; }
 
-    public record MetricsSummary(int Drafts, int Approved, int Scheduled, int Published, int Reach, int Interactions, int Conversions);
+    public record MetricsSummary(int Drafts, int Approved, int Scheduled, int Published, int Reach, int Interactions, int Conversions, int LandingViews, int CapturedLeads);
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
@@ -78,6 +78,21 @@ public class DetailsModel : PageModel
         if (lead is null) return NotFound();
 
         lead.Status = "Accepted";
+        Plan.Status = "Review";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostApproveLandingAsync(int id)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        if (Plan.LandingPage is null) return NotFound();
+
+        Plan.LandingPage.Status = "Approved";
+        Plan.LandingPage.ApprovedAtUtc = DateTime.UtcNow;
         Plan.Status = "Review";
         await _db.SaveChangesAsync();
 
@@ -190,6 +205,42 @@ public class DetailsModel : PageModel
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostUpdateLandingAsync(
+        int id,
+        string? headline,
+        string? subheadline,
+        string? body,
+        string? primaryCallToAction,
+        string? formTitle,
+        string? formIntro,
+        string? thankYouMessage)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        if (Plan.LandingPage is null) return NotFound();
+        if (Plan.LandingPage.Status == "Published")
+        {
+            StatusMessage = "This landing page is already published. Create the next campaign to change the funnel.";
+            return RedirectToPage(new { id });
+        }
+
+        Plan.LandingPage.Headline = RequiredText(headline, Plan.LandingPage.Headline, 180);
+        Plan.LandingPage.Subheadline = RequiredText(subheadline, Plan.LandingPage.Subheadline, 260);
+        Plan.LandingPage.Body = RequiredText(body, Plan.LandingPage.Body, 1600);
+        Plan.LandingPage.PrimaryCallToAction = RequiredText(primaryCallToAction, Plan.LandingPage.PrimaryCallToAction, 120);
+        Plan.LandingPage.FormTitle = RequiredText(formTitle, Plan.LandingPage.FormTitle, 160);
+        Plan.LandingPage.FormIntro = RequiredText(formIntro, Plan.LandingPage.FormIntro, 260);
+        Plan.LandingPage.ThankYouMessage = RequiredText(thankYouMessage, Plan.LandingPage.ThankYouMessage, 260);
+        Plan.LandingPage.Status = "Draft";
+        Plan.LandingPage.ApprovedAtUtc = null;
+        Plan.Status = "Review";
+        StatusMessage = "Landing page updated. Approve it before publishing.";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostApproveAllAsync(int id)
     {
         var loaded = await LoadPlanAsync(id, tracked: true);
@@ -210,6 +261,12 @@ public class DetailsModel : PageModel
 
         foreach (var lead in Plan.Leads.Where(x => x.Status == "Suggested"))
             lead.Status = "Accepted";
+
+        if (Plan.LandingPage is not null && Plan.LandingPage.Status == "Draft")
+        {
+            Plan.LandingPage.Status = "Approved";
+            Plan.LandingPage.ApprovedAtUtc = now;
+        }
 
         Plan.Status = "Approved";
         await _db.SaveChangesAsync();
@@ -239,6 +296,12 @@ public class DetailsModel : PageModel
 
         foreach (var email in Plan.Emails.Where(x => x.Status == "Approved"))
             email.Status = "Scheduled";
+
+        if (Plan.LandingPage is not null && Plan.LandingPage.Status == "Approved")
+        {
+            Plan.LandingPage.Status = "Published";
+            Plan.LandingPage.PublishedAtUtc = DateTime.UtcNow;
+        }
 
         Plan.Status = "Scheduled";
         await _db.SaveChangesAsync();
@@ -280,6 +343,8 @@ public class DetailsModel : PageModel
             .Include(x => x.Posts)
             .Include(x => x.Emails)
             .Include(x => x.Leads)
+            .Include(x => x.LandingPage)
+            .ThenInclude(x => x!.Leads)
             .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (plan is null)
@@ -304,17 +369,24 @@ public class DetailsModel : PageModel
     private static MetricsSummary BuildMetrics(MarketingPlan plan)
     {
         var items = plan.Posts.Select(x => x.Status).Concat(plan.Emails.Select(x => x.Status)).ToList();
+        if (plan.LandingPage is not null)
+            items.Add(plan.LandingPage.Status);
+
         var livePosts = plan.Posts.Where(x => x.Status == "Published").ToList();
         var sentEmails = plan.Emails.Where(x => x.Status == "Sent").ToList();
+        var landingViews = plan.LandingPage?.ViewCount ?? 0;
+        var capturedLeads = plan.LandingPage?.Leads.Count ?? 0;
 
         return new MetricsSummary(
             items.Count(x => x == "Draft"),
             items.Count(x => x == "Approved"),
             items.Count(x => x == "Scheduled"),
-            livePosts.Count + sentEmails.Count,
-            livePosts.Sum(x => x.EstimatedReach) + sentEmails.Sum(x => x.EstimatedReach),
-            livePosts.Sum(x => x.EstimatedInteractions) + sentEmails.Sum(x => x.EstimatedInteractions),
-            livePosts.Sum(x => x.EstimatedConversions) + sentEmails.Sum(x => x.EstimatedConversions));
+            livePosts.Count + sentEmails.Count + (plan.LandingPage?.Status == "Published" ? 1 : 0),
+            livePosts.Sum(x => x.EstimatedReach) + sentEmails.Sum(x => x.EstimatedReach) + landingViews,
+            livePosts.Sum(x => x.EstimatedInteractions) + sentEmails.Sum(x => x.EstimatedInteractions) + capturedLeads,
+            livePosts.Sum(x => x.EstimatedConversions) + sentEmails.Sum(x => x.EstimatedConversions) + capturedLeads,
+            landingViews,
+            capturedLeads);
     }
 
     private static bool CanEditDraft(string status)

@@ -7,8 +7,8 @@
 <section class="app-page-hero ai-planner-hero">
     <div>
         <span class="tag mb-3">AI campaign planner</span>
-        <h1 class="hero-title fw-bold mb-2">Generate a month of posts, emails and lead ideas.</h1>
-        <p class="lead muted mb-0">Give Promovert the product, audience and goal. It drafts daily platform-specific content, email sequences and prospecting targets for approval.</p>
+        <h1 class="hero-title fw-bold mb-2">Turn a company URL into a complete campaign funnel.</h1>
+        <p class="lead muted mb-0">Promovert builds the Business DNA, posts, emails, landing page, approval workflow, lead capture and report for the next campaign.</p>
     </div>
     <div class="app-page-hero-actions">
         <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard"><i class="bi bi-bar-chart me-1"></i>Dashboard</a>
@@ -33,7 +33,7 @@
         <div class="app-panel-header">
             <div>
                 <h2>Campaign intelligence</h2>
-                <p>Add a URL and let Promovert suggest the brief, then adjust anything before generating posts, emails and leads.</p>
+                <p>Add a URL and let Promovert suggest the brief, then adjust anything before generating posts, emails, a landing page and lead capture.</p>
             </div>
         </div>
 
@@ -181,6 +181,35 @@
                 <span asp-validation-for="Input.Platforms" class="text-danger"></span>
             </div>
             <div class="col-12">
+                <section class="lead-discovery-panel">
+                    <div class="lead-discovery-head">
+                        <div>
+                            <label asp-for="Input.UseCrmLeads" class="form-label mb-1"></label>
+                            <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Use these when your own prospecting team already found the audience.</p>
+                        </div>
+                        <a class="btn btn-outline-secondary" asp-page="/App/Crm/Index">
+                            <i class="bi bi-database-add me-1"></i>Import CRM leads
+                        </a>
+                    </div>
+                    <div class="crm-focus-grid mt-3">
+                        <label class="crm-focus-toggle">
+                            <input asp-for="Input.UseCrmLeads" />
+                            <span>Focus this campaign on imported CRM leads</span>
+                        </label>
+                        <label>
+                            <span class="form-label">Filter by stage, tag, industry, company or location</span>
+                            <input asp-for="Input.CrmLeadFilter" class="form-control" placeholder="Qualified, manufacturing, Portugal, demo..." />
+                        </label>
+                        <label>
+                            <span class="form-label">Max CRM leads</span>
+                            <input asp-for="Input.CrmLeadLimit" class="form-control" type="number" min="1" max="500" />
+                        </label>
+                    </div>
+                    <span asp-validation-for="Input.CrmLeadFilter" class="text-danger"></span>
+                    <span asp-validation-for="Input.CrmLeadLimit" class="text-danger"></span>
+                </section>
+            </div>
+            <div class="col-12">
                 <label asp-for="Input.EmailAudience" class="form-label"></label>
                 <textarea asp-for="Input.EmailAudience" class="form-control" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;marketing@empresa.pt"></textarea>
                 <div class="form-text">One email per line. Promovert generates a multi-day sequence and estimates reach, replies/interactions and conversions.</div>
@@ -280,6 +309,20 @@
                 <span>Suggested industries, roles and search prompts for prospecting.</span>
             </div>
         </div>
+        <div class="planner-feature">
+            <i class="bi bi-window-stack"></i>
+            <div>
+                <strong>Landing page + form</strong>
+                <span>A campaign page captures leads after authorized publication.</span>
+            </div>
+        </div>
+        <div class="planner-feature">
+            <i class="bi bi-database-add"></i>
+            <div>
+                <strong>CRM audience</strong>
+                <span>Imported CRM leads can become the focus of the campaign.</span>
+            </div>
+        </div>
     </aside>
 </div>
 
@@ -321,7 +364,7 @@
                         <td>@plan.StartDate.ToString("MMM d") - @plan.EndDate.ToString("MMM d")</td>
                         <td>@plan.Location</td>
                         <td>@plan.Platforms.Replace(",", ", ")</td>
-                        <td>@plan.Posts posts / @plan.Emails emails</td>
+                        <td>@plan.Posts posts / @plan.Emails emails / landing page</td>
                         <td><span class="badge text-bg-secondary">@plan.Status</span></td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Open</a>

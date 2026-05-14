@@ -18,6 +18,10 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<MarketingPostSuggestion> MarketingPostSuggestions => Set<MarketingPostSuggestion>();
     public DbSet<MarketingEmailSuggestion> MarketingEmailSuggestions => Set<MarketingEmailSuggestion>();
     public DbSet<MarketingLeadSuggestion> MarketingLeadSuggestions => Set<MarketingLeadSuggestion>();
+    public DbSet<MarketingLandingPage> MarketingLandingPages => Set<MarketingLandingPage>();
+    public DbSet<MarketingLandingLead> MarketingLandingLeads => Set<MarketingLandingLead>();
+    public DbSet<CrmIntegration> CrmIntegrations => Set<CrmIntegration>();
+    public DbSet<CrmLead> CrmLeads => Set<CrmLead>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
     public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
     public DbSet<UserNotificationSettings> UserNotificationSettings => Set<UserNotificationSettings>();
@@ -131,6 +135,49 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                     leadSuggestion.CreatedAtUtc = now;
                 }
             }
+            else if (entry.Entity is MarketingLandingPage landingPage)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (landingPage.CreatedAtUtc == default) landingPage.CreatedAtUtc = now;
+                    landingPage.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    landingPage.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is MarketingLandingLead landingLead)
+            {
+                if (entry.State == EntityState.Added && landingLead.CreatedAtUtc == default)
+                {
+                    landingLead.CreatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is CrmIntegration crmIntegration)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (crmIntegration.CreatedAtUtc == default) crmIntegration.CreatedAtUtc = now;
+                    crmIntegration.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    crmIntegration.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is CrmLead crmLead)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (crmLead.CreatedAtUtc == default) crmLead.CreatedAtUtc = now;
+                    crmLead.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    crmLead.UpdatedAtUtc = now;
+                }
+            }
             else if (entry.Entity is SupportTicket ticket)
             {
                 if (entry.State == EntityState.Added)
@@ -242,6 +289,43 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .WithMany(x => x.Leads)
             .HasForeignKey(x => x.MarketingPlanId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MarketingLandingPage>()
+            .HasIndex(x => x.Slug)
+            .IsUnique();
+
+        builder.Entity<MarketingLandingPage>()
+            .HasIndex(x => new { x.Status, x.PublishedAtUtc });
+
+        builder.Entity<MarketingLandingPage>()
+            .HasOne(x => x.MarketingPlan)
+            .WithOne(x => x.LandingPage)
+            .HasForeignKey<MarketingLandingPage>(x => x.MarketingPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MarketingLandingLead>()
+            .HasIndex(x => new { x.MarketingLandingPageId, x.CreatedAtUtc });
+
+        builder.Entity<MarketingLandingLead>()
+            .HasIndex(x => x.Email);
+
+        builder.Entity<MarketingLandingLead>()
+            .HasOne(x => x.MarketingLandingPage)
+            .WithMany(x => x.Leads)
+            .HasForeignKey(x => x.MarketingLandingPageId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<CrmIntegration>()
+            .HasIndex(x => new { x.UserId, x.Provider });
+
+        builder.Entity<CrmLead>()
+            .HasIndex(x => new { x.UserId, x.Email });
+
+        builder.Entity<CrmLead>()
+            .HasIndex(x => new { x.UserId, x.Stage });
+
+        builder.Entity<CrmLead>()
+            .HasIndex(x => new { x.UserId, x.Industry });
 
         builder.Entity<AlertTrigger>()
             .HasIndex(t => new { t.AlertId, t.TriggeredAtUtc });

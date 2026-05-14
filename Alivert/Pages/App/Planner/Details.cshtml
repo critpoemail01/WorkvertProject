@@ -12,6 +12,7 @@
     </div>
     <div class="app-page-hero-actions">
         <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index"><i class="bi bi-arrow-left me-1"></i>Planner</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id"><i class="bi bi-arrow-repeat me-1"></i>Next campaign</a>
         <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
             <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all</button>
         </form>
@@ -29,6 +30,10 @@
         <div>
             <div class="app-stat-label">Plan status</div>
             <h2>@Model.Plan.Status</h2>
+            @if (Model.Plan.CrmLeadSourceCount > 0)
+            {
+                <p class="mb-1"><i class="bi bi-database-check me-1"></i>@Model.Plan.CrmLeadSourceCount imported CRM lead email@(Model.Plan.CrmLeadSourceCount == 1 ? "" : "s") included@(string.IsNullOrWhiteSpace(Model.Plan.CrmLeadFilter) ? "" : $" for '{Model.Plan.CrmLeadFilter}'").</p>
+            }
             <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>@LocationLabel()</p>
             <p>@Model.Plan.StartDate.ToString("MMM d, yyyy") - @Model.Plan.EndDate.ToString("MMM d, yyyy") · @Model.Plan.Platforms.Replace(",", ", ") · @FrequencyLabel(Model.Plan.Frequency) · @Model.PlanCreditUnits credit@(Model.PlanCreditUnits == 1 ? "" : "s") when scheduled</p>
         </div>
@@ -46,6 +51,28 @@
         <form method="post" asp-page-handler="PublishDue" asp-route-id="@Model.Plan.Id">
             <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-send-check me-1"></i>Publish due now</button>
         </form>
+    </div>
+</section>
+
+<section class="surface app-panel mt-4">
+    <div class="app-panel-header">
+        <div>
+            <h2>Campaign funnel</h2>
+            <p>URL da empresa -> Business DNA -> campanha completa -> aprovação -> publicação autorizada -> captação de leads -> relatório e próxima campanha.</p>
+        </div>
+    </div>
+    <div class="campaign-flow">
+        <span><i class="bi bi-link-45deg"></i>URL</span>
+        <span><i class="bi bi-fingerprint"></i>Business DNA</span>
+        <span><i class="bi bi-megaphone"></i>Posts + emails + landing</span>
+        <span><i class="bi bi-check2-square"></i>Approval</span>
+        <span><i class="bi bi-send-check"></i>Authorized publishing</span>
+        <span><i class="bi bi-person-plus"></i>Lead capture</span>
+        <span><i class="bi bi-graph-up"></i>Report</span>
+    </div>
+    <div class="business-dna-box mt-3">
+        <strong>Business DNA</strong>
+        <p>@(string.IsNullOrWhiteSpace(Model.Plan.BusinessDna) ? "Business DNA will be generated for new campaigns." : Model.Plan.BusinessDna)</p>
     </div>
 </section>
 
@@ -74,11 +101,126 @@
     <div class="surface app-stat-card">
         <span class="app-stat-icon"><i class="bi bi-envelope-paper"></i></span>
         <div>
-            <div class="app-stat-label">Email templates</div>
-            <div class="app-stat-value">@Model.Plan.Emails.Count</div>
+            <div class="app-stat-label">Landing views</div>
+            <div class="app-stat-value">@Model.Metrics.LandingViews</div>
+        </div>
+    </div>
+    <div class="surface app-stat-card">
+        <span class="app-stat-icon"><i class="bi bi-person-plus-fill"></i></span>
+        <div>
+            <div class="app-stat-label">Captured leads</div>
+            <div class="app-stat-value">@Model.Metrics.CapturedLeads</div>
         </div>
     </div>
 </div>
+
+@if (Model.Plan.LandingPage is not null)
+{
+    var landingUrl = Url.Page("/Campaign", new { slug = Model.Plan.LandingPage.Slug });
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Landing page and form</h2>
+                <p>The landing page stays draft/approved until the campaign is scheduled. After authorized publication, it captures leads into this report.</p>
+            </div>
+            @if (Model.Plan.LandingPage.Status == "Published")
+            {
+                <a class="btn btn-sm btn-outline-secondary" href="@landingUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1"></i>Open public page</a>
+            }
+        </div>
+
+        <article class="landing-review-card">
+            <div class="planner-post-head">
+                <span>@landingUrl</span>
+                <span class="badge @StatusClass(Model.Plan.LandingPage.Status)">@Model.Plan.LandingPage.Status</span>
+            </div>
+            <h3>@Model.Plan.LandingPage.Headline</h3>
+            <p class="planner-hook">@Model.Plan.LandingPage.Subheadline</p>
+            <div class="landing-body-preview">
+                @foreach (var paragraph in Model.Plan.LandingPage.Body.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    <p>@paragraph</p>
+                }
+            </div>
+            <div class="planner-card-footer">
+                <span>@Model.Plan.LandingPage.ViewCount views Â· @Model.Plan.LandingPage.Leads.Count captured leads</span>
+                @if (Model.Plan.LandingPage.Status == "Draft")
+                {
+                    <form method="post" asp-page-handler="ApproveLanding" asp-route-id="@Model.Plan.Id">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Approve landing</button>
+                    </form>
+                }
+            </div>
+
+            @if (Model.Plan.LandingPage.Status is "Draft" or "Approved")
+            {
+                <details class="planner-editor">
+                    <summary><i class="bi bi-pencil-square"></i>Edit landing page</summary>
+                    <form method="post" asp-page-handler="UpdateLanding" asp-route-id="@Model.Plan.Id" class="planner-editor-form">
+                        <div class="planner-editor-grid">
+                            <label class="planner-editor-field planner-editor-field-full">
+                                <span>Headline</span>
+                                <input class="form-control" name="headline" maxlength="180" value="@Model.Plan.LandingPage.Headline" />
+                            </label>
+                            <label class="planner-editor-field planner-editor-field-full">
+                                <span>Subheadline</span>
+                                <textarea class="form-control" name="subheadline" maxlength="260" rows="2">@Model.Plan.LandingPage.Subheadline</textarea>
+                            </label>
+                            <label class="planner-editor-field planner-editor-field-full">
+                                <span>Body</span>
+                                <textarea class="form-control" name="body" maxlength="1600" rows="7">@Model.Plan.LandingPage.Body</textarea>
+                            </label>
+                            <label class="planner-editor-field">
+                                <span>CTA</span>
+                                <input class="form-control" name="primaryCallToAction" maxlength="120" value="@Model.Plan.LandingPage.PrimaryCallToAction" />
+                            </label>
+                            <label class="planner-editor-field">
+                                <span>Form title</span>
+                                <input class="form-control" name="formTitle" maxlength="160" value="@Model.Plan.LandingPage.FormTitle" />
+                            </label>
+                            <label class="planner-editor-field planner-editor-field-full">
+                                <span>Form intro</span>
+                                <input class="form-control" name="formIntro" maxlength="260" value="@Model.Plan.LandingPage.FormIntro" />
+                            </label>
+                            <label class="planner-editor-field planner-editor-field-full">
+                                <span>Thank-you message</span>
+                                <input class="form-control" name="thankYouMessage" maxlength="260" value="@Model.Plan.LandingPage.ThankYouMessage" />
+                            </label>
+                        </div>
+                        <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-save2 me-1"></i>Save landing page</button>
+                    </form>
+                </details>
+            }
+        </article>
+
+        @if (Model.Plan.LandingPage.Leads.Any())
+        {
+            <div class="table-responsive mt-3">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Lead</th>
+                            <th>Company</th>
+                            <th>Source</th>
+                            <th>Captured</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var lead in Model.Plan.LandingPage.Leads.OrderByDescending(x => x.CreatedAtUtc))
+                    {
+                        <tr>
+                            <td><strong>@lead.Name</strong><div class="text-muted">@lead.Email</div></td>
+                            <td><strong>@lead.Company</strong><div class="text-muted">@lead.Role</div></td>
+                            <td>@lead.Source</td>
+                            <td class="text-muted">@lead.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+}
 
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">

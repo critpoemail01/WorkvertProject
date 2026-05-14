@@ -50,6 +50,8 @@ public class IndexModel : PageModel
     public IReadOnlyList<LeadSearchQuery> LeadSearchQueries { get; private set; } = [];
     public IReadOnlyList<DiscoveredLeadEmail> DiscoveredLeadEmails { get; private set; } = [];
     public IReadOnlyList<string> LeadDiscoveryWarnings { get; private set; } = [];
+    public int CrmLeadCount { get; private set; }
+    public int CrmLeadEmails { get; private set; }
 
     public record PlanRow(int Id, string ProductName, string Platforms, string Location, string Status, DateOnly StartDate, DateOnly EndDate, int Posts, int Emails);
 
@@ -125,13 +127,27 @@ public class IndexModel : PageModel
         [StringLength(4000)]
         public string? EmailAudience { get; set; }
 
+        [Display(Name = "Use imported CRM leads")]
+        public bool UseCrmLeads { get; set; }
+
+        [Display(Name = "CRM lead filter")]
+        [StringLength(240)]
+        public string? CrmLeadFilter { get; set; }
+
+        [Display(Name = "CRM lead limit")]
+        [Range(1, 500)]
+        public int CrmLeadLimit { get; set; } = 100;
+
         [Display(Name = "Company websites to scan")]
         [StringLength(3000)]
         public string? LeadCompanyUrls { get; set; }
     }
 
-    public async Task OnGetAsync()
+    public async Task OnGetAsync(int? sourcePlanId = null)
     {
+        if (sourcePlanId is not null)
+            await LoadNextCampaignSourceAsync(sourcePlanId.Value);
+
         await LoadPlansAsync();
     }
 
@@ -254,6 +270,12 @@ public class IndexModel : PageModel
 
         var latitude = ParseCoordinate(Input.AudienceLatitude, -90, 90);
         var longitude = ParseCoordinate(Input.AudienceLongitude, -180, 180);
+        var crmLeadEmails = Input.UseCrmLeads
+            ? await LoadMatchingCrmLeadEmailsAsync(userId, Input.CrmLeadFilter, Input.CrmLeadLimit)
+            : [];
+        var emailAudience = Input.UseCrmLeads && crmLeadEmails.Count > 0
+            ? MergeEmailAudience(Input.EmailAudience, crmLeadEmails)
+            : Input.EmailAudience;
 
         var plan = new MarketingPlan
         {
@@ -261,6 +283,7 @@ public class IndexModel : PageModel
             ProductName = Input.ProductName.Trim(),
             ProductUrl = Clean(Input.ProductUrl),
             CompanyOrIdea = Input.CompanyOrIdea.Trim(),
+            BusinessDna = string.Empty,
             TargetAudience = Input.TargetAudience.Trim(),
             ValueProposition = Input.ValueProposition.Trim(),
             CampaignGoal = Input.CampaignGoal.Trim(),
@@ -275,7 +298,9 @@ public class IndexModel : PageModel
             Frequency = Input.Frequency,
             StartDate = Input.StartDate,
             EndDate = endDate,
-            EmailAudience = Clean(Input.EmailAudience),
+            EmailAudience = Clean(emailAudience),
+            CrmLeadFilter = Input.UseCrmLeads ? Clean(Input.CrmLeadFilter) : null,
+            CrmLeadSourceCount = crmLeadEmails.Count,
             Status = "Draft"
         };
 
@@ -303,6 +328,10 @@ public class IndexModel : PageModel
         plan.Posts.AddRange(draft.Posts);
         plan.Emails.AddRange(draft.Emails);
         plan.Leads.AddRange(draft.Leads);
+        plan.LandingPage = draft.LandingPage;
+        plan.BusinessDna = plan.CrmLeadSourceCount > 0
+            ? Clip($"{draft.BusinessDna} CRM focus: {plan.CrmLeadSourceCount} imported lead email{(plan.CrmLeadSourceCount == 1 ? "" : "s")} matching '{plan.CrmLeadFilter ?? "all CRM leads"}'.", 1000)
+            : draft.BusinessDna;
 
         _db.MarketingPlans.Add(plan);
         await _db.SaveChangesAsync();
@@ -347,6 +376,9 @@ public class IndexModel : PageModel
                 x.Posts,
                 x.Emails))
             .ToList();
+
+        CrmLeadCount = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId);
+        CrmLeadEmails = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Email != "");
     }
 
     private void NormalizeInput()
@@ -363,11 +395,82 @@ public class IndexModel : PageModel
         Input.AudienceCountry = Clean(Input.AudienceCountry);
         Input.AudienceCity = Clean(Input.AudienceCity);
         Input.AudienceRadiusKm = Math.Clamp(Input.AudienceRadiusKm, 1, 1000);
+        Input.CrmLeadFilter = Clean(Input.CrmLeadFilter);
+        Input.CrmLeadLimit = Math.Clamp(Input.CrmLeadLimit, 1, 500);
 
         Input.Platforms = Input.Platforms
             .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private async Task LoadNextCampaignSourceAsync(int sourcePlanId)
+    {
+        var userId = _userManager.GetUserId(User) ?? string.Empty;
+        var source = await _db.MarketingPlans
+            .AsNoTracking()
+            .Include(x => x.LandingPage)
+            .ThenInclude(x => x!.Leads)
+            .FirstOrDefaultAsync(x => x.Id == sourcePlanId && x.UserId == userId);
+
+        if (source is null)
+            return;
+
+        Input.ProductName = source.ProductName;
+        Input.ProductUrl = source.ProductUrl;
+        Input.CompanyOrIdea = source.CompanyOrIdea;
+        Input.TargetAudience = source.TargetAudience;
+        Input.ValueProposition = source.ValueProposition;
+        Input.CampaignGoal = source.CampaignGoal;
+        Input.Tone = source.Tone;
+        Input.Platforms = source.Platforms
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        Input.AudienceLocationScope = source.AudienceLocationScope;
+        Input.AudienceCountry = source.AudienceCountry;
+        Input.AudienceCity = source.AudienceCity;
+        Input.AudienceLatitude = source.AudienceLatitude?.ToString(CultureInfo.InvariantCulture);
+        Input.AudienceLongitude = source.AudienceLongitude?.ToString(CultureInfo.InvariantCulture);
+        Input.AudienceRadiusKm = source.AudienceRadiusKm ?? 25;
+        Input.StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+        Input.DurationDays = Math.Clamp(source.EndDate.DayNumber - source.StartDate.DayNumber + 1, 7, 90);
+        Input.Frequency = source.Frequency;
+        Input.EmailAudience = MergeEmailAudience(
+            source.EmailAudience,
+            source.LandingPage?.Leads.Select(x => x.Email) ?? Enumerable.Empty<string>());
+        Input.UseCrmLeads = source.CrmLeadSourceCount > 0;
+        Input.CrmLeadFilter = source.CrmLeadFilter;
+        Input.CrmLeadLimit = Math.Max(100, source.CrmLeadSourceCount);
+        SuggestionMessage = "Next campaign prepared from the previous campaign report and captured leads.";
+    }
+
+    private async Task<List<string>> LoadMatchingCrmLeadEmailsAsync(string userId, string? filter, int limit)
+    {
+        var query = _db.CrmLeads
+            .AsNoTracking()
+            .Where(x => x.UserId == userId && x.Email != "" && x.Status == "Imported");
+
+        if (!string.IsNullOrWhiteSpace(filter))
+        {
+            var term = filter.Trim();
+            query = query.Where(x =>
+                (x.CompanyName != null && x.CompanyName.Contains(term)) ||
+                (x.ContactName != null && x.ContactName.Contains(term)) ||
+                (x.Role != null && x.Role.Contains(term)) ||
+                (x.Industry != null && x.Industry.Contains(term)) ||
+                (x.Country != null && x.Country.Contains(term)) ||
+                (x.City != null && x.City.Contains(term)) ||
+                (x.Stage != null && x.Stage.Contains(term)) ||
+                (x.Tags != null && x.Tags.Contains(term)));
+        }
+
+        return await query
+            .OrderByDescending(x => x.UpdatedAtUtc)
+            .Take(limit)
+            .Select(x => x.Email)
+            .ToListAsync();
     }
 
     private void ValidateLocation()
@@ -444,6 +547,11 @@ public class IndexModel : PageModel
     private static string? Clean(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string Clip(string value, int maxLength)
+    {
+        return value.Length <= maxLength ? value : value[..Math.Max(0, maxLength - 3)].TrimEnd() + "...";
     }
 
     private static double? ParseCoordinate(string? value, double min, double max)
