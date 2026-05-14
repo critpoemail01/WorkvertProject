@@ -283,21 +283,33 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostDiscoverLeadsAsync(CancellationToken cancellationToken)
     {
+        return await SuggestLeadEmailsAsync(searchOnline: false, cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostSuggestLeadEmailsAsync(CancellationToken cancellationToken)
+    {
+        return await SuggestLeadEmailsAsync(searchOnline: true, cancellationToken);
+    }
+
+    private async Task<IActionResult> SuggestLeadEmailsAsync(bool searchOnline, CancellationToken cancellationToken)
+    {
         NormalizeInput();
         ModelState.Clear();
 
-        if (string.IsNullOrWhiteSpace(Input.TargetAudience))
+        if (string.IsNullOrWhiteSpace(Input.TargetAudience) && string.IsNullOrWhiteSpace(Input.CompanyOrIdea))
         {
-            ModelState.AddModelError("Input.TargetAudience", "Add the target audience before discovering potential clients.");
+            ModelState.AddModelError("Input.EmailAudience", "Add the target audience or company idea before suggesting emails.");
             await LoadPlansAsync();
             return Page();
         }
 
         var result = await _leadDiscovery.DiscoverAsync(new LeadDiscoveryRequest(
-            Input.TargetAudience,
+            string.IsNullOrWhiteSpace(Input.TargetAudience) ? Input.CompanyOrIdea : Input.TargetAudience,
             Input.CampaignGoal,
             BuildInputLocationSummary(),
-            Input.LeadCompanyUrls),
+            Input.LeadCompanyUrls,
+            BuildLeadDiscoveryProductContext(),
+            searchOnline),
             cancellationToken);
 
         LeadSearchQueries = result.SearchQueries;
@@ -307,11 +319,15 @@ public class IndexModel : PageModel
         if (result.Emails.Count > 0)
         {
             Input.EmailAudience = MergeEmailAudience(Input.EmailAudience, result.Emails.Select(x => x.Email));
-            LeadDiscoveryMessage = $"{result.Emails.Count} public email address{(result.Emails.Count == 1 ? "" : "es")} found and added to the potential-client list for review.";
+            LeadDiscoveryMessage = searchOnline
+                ? $"{result.Emails.Count} public email address{(result.Emails.Count == 1 ? "" : "es")} suggested from online company pages and added for review."
+                : $"{result.Emails.Count} public email address{(result.Emails.Count == 1 ? "" : "es")} found and added to the potential-client list for review.";
         }
         else
         {
-            LeadDiscoveryMessage = "Prospecting searches were prepared. Add company websites or contact-page URLs to extract public emails.";
+            LeadDiscoveryMessage = searchOnline
+                ? "No public emails were found automatically. Review the prospecting searches or type/paste emails manually."
+                : "Prospecting searches were prepared. Add company websites or contact-page URLs to extract public emails.";
         }
 
         ModelState.Clear();
@@ -718,6 +734,17 @@ public class IndexModel : PageModel
             Input.AudienceCountry,
             Input.AudienceCity,
             Input.AudienceRadiusKm);
+    }
+
+    private string BuildLeadDiscoveryProductContext()
+    {
+        return string.Join(" ", new[]
+        {
+            Input.ProductName,
+            Input.DetectedApplicationType,
+            Input.CompanyOrIdea,
+            Input.ValueProposition
+        }.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
     private static string MergeEmailAudience(string? existingAudience, IEnumerable<string> discoveredEmails)

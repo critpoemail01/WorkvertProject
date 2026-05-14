@@ -49,6 +49,42 @@ public class LeadDiscoveryServiceTests
     }
 
     [Fact]
+    public async Task DiscoverAsync_SearchesOnlineAndExtractsEmailsWhenRequested()
+    {
+        var service = new LeadDiscoveryService(new HttpClient(new TestHandler(request =>
+        {
+            var host = request.RequestUri?.Host ?? "";
+            var path = request.RequestUri?.AbsolutePath ?? "/";
+            if (host.Contains("bing.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("<html><li class=\"b_algo\"><a href=\"https://prospect.example/contact\">Prospect</a></li></html>")
+                };
+            }
+
+            var html = path.Equals("/contact", StringComparison.OrdinalIgnoreCase)
+                ? "<html><a href=\"mailto:hello@prospect.example\">hello@prospect.example</a></html>"
+                : "<html><a href=\"/contact\">Contact</a></html>";
+
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(html)
+            };
+        })));
+
+        var result = await service.DiscoverAsync(new LeadDiscoveryRequest(
+            "industrial operations managers",
+            "demos",
+            "Portugal",
+            null,
+            "production planning software",
+            SearchOnline: true));
+
+        Assert.Contains(result.Emails, email => email.Email == "hello@prospect.example");
+    }
+
+    [Fact]
     public async Task DiscoverAsync_SkipsInternalUrls()
     {
         var service = new LeadDiscoveryService(new HttpClient(new TestHandler(_ => new HttpResponseMessage(HttpStatusCode.OK))));

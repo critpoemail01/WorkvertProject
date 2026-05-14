@@ -360,24 +360,26 @@
                 </section>
             </div>
             <div class="col-12">
-                <label asp-for="Input.EmailAudience" class="form-label"></label>
-                <textarea asp-for="Input.EmailAudience" class="form-control" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;marketing@empresa.pt"></textarea>
-                <div class="form-text">One email per line. Promovert generates a multi-day sequence and estimates reach, replies/interactions and conversions.</div>
-                <span asp-validation-for="Input.EmailAudience" class="text-danger"></span>
-            </div>
-            <div class="col-12">
-                <section class="lead-discovery-panel">
+                <section class="lead-discovery-panel lead-email-builder">
                     <div class="lead-discovery-head">
                         <div>
-                            <label asp-for="Input.LeadCompanyUrls" class="form-label mb-1"></label>
-                            <p class="form-text mb-0">Paste public company websites or contact pages, one per line. Promovert extracts visible contact emails and adds them above for review.</p>
+                            <label asp-for="Input.EmailAudience" class="form-label mb-1"></label>
+                            <p class="form-text mb-0">Type emails manually, or let Promovert suggest public contact emails based on product, audience and location.</p>
                         </div>
-                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=DiscoverLeads" formnovalidate>
-                            <i class="bi bi-search me-1"></i>Find potential clients
+                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=SuggestLeadEmails" formnovalidate>
+                            <i class="bi bi-search me-1"></i>Suggest emails
                         </button>
                     </div>
-                    <textarea asp-for="Input.LeadCompanyUrls" class="form-control mt-3" rows="4" placeholder="https://empresa.pt&#10;https://example.com/contact"></textarea>
-                    <span asp-validation-for="Input.LeadCompanyUrls" class="text-danger"></span>
+                    <textarea asp-for="Input.EmailAudience" class="form-control mt-3" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;marketing@empresa.pt"></textarea>
+                    <div class="form-text">One email per line. Suggested emails are added here for review before generating the campaign.</div>
+                    <span asp-validation-for="Input.EmailAudience" class="text-danger"></span>
+
+                    <details class="lead-source-details mt-3">
+                        <summary>Optional: add known company websites or contact pages</summary>
+                        <p class="form-text mb-2">If you already know possible companies, paste their public websites here. The same button extracts visible emails from them and merges them with the manual list.</p>
+                        <textarea asp-for="Input.LeadCompanyUrls" class="form-control" rows="4" placeholder="https://empresa.pt&#10;https://example.com/contact"></textarea>
+                        <span asp-validation-for="Input.LeadCompanyUrls" class="text-danger"></span>
+                    </details>
 
                     @if (Model.LeadSearchQueries.Any() || Model.DiscoveredLeadEmails.Any() || Model.LeadDiscoveryWarnings.Any())
                     {

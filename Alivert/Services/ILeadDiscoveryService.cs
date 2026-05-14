@@ -9,7 +9,9 @@ public sealed record LeadDiscoveryRequest(
     string TargetAudience,
     string CampaignGoal,
     string LocationSummary,
-    string? CompanyWebsiteUrls);
+    string? CompanyWebsiteUrls,
+    string? ProductContext = null,
+    bool SearchOnline = false);
 
 public sealed record LeadDiscoveryResult(
     IReadOnlyList<LeadSearchQuery> SearchQueries,

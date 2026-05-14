@@ -8,10 +8,15 @@ namespace Alivert.Services;
 public sealed class LeadDiscoveryService : ILeadDiscoveryService
 {
     private const int MaxUrlsPerRequest = 8;
+    private const int MaxOnlineSearchQueries = 4;
+    private const int MaxOnlineWebsites = 8;
     private const int MaxPagesPerWebsite = 5;
     private const int MaxPageChars = 220_000;
     private static readonly Regex EmailRegex = new(
         @"[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,24}",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    private static readonly Regex HrefRegex = new(
+        "href\\s*=\\s*[\"'](?<url>https?://[^\"'<>]+)[\"']",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private readonly HttpClient _httpClient;
@@ -26,8 +31,22 @@ public sealed class LeadDiscoveryService : ILeadDiscoveryService
         var queries = BuildSearchQueries(request);
         var warnings = new List<string>();
         var discovered = new Dictionary<string, DiscoveredLeadEmail>(StringComparer.OrdinalIgnoreCase);
+        var websites = ParseCompanyUrls(request.CompanyWebsiteUrls).Take(MaxUrlsPerRequest).ToList();
 
-        foreach (var website in ParseCompanyUrls(request.CompanyWebsiteUrls).Take(MaxUrlsPerRequest))
+        if (request.SearchOnline)
+        {
+            var onlineWebsites = await FindOnlineCandidateWebsitesAsync(queries, cancellationToken);
+            websites = websites
+                .Concat(onlineWebsites)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(MaxUrlsPerRequest + MaxOnlineWebsites)
+                .ToList();
+
+            if (onlineWebsites.Count == 0)
+                warnings.Add("No company websites were found automatically for this audience and location. Review the prospecting searches or paste known company websites.");
+        }
+
+        foreach (var website in websites)
         {
             if (!TryCreatePublicUri(website, out var rootUri, out var rejectReason))
             {
@@ -54,9 +73,11 @@ public sealed class LeadDiscoveryService : ILeadDiscoveryService
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(request.CompanyWebsiteUrls) && discovered.Count == 0)
+        if (websites.Count > 0 && discovered.Count == 0)
         {
-            warnings.Add("No public email addresses were found on the supplied company websites. Try adding the company contact page URLs directly.");
+            warnings.Add(request.SearchOnline
+                ? "No public email addresses were found automatically on the candidate company websites. You can still paste emails manually."
+                : "No public email addresses were found on the supplied company websites. Try adding the company contact page URLs directly.");
         }
 
         return new LeadDiscoveryResult(
@@ -70,9 +91,11 @@ public sealed class LeadDiscoveryService : ILeadDiscoveryService
         var audience = CleanQueryPart(request.TargetAudience, "potential customers");
         var goal = CleanQueryPart(request.CampaignGoal, "subscriptions");
         var location = CleanQueryPart(request.LocationSummary, "worldwide");
+        var product = CleanQueryPart(request.ProductContext, audience);
         var segments = SegmentKeywords(request.TargetAudience).Take(4).ToList();
         var queries = new List<LeadSearchQuery>
         {
+            Search("Companies likely to need this product", $"{product} {audience} companies {location} contact email"),
             Search("Companies matching target audience", $"{audience} companies {location} contact"),
             Search("Decision makers to contact", $"{audience} founder marketing manager sales lead {location}"),
             Search("Directories and associations", $"{audience} business directory association {location}"),
@@ -89,7 +112,114 @@ public sealed class LeadDiscoveryService : ILeadDiscoveryService
 
     private static LeadSearchQuery Search(string label, string query)
     {
-        return new LeadSearchQuery(label, $"https://www.google.com/search?q={Uri.EscapeDataString(query)}");
+        return new LeadSearchQuery(label, $"https://www.bing.com/search?q={Uri.EscapeDataString(query)}");
+    }
+
+    private async Task<IReadOnlyList<string>> FindOnlineCandidateWebsitesAsync(
+        IReadOnlyList<LeadSearchQuery> queries,
+        CancellationToken cancellationToken)
+    {
+        var websites = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var query in queries.Take(MaxOnlineSearchQueries))
+        {
+            string html;
+            try
+            {
+                html = await DownloadPageAsync(new Uri(query.Url), cancellationToken);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
+            {
+                continue;
+            }
+
+            foreach (var resultUrl in ExtractSearchResultUrls(html))
+            {
+                if (!TryCreatePublicUri(resultUrl, out var candidateRoot, out _) ||
+                    IsSearchOrSocialHost(candidateRoot.Host))
+                {
+                    continue;
+                }
+
+                var candidate = candidateRoot.ToString();
+                if (!seen.Add(candidate))
+                    continue;
+
+                websites.Add(candidate);
+                if (websites.Count >= MaxOnlineWebsites)
+                    return websites;
+            }
+        }
+
+        return websites;
+    }
+
+    private static IEnumerable<string> ExtractSearchResultUrls(string html)
+    {
+        foreach (Match match in HrefRegex.Matches(html))
+        {
+            var decoded = WebUtility.HtmlDecode(match.Groups["url"].Value);
+            var normalized = DecodeBingRedirect(decoded);
+            if (!string.IsNullOrWhiteSpace(normalized))
+                yield return normalized;
+        }
+    }
+
+    private static string DecodeBingRedirect(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            !uri.Host.EndsWith("bing.com", StringComparison.OrdinalIgnoreCase) ||
+            !uri.AbsolutePath.StartsWith("/ck/", StringComparison.OrdinalIgnoreCase))
+        {
+            return url;
+        }
+
+        var encodedTarget = QueryValue(uri, "u");
+        if (string.IsNullOrWhiteSpace(encodedTarget))
+            return url;
+
+        if (encodedTarget.StartsWith("a1", StringComparison.OrdinalIgnoreCase))
+            encodedTarget = encodedTarget[2..];
+
+        try
+        {
+            var padded = encodedTarget.Replace('-', '+').Replace('_', '/');
+            padded = padded.PadRight(padded.Length + (4 - padded.Length % 4) % 4, '=');
+            var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(padded));
+            return Uri.TryCreate(decoded, UriKind.Absolute, out _) ? decoded : url;
+        }
+        catch (FormatException)
+        {
+            return url;
+        }
+    }
+
+    private static string? QueryValue(Uri uri, string name)
+    {
+        foreach (var part in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var pieces = part.Split('=', 2);
+            if (pieces.Length == 2 && pieces[0].Equals(name, StringComparison.OrdinalIgnoreCase))
+                return WebUtility.UrlDecode(pieces[1]);
+        }
+
+        return null;
+    }
+
+    private static bool IsSearchOrSocialHost(string host)
+    {
+        var normalized = host.ToLowerInvariant();
+        return normalized.Contains("bing.com") ||
+            normalized.Contains("google.") ||
+            normalized.Contains("duckduckgo.") ||
+            normalized.Contains("microsoft.com") ||
+            normalized.Contains("linkedin.com") ||
+            normalized.Contains("facebook.com") ||
+            normalized.Contains("instagram.com") ||
+            normalized.Contains("youtube.com") ||
+            normalized.Contains("x.com") ||
+            normalized.Contains("twitter.com");
     }
 
     private static IEnumerable<string> SegmentKeywords(string targetAudience)
@@ -247,7 +377,7 @@ public sealed class LeadDiscoveryService : ILeadDiscoveryService
         return true;
     }
 
-    private static string CleanQueryPart(string value, string fallback)
+    private static string CleanQueryPart(string? value, string fallback)
     {
         if (string.IsNullOrWhiteSpace(value))
             return fallback;
