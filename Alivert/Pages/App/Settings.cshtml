@@ -48,13 +48,13 @@
                     <label class="notification-channel-switch">
                         <span>
                             <strong>Email outreach</strong>
-                            <small>Uses the account email with the SMTP transport configured on the server.</small>
+                            <small>Uses verified SMTP sender profiles configured on the server, selected per recipient for healthier delivery.</small>
                         </span>
                         <span class="form-check form-switch m-0">
                             <input class="form-check-input" asp-for="Input.EmailEnabled" />
                         </span>
                     </label>
-                    <small class="notification-channel-note">@(Model.EmailTransportConfigured ? "SMTP email transport is configured." : "Set Notifications:Email before email campaigns can send.")</small>
+                    <small class="notification-channel-note">@(Model.EmailTransportConfigured ? $"{Model.EmailSenderProfileCount} verified sender profile{(Model.EmailSenderProfileCount == 1 ? "" : "s")} configured." : "Set Notifications:Email or Notifications:Email:SenderProfiles before email campaigns can send.")</small>
                 </article>
 
                 <article class="notification-channel-card">

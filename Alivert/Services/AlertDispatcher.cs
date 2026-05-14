@@ -219,7 +219,8 @@ public sealed class AlertDispatcher : IAlertDispatcher
             return Skip(log, "Email outreach is disabled.");
 
         var emailOptions = _options.CurrentValue.Email;
-        if (!EmailTransportConfigured(emailOptions))
+        var senderProfiles = EmailSenderPool.GetConfiguredSenders(emailOptions);
+        if (senderProfiles.Count == 0)
             return Skip(log, "Email transport is not configured yet.");
 
         var recipients = ParseAudienceEmailRecipients(alert.AudienceList).ToList();
@@ -240,19 +241,19 @@ public sealed class AlertDispatcher : IAlertDispatcher
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(_options.CurrentValue.RequestTimeoutSeconds, 1, 30)));
 
-        using var client = new SmtpClient(emailOptions.SmtpServer.Trim(), emailOptions.SmtpPort)
+        for (var index = 0; index < recipients.Count; index++)
         {
-            EnableSsl = emailOptions.EnableSsl,
-            Credentials = new NetworkCredential(
-                string.IsNullOrWhiteSpace(emailOptions.Username) ? emailOptions.FromEmail!.Trim() : emailOptions.Username.Trim(),
-                emailOptions.Password)
-        };
+            var recipient = recipients[index];
+            var sender = EmailSenderPool.SelectSender(senderProfiles, alert.Id, recipient.Address, index);
+            using var client = new SmtpClient(sender.SmtpServer, sender.SmtpPort)
+            {
+                EnableSsl = sender.EnableSsl,
+                Credentials = new NetworkCredential(sender.Username, sender.Password)
+            };
 
-        foreach (var recipient in recipients)
-        {
             using var mail = new MailMessage
             {
-                From = new MailAddress(emailOptions.FromEmail!.Trim(), string.IsNullOrWhiteSpace(emailOptions.FromName) ? "Promovert" : emailOptions.FromName.Trim()),
+                From = new MailAddress(sender.FromEmail, sender.FromName),
                 Subject = Truncate($"Promovert campaign - {alert.Symbol}", 120),
                 Body = BuildEmailBody(alert, snapshot, message, RecipientName(recipient)),
                 IsBodyHtml = false
@@ -263,7 +264,9 @@ public sealed class AlertDispatcher : IAlertDispatcher
         }
 
         log.Status = "Sent";
-        log.Destination = recipients.Count == 1 ? recipients[0].Address : $"{recipients.Count} potential clients";
+        log.Destination = recipients.Count == 1
+            ? recipients[0].Address
+            : $"{recipients.Count} potential clients via {senderProfiles.Count} sender profile{(senderProfiles.Count == 1 ? "" : "s")}";
         return log;
     }
 
@@ -357,14 +360,6 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         uri = parsed;
         return true;
-    }
-
-    private static bool EmailTransportConfigured(EmailNotificationOptions options)
-    {
-        return !string.IsNullOrWhiteSpace(options.FromEmail) &&
-            !string.IsNullOrWhiteSpace(options.Password) &&
-            !string.IsNullOrWhiteSpace(options.SmtpServer) &&
-            options.SmtpPort > 0;
     }
 
     private static AlertDeliveryLog DeliverCampaignQueue(AlertDeliveryLog log, Alert alert, string channel)

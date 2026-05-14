@@ -36,6 +36,7 @@ public class SettingsModel : PageModel
 
     public bool TelegramBotConfigured { get; private set; }
     public bool EmailTransportConfigured { get; private set; }
+    public int EmailSenderProfileCount { get; private set; }
     public IReadOnlyList<ScheduleTimeZoneChoice> NotificationTimeZones { get; private set; } = TimeZoneCatalog.GetScheduleChoices(DateTime.UtcNow);
 
     public class InputModel
@@ -72,6 +73,7 @@ public class SettingsModel : PageModel
     {
         TelegramBotConfigured = !string.IsNullOrWhiteSpace(_notificationOptions.CurrentValue.TelegramBotToken);
         EmailTransportConfigured = IsEmailTransportConfigured();
+        EmailSenderProfileCount = CountEmailSenderProfiles();
 
         var userId = _userManager.GetUserId(User) ?? string.Empty;
         var settings = await _db.UserNotificationSettings
@@ -94,6 +96,7 @@ public class SettingsModel : PageModel
     {
         TelegramBotConfigured = !string.IsNullOrWhiteSpace(_notificationOptions.CurrentValue.TelegramBotToken);
         EmailTransportConfigured = IsEmailTransportConfigured();
+        EmailSenderProfileCount = CountEmailSenderProfiles();
 
         ValidateOptionalUrl("Input.WebhookUrl", Input.WebhookUrl);
         ValidateOptionalUrl("Input.DiscordWebhookUrl", Input.DiscordWebhookUrl);
@@ -145,10 +148,11 @@ public class SettingsModel : PageModel
 
     private bool IsEmailTransportConfigured()
     {
-        var email = _notificationOptions.CurrentValue.Email;
-        return !string.IsNullOrWhiteSpace(email.FromEmail) &&
-            !string.IsNullOrWhiteSpace(email.Password) &&
-            !string.IsNullOrWhiteSpace(email.SmtpServer) &&
-            email.SmtpPort > 0;
+        return CountEmailSenderProfiles() > 0;
+    }
+
+    private int CountEmailSenderProfiles()
+    {
+        return EmailSenderPool.GetConfiguredSenders(_notificationOptions.CurrentValue.Email).Count;
     }
 }
