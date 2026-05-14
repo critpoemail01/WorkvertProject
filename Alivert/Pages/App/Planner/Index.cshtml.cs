@@ -23,19 +23,22 @@ public class IndexModel : PageModel
     private readonly IAiMarketingPlannerService _planner;
     private readonly IUrlCampaignBriefSuggester _urlSuggester;
     private readonly ILeadDiscoveryService _leadDiscovery;
+    private readonly ICampaignLibraryService _campaignLibrary;
 
     public IndexModel(
         ApplicationDbContext db,
         UserManager<IdentityUser> userManager,
         IAiMarketingPlannerService planner,
         IUrlCampaignBriefSuggester urlSuggester,
-        ILeadDiscoveryService leadDiscovery)
+        ILeadDiscoveryService leadDiscovery,
+        ICampaignLibraryService campaignLibrary)
     {
         _db = db;
         _userManager = userManager;
         _planner = planner;
         _urlSuggester = urlSuggester;
         _leadDiscovery = leadDiscovery;
+        _campaignLibrary = campaignLibrary;
     }
 
     [BindProperty]
@@ -50,6 +53,7 @@ public class IndexModel : PageModel
     public IReadOnlyList<LeadSearchQuery> LeadSearchQueries { get; private set; } = [];
     public IReadOnlyList<DiscoveredLeadEmail> DiscoveredLeadEmails { get; private set; } = [];
     public IReadOnlyList<string> LeadDiscoveryWarnings { get; private set; } = [];
+    public IReadOnlyList<SectorCampaignRecommendation> CampaignRecommendations { get; private set; } = [];
     public int CrmLeadCount { get; private set; }
     public int CrmLeadEmails { get; private set; }
 
@@ -138,15 +142,28 @@ public class IndexModel : PageModel
         [Range(1, 500)]
         public int CrmLeadLimit { get; set; } = 100;
 
+        [StringLength(120)]
+        public string? DetectedApplicationType { get; set; }
+
         [Display(Name = "Company websites to scan")]
         [StringLength(3000)]
         public string? LeadCompanyUrls { get; set; }
     }
 
-    public async Task OnGetAsync(int? sourcePlanId = null)
+    public async Task OnGetAsync(int? sourcePlanId = null, string? templateKey = null)
     {
         if (sourcePlanId is not null)
             await LoadNextCampaignSourceAsync(sourcePlanId.Value);
+
+        if (!string.IsNullOrWhiteSpace(templateKey))
+        {
+            var template = _campaignLibrary.Find(templateKey);
+            if (template is not null)
+            {
+                ApplyTemplate(template);
+                SuggestionMessage = $"{template.Sector}: '{template.Title}' prepared as the next campaign.";
+            }
+        }
 
         await LoadPlansAsync();
     }
@@ -173,6 +190,7 @@ public class IndexModel : PageModel
             Input.ValueProposition = suggestion.ValueProposition;
             Input.CampaignGoal = suggestion.CampaignGoal;
             Input.Tone = suggestion.Tone;
+            Input.DetectedApplicationType = suggestion.DetectedApplicationType;
             Input.Platforms = suggestion.Platforms
                 .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -195,6 +213,25 @@ public class IndexModel : PageModel
                 : ex.Message);
         }
 
+        await LoadPlansAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostUseTemplateAsync(string templateKey)
+    {
+        NormalizeInput();
+        ModelState.Clear();
+
+        var template = _campaignLibrary.Find(templateKey);
+        if (template is null)
+        {
+            ModelState.AddModelError(string.Empty, "Campaign template not found.");
+            await LoadPlansAsync();
+            return Page();
+        }
+
+        ApplyTemplate(template);
+        SuggestionMessage = $"{template.Sector}: '{template.Title}' applied. Review the structured campaign before generating the plan.";
         await LoadPlansAsync();
         return Page();
     }
@@ -379,6 +416,7 @@ public class IndexModel : PageModel
 
         CrmLeadCount = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId);
         CrmLeadEmails = await _db.CrmLeads.AsNoTracking().CountAsync(x => x.UserId == userId && x.Email != "");
+        CampaignRecommendations = _campaignLibrary.Recommend(BuildCampaignLibraryRequest(), 3);
     }
 
     private void NormalizeInput()
@@ -396,6 +434,7 @@ public class IndexModel : PageModel
         Input.AudienceCity = Clean(Input.AudienceCity);
         Input.AudienceRadiusKm = Math.Clamp(Input.AudienceRadiusKm, 1, 1000);
         Input.CrmLeadFilter = Clean(Input.CrmLeadFilter);
+        Input.DetectedApplicationType = Clean(Input.DetectedApplicationType);
         Input.CrmLeadLimit = Math.Clamp(Input.CrmLeadLimit, 1, 500);
 
         Input.Platforms = Input.Platforms
@@ -471,6 +510,45 @@ public class IndexModel : PageModel
             .Take(limit)
             .Select(x => x.Email)
             .ToListAsync();
+    }
+
+    private void ApplyTemplate(SectorCampaignRecommendation template)
+    {
+        Input.CampaignGoal = Clip(template.Goal, 200);
+        Input.ValueProposition = Clip(string.IsNullOrWhiteSpace(Input.ValueProposition)
+            ? template.Offer
+            : $"{Input.ValueProposition}. Campaign offer: {template.Offer}", 700);
+        Input.TargetAudience = Clip(string.IsNullOrWhiteSpace(Input.TargetAudience)
+            ? template.Audience
+            : Input.TargetAudience, 700);
+        Input.CompanyOrIdea = Clip(string.IsNullOrWhiteSpace(Input.CompanyOrIdea)
+            ? $"{template.Sector} campaign: {template.Strategy}"
+            : Input.CompanyOrIdea, 400);
+        Input.DurationDays = Math.Clamp(template.DurationDays, 7, 90);
+        Input.Frequency = SupportedFrequencies.Contains(template.Frequency, StringComparer.OrdinalIgnoreCase)
+            ? template.Frequency
+            : "ThreePerWeek";
+        Input.Platforms = template.Platforms
+            .Where(platform => SupportedPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (Input.Platforms.Count == 0)
+            Input.Platforms = ["Instagram", "Facebook", "LinkedIn"];
+
+        Input.Tone = Clip($"{template.Sector.ToLowerInvariant()}, practical and conversion-focused", 80);
+        Input.DetectedApplicationType = template.Sector;
+    }
+
+    private CampaignLibraryRequest BuildCampaignLibraryRequest()
+    {
+        return new CampaignLibraryRequest(
+            Input.ProductName,
+            Input.CompanyOrIdea,
+            Input.TargetAudience,
+            Input.ValueProposition,
+            Input.CampaignGoal,
+            Input.DetectedApplicationType);
     }
 
     private void ValidateLocation()

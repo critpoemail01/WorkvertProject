@@ -15,16 +15,23 @@ public class DetailsModel : PageModel
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IUserAccountService _accounts;
+    private readonly ICampaignLibraryService _campaignLibrary;
 
-    public DetailsModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IUserAccountService accounts)
+    public DetailsModel(
+        ApplicationDbContext db,
+        UserManager<IdentityUser> userManager,
+        IUserAccountService accounts,
+        ICampaignLibraryService campaignLibrary)
     {
         _db = db;
         _userManager = userManager;
         _accounts = accounts;
+        _campaignLibrary = campaignLibrary;
     }
 
     public MarketingPlan Plan { get; private set; } = default!;
     public MetricsSummary Metrics { get; private set; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public IReadOnlyList<SectorCampaignRecommendation> NextCampaignRecommendations { get; private set; } = [];
     public int PlanCreditUnits => CampaignCreditUsage.CountPlatformUnits(Plan.Platforms);
     [TempData]
     public string? StatusMessage { get; set; }
@@ -371,6 +378,13 @@ public class DetailsModel : PageModel
 
         Plan = plan;
         Metrics = BuildMetrics(plan);
+        NextCampaignRecommendations = _campaignLibrary.Recommend(new CampaignLibraryRequest(
+            plan.ProductName,
+            plan.CompanyOrIdea,
+            plan.TargetAudience,
+            plan.ValueProposition,
+            plan.CampaignGoal,
+            plan.BusinessDna), 3);
         return true;
     }
 

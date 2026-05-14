@@ -36,6 +36,7 @@
                 <p>Add a URL and let Promovert suggest the brief, then adjust anything before generating posts, emails, a landing page and lead capture.</p>
             </div>
         </div>
+        <input asp-for="Input.DetectedApplicationType" type="hidden" />
 
         <div class="row g-3">
             <div class="col-md-6">
@@ -59,6 +60,38 @@
                 <textarea asp-for="Input.CompanyOrIdea" class="form-control" rows="3" placeholder="What the company/app does, business model and current stage"></textarea>
                 <span asp-validation-for="Input.CompanyOrIdea" class="text-danger"></span>
             </div>
+            @if (Model.CampaignRecommendations.Any())
+            {
+                <div class="col-12">
+                    <section class="campaign-library-panel">
+                        <div class="lead-discovery-head">
+                            <div>
+                                <h3>Campaign library by sector</h3>
+                                <p class="form-text mb-0">Suggested complete campaigns for this type of company. Apply one to replace the generic plan with a sector-specific campaign.</p>
+                            </div>
+                        </div>
+                        <div class="campaign-library-grid">
+                            @foreach (var recommendation in Model.CampaignRecommendations)
+                            {
+                                <article class="campaign-template-card">
+                                    <span class="tag">@recommendation.Sector</span>
+                                    <h4>@recommendation.Title</h4>
+                                    <p>@recommendation.Strategy</p>
+                                    <dl>
+                                        <div><dt>Goal</dt><dd>@recommendation.Goal</dd></div>
+                                        <div><dt>Offer</dt><dd>@recommendation.Offer</dd></div>
+                                        <div><dt>Channels</dt><dd>@string.Join(" + ", recommendation.Platforms)</dd></div>
+                                        <div><dt>Duration</dt><dd>@recommendation.DurationDays days</dd></div>
+                                    </dl>
+                                    <button class="btn btn-sm btn-outline-secondary" type="submit" formaction="?handler=UseTemplate&templateKey=@recommendation.Key" formnovalidate>
+                                        Apply campaign
+                                    </button>
+                                </article>
+                            }
+                        </div>
+                    </section>
+                </div>
+            }
             <div class="col-md-6">
                 <label asp-for="Input.TargetAudience" class="form-label"></label>
                 <textarea asp-for="Input.TargetAudience" class="form-control" rows="4" placeholder="Founders, local clinics, B2B SaaS teams, ecommerce managers..."></textarea>

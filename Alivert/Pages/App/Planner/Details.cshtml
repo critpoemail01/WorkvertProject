@@ -109,6 +109,35 @@
     </div>
 </section>
 
+@if (Model.NextCampaignRecommendations.Any())
+{
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Suggested next campaigns</h2>
+                <p>Sector-specific campaigns based on this company, application and audience.</p>
+            </div>
+        </div>
+        <div class="campaign-library-grid">
+            @foreach (var recommendation in Model.NextCampaignRecommendations)
+            {
+                <article class="campaign-template-card">
+                    <span class="tag">@recommendation.Sector</span>
+                    <h4>@recommendation.Title</h4>
+                    <p>@recommendation.Strategy</p>
+                    <dl>
+                        <div><dt>Goal</dt><dd>@recommendation.Goal</dd></div>
+                        <div><dt>Offer</dt><dd>@recommendation.Offer</dd></div>
+                        <div><dt>Channels</dt><dd>@string.Join(" + ", recommendation.Platforms)</dd></div>
+                        <div><dt>Report</dt><dd>@recommendation.ReportFocus</dd></div>
+                    </dl>
+                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-route-templateKey="@recommendation.Key">Prepare this campaign</a>
+                </article>
+            }
+        </div>
+    </section>
+}
+
 <div class="dashboard-stat-grid mt-4">
     <div class="surface app-stat-card">
         <span class="app-stat-icon"><i class="bi bi-broadcast"></i></span>
