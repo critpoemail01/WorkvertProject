@@ -214,12 +214,16 @@
                     <div class="planner-location-grid mt-3">
                         <div class="planner-location-country" data-location-panel="country">
                             <label asp-for="Input.AudienceCountry" class="form-label"></label>
-                            <input asp-for="Input.AudienceCountry" class="form-control" placeholder="Portugal, Spain, United States..." data-location-country />
+                            <input asp-for="Input.AudienceCountry" class="form-control" list="audienceCountryOptions" autocomplete="country-name" placeholder="Portugal, Spain, United States..." data-location-country />
+                            <datalist id="audienceCountryOptions" data-location-country-list></datalist>
+                            <div class="planner-location-autocomplete" data-location-country-menu hidden></div>
                             <span asp-validation-for="Input.AudienceCountry" class="text-danger"></span>
                         </div>
                         <div class="planner-location-city" data-location-panel="city">
                             <label asp-for="Input.AudienceCity" class="form-label"></label>
-                            <input asp-for="Input.AudienceCity" class="form-control" placeholder="Lisbon, Porto, Madrid..." data-location-city />
+                            <input asp-for="Input.AudienceCity" class="form-control" list="audienceCityOptions" autocomplete="address-level2" placeholder="Lisbon, Porto, Madrid..." data-location-city />
+                            <datalist id="audienceCityOptions" data-location-city-list></datalist>
+                            <div class="planner-location-autocomplete" data-location-city-menu hidden></div>
                             <span asp-validation-for="Input.AudienceCity" class="text-danger"></span>
                         </div>
                         <div class="planner-location-city" data-location-panel="city">
