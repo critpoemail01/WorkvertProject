@@ -304,21 +304,22 @@
                 <span asp-validation-for="Input.Platforms" class="text-danger"></span>
             </div>
             <div class="col-12">
-                <section class="lead-discovery-panel">
-                    <div class="lead-discovery-head">
-                        <div>
+                <section class="lead-discovery-panel crm-optional-panel" data-crm-leads-panel>
+                    <label class="crm-focus-toggle crm-optional-toggle">
+                        <input asp-for="Input.UseCrmLeads" data-crm-leads-toggle />
+                        <span>
+                            <strong>Focus this campaign on imported CRM leads</strong>
+                            <small>Optional. Select this only when the campaign should use contacts from your CRM or prospecting team.</small>
+                        </span>
+                    </label>
+                    <div class="crm-focus-grid crm-optional-fields mt-3 @(Model.Input.UseCrmLeads ? "is-open" : "")" data-crm-leads-fields aria-hidden="@(Model.Input.UseCrmLeads ? "false" : "true")">
+                        <div class="crm-optional-info">
                             <label asp-for="Input.UseCrmLeads" class="form-label mb-1"></label>
                             <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available after consent/exclusion filtering from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Use these when your own prospecting team already found the audience.</p>
+                            <a class="btn btn-outline-secondary btn-sm mt-3" asp-page="/App/Crm/Index">
+                                <i class="bi bi-database-add me-1"></i>Import CRM leads
+                            </a>
                         </div>
-                        <a class="btn btn-outline-secondary" asp-page="/App/Crm/Index">
-                            <i class="bi bi-database-add me-1"></i>Import CRM leads
-                        </a>
-                    </div>
-                    <div class="crm-focus-grid mt-3">
-                        <label class="crm-focus-toggle">
-                            <input asp-for="Input.UseCrmLeads" />
-                            <span>Focus this campaign on imported CRM leads</span>
-                        </label>
                         <label>
                             <span class="form-label">Filter by stage, tag, industry, company or location</span>
                             <input asp-for="Input.CrmLeadFilter" class="form-control" placeholder="Qualified, manufacturing, Portugal, demo..." />
@@ -556,4 +557,19 @@
     <partial name="_ValidationScriptsPartial" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/alivert-location-targeting.js" asp-append-version="true"></script>
+    <script>
+        document.querySelectorAll('[data-crm-leads-panel]').forEach((panel) => {
+            const toggle = panel.querySelector('[data-crm-leads-toggle]');
+            const fields = panel.querySelector('[data-crm-leads-fields]');
+            if (!toggle || !fields) return;
+
+            const syncCrmFields = () => {
+                fields.classList.toggle('is-open', toggle.checked);
+                fields.setAttribute('aria-hidden', toggle.checked ? 'false' : 'true');
+            };
+
+            toggle.addEventListener('change', syncCrmFields);
+            syncCrmFields();
+        });
+    </script>
 }

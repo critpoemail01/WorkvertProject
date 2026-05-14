@@ -5066,6 +5066,30 @@ a { text-decoration: none; }
   font-weight: 800;
 }
 
+.crm-focus-toggle small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(232,238,255,0.58);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.crm-optional-fields {
+  display: none;
+}
+
+.crm-optional-fields.is-open {
+  display: grid;
+}
+
+.crm-optional-info {
+  align-self: start;
+}
+
+.crm-optional-info .btn {
+  width: fit-content;
+}
+
 .campaign-library-panel {
   padding: 18px;
   border-radius: 12px;
