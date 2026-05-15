@@ -187,7 +187,7 @@
     const normalizedQuery = normalizeText(query);
     const matches = countryOptions
       .filter((country) => !normalizedQuery || optionScore(country, query) < 99)
-      .map((country) => ({ value: country, label: country, meta: 'Country' }));
+      .map((country) => ({ value: country, label: country, meta: 'Pais' }));
 
     renderMenu(countryMenu, sortSuggestions(matches, query, (item) => item.label), (suggestion) => {
       countryInput.value = suggestion.value;
@@ -302,13 +302,13 @@
     const country = countryInput && countryInput.value ? countryInput.value.trim() : '';
     const city = cityInput && cityInput.value ? cityInput.value.trim() : '';
 
-    if (scope === 'Country') return country || 'Country campaign';
+    if (scope === 'Country') return country || 'Campanha por pais';
     if (scope === 'City') {
-      const place = [city, country].filter(Boolean).join(', ') || 'Selected city';
+      const place = [city, country].filter(Boolean).join(', ') || 'Cidade selecionada';
       return `${place} within ${radiusKm()} km`;
     }
 
-    return 'Worldwide campaign';
+    return 'Campanha mundial';
   }
 
   function updateSummary() {
@@ -321,7 +321,7 @@
     if (selectedScope() === 'City' && lat !== null && lng !== null) {
       coordinates.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)} - ${radiusKm()} km radius`;
     } else {
-      coordinates.textContent = 'No point selected yet.';
+      coordinates.textContent = 'Nenhum ponto selecionado.';
     }
   }
 

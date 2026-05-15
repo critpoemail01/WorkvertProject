@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Net.Mail;
+using System.Text;
 
 namespace Alivert.Services;
 
@@ -6,50 +8,65 @@ public sealed class CrmLeadImportService
 {
     public IReadOnlyList<CrmLeadImportRow> Parse(string? raw, string fallbackSource)
     {
-        if (string.IsNullOrWhiteSpace(raw))
-            return [];
+        var document = ReadDocument(raw);
+        return document.Lines.Count == 0
+            ? []
+            : Parse(raw, fallbackSource, document.SuggestedMapping);
+    }
 
-        var lines = raw
-            .Replace("\r\n", "\n", StringComparison.Ordinal)
-            .Replace('\r', '\n')
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(line => !string.IsNullOrWhiteSpace(line))
+    public CsvLeadPreview Preview(string? raw, int sampleSize = 5)
+    {
+        var document = ReadDocument(raw);
+        if (document.Lines.Count == 0)
+            return CsvLeadPreview.Empty;
+
+        var sampleRows = document.DataLines
+            .Take(sampleSize)
+            .Select(line => ParseLine(line, document.Delimiter))
             .ToList();
 
-        if (lines.Count == 0)
+        var columns = document.Columns
+            .Select((column, index) => new CsvColumnPreview(index, column, sampleRows.FirstOrDefault()?.ElementAtOrDefault(index)))
+            .ToList();
+
+        return new CsvLeadPreview(
+            document.Delimiter,
+            document.HasHeader,
+            columns,
+            sampleRows,
+            document.SuggestedMapping);
+    }
+
+    public IReadOnlyList<CrmLeadImportRow> Parse(string? raw, string fallbackSource, CrmLeadColumnMapping mapping)
+    {
+        var document = ReadDocument(raw);
+        if (document.Lines.Count == 0 || mapping.EmailColumn is null)
             return [];
 
-        var delimiter = DetectDelimiter(lines[0]);
-        var first = ParseLine(lines[0], delimiter);
-        var hasHeader = first.Any(value => HeaderAliases.ContainsKey(NormalizeHeader(value)));
-        var headers = hasHeader
-            ? first.Select(NormalizeHeader).ToList()
-            : new List<string> { "email", "name", "company", "role", "industry", "country", "city", "stage", "tags", "notes" };
-        var dataLines = hasHeader ? lines.Skip(1) : lines;
         var rows = new List<CrmLeadImportRow>();
         var seenEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var line in dataLines)
+        foreach (var line in document.DataLines)
         {
-            var columns = ParseLine(line, delimiter);
-            var email = Get(columns, headers, "email");
+            var columns = ParseLine(line, document.Delimiter);
+            var email = Get(columns, mapping.EmailColumn);
             if (!IsEmail(email) || !seenEmails.Add(email!.Trim()))
                 continue;
 
             rows.Add(new CrmLeadImportRow(
-                Clip(Get(columns, headers, "externalid"), 120),
-                Clip(Get(columns, headers, "name") ?? email, 160) ?? email!,
+                Clip(Get(columns, mapping.ExternalIdColumn), 120),
+                Clip(Get(columns, mapping.ContactNameColumn) ?? email, 160) ?? email!,
                 email.Trim(),
-                Clip(Get(columns, headers, "phone"), 80),
-                Clip(Get(columns, headers, "company"), 180),
-                Clip(Get(columns, headers, "role"), 120),
-                Clip(Get(columns, headers, "industry"), 120),
-                Clip(Get(columns, headers, "country"), 120),
-                Clip(Get(columns, headers, "city"), 160),
-                Clip(Get(columns, headers, "stage"), 120),
-                Clip(Get(columns, headers, "tags"), 300),
-                Clip(Get(columns, headers, "source") ?? fallbackSource, 120),
-                Clip(Get(columns, headers, "notes"), 800)));
+                Clip(Get(columns, mapping.PhoneColumn), 80),
+                Clip(Get(columns, mapping.CompanyNameColumn), 180),
+                Clip(Get(columns, mapping.RoleColumn), 120),
+                Clip(Get(columns, mapping.IndustryColumn), 120),
+                Clip(Get(columns, mapping.CountryColumn), 120),
+                Clip(Get(columns, mapping.CityColumn), 160),
+                Clip(Get(columns, mapping.StageColumn), 120),
+                Clip(Get(columns, mapping.TagsColumn), 300),
+                Clip(Get(columns, mapping.SourceColumn) ?? fallbackSource, 120),
+                Clip(Get(columns, mapping.NotesColumn), 800)));
         }
 
         return rows;
@@ -60,32 +77,53 @@ public sealed class CrmLeadImportService
         ["id"] = "externalid",
         ["externalid"] = "externalid",
         ["external_id"] = "externalid",
+        ["externalref"] = "externalid",
+        ["recordid"] = "externalid",
         ["nome"] = "name",
         ["name"] = "name",
+        ["fullname"] = "name",
+        ["full_name"] = "name",
+        ["person"] = "name",
         ["contact"] = "name",
         ["contactname"] = "name",
         ["contact_name"] = "name",
         ["email"] = "email",
         ["e-mail"] = "email",
         ["mail"] = "email",
+        ["emailaddress"] = "email",
+        ["email_address"] = "email",
+        ["businessmail"] = "email",
+        ["businessemail"] = "email",
         ["phone"] = "phone",
+        ["mobile"] = "phone",
         ["telefone"] = "phone",
         ["telemovel"] = "phone",
-        ["telemóvel"] = "phone",
+        ["telemÃ³vel"] = "phone",
+        ["telemã³vel"] = "phone",
         ["company"] = "company",
         ["companyname"] = "company",
         ["company_name"] = "company",
         ["empresa"] = "company",
+        ["organization"] = "company",
+        ["organisation"] = "company",
+        ["account"] = "company",
         ["role"] = "role",
         ["title"] = "role",
+        ["jobtitle"] = "role",
+        ["job_title"] = "role",
         ["cargo"] = "role",
         ["industry"] = "industry",
         ["industria"] = "industry",
-        ["indústria"] = "industry",
+        ["indastria"] = "industry",
+        ["indÃºstria"] = "industry",
+        ["indãºstria"] = "industry",
         ["sector"] = "industry",
         ["country"] = "country",
         ["pais"] = "country",
-        ["país"] = "country",
+        ["paas"] = "country",
+        ["paÃ­s"] = "country",
+        ["paã­s"] = "country",
+        ["paãs"] = "country",
         ["city"] = "city",
         ["cidade"] = "city",
         ["stage"] = "stage",
@@ -94,13 +132,99 @@ public sealed class CrmLeadImportService
         ["estado"] = "stage",
         ["tags"] = "tags",
         ["tag"] = "tags",
+        ["segment"] = "tags",
+        ["segments"] = "tags",
         ["source"] = "source",
         ["fonte"] = "source",
         ["notes"] = "notes",
         ["notas"] = "notes",
         ["observacoes"] = "notes",
-        ["observações"] = "notes"
+        ["observaÃ§Ãµes"] = "notes",
+        ["observaã§ãµes"] = "notes"
     };
+
+    private static CsvDocument ReadDocument(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return CsvDocument.Empty;
+
+        var lines = raw
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n')
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToList();
+
+        if (lines.Count == 0)
+            return CsvDocument.Empty;
+
+        var delimiter = DetectDelimiter(lines[0]);
+        var first = ParseLine(lines[0], delimiter);
+        var laterRows = lines.Skip(1).Take(5).Select(line => ParseLine(line, delimiter)).ToList();
+        var hasHeader = HasHeader(first, laterRows);
+        var columns = hasHeader
+            ? first.Select(value => string.IsNullOrWhiteSpace(value) ? "Unnamed column" : value.Trim()).ToList()
+            : first.Select((_, index) => $"Column {index + 1}").ToList();
+        var dataLines = hasHeader ? lines.Skip(1).ToList() : lines;
+
+        return new CsvDocument(
+            delimiter,
+            hasHeader,
+            lines,
+            dataLines,
+            columns,
+            BuildSuggestedMapping(columns, dataLines.Take(8).Select(line => ParseLine(line, delimiter)).ToList()));
+    }
+
+    private static bool HasHeader(IReadOnlyList<string> first, IReadOnlyList<IReadOnlyList<string>> laterRows)
+    {
+        if (first.Any(value => HeaderAliases.ContainsKey(NormalizeHeader(value))))
+            return true;
+
+        return !first.Any(IsEmail) && laterRows.Any(row => row.Any(IsEmail));
+    }
+
+    private static CrmLeadColumnMapping BuildSuggestedMapping(
+        IReadOnlyList<string> columns,
+        IReadOnlyList<IReadOnlyList<string>> samples)
+    {
+        return new CrmLeadColumnMapping(
+            FindColumn(columns, samples, "externalid"),
+            FindColumn(columns, samples, "name"),
+            FindColumn(columns, samples, "email"),
+            FindColumn(columns, samples, "phone"),
+            FindColumn(columns, samples, "company"),
+            FindColumn(columns, samples, "role"),
+            FindColumn(columns, samples, "industry"),
+            FindColumn(columns, samples, "country"),
+            FindColumn(columns, samples, "city"),
+            FindColumn(columns, samples, "stage"),
+            FindColumn(columns, samples, "tags"),
+            FindColumn(columns, samples, "source"),
+            FindColumn(columns, samples, "notes"));
+    }
+
+    private static int? FindColumn(IReadOnlyList<string> columns, IReadOnlyList<IReadOnlyList<string>> samples, string key)
+    {
+        for (var index = 0; index < columns.Count; index++)
+        {
+            var normalized = NormalizeHeader(columns[index]);
+            var alias = HeaderAliases.TryGetValue(normalized, out var mapped) ? mapped : normalized;
+            if (alias.Equals(key, StringComparison.OrdinalIgnoreCase))
+                return index;
+        }
+
+        if (key == "email")
+        {
+            for (var index = 0; index < columns.Count; index++)
+            {
+                if (samples.Any(row => index < row.Count && IsEmail(row[index])))
+                    return index;
+            }
+        }
+
+        return null;
+    }
 
     private static char DetectDelimiter(string line)
     {
@@ -145,21 +269,31 @@ public sealed class CrmLeadImportService
         return values;
     }
 
-    private static string? Get(IReadOnlyList<string> values, IReadOnlyList<string> headers, string key)
+    private static string? Get(IReadOnlyList<string> values, int? column)
     {
-        for (var i = 0; i < headers.Count && i < values.Count; i++)
-        {
-            var normalized = HeaderAliases.TryGetValue(headers[i], out var alias) ? alias : headers[i];
-            if (normalized.Equals(key, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(values[i]))
-                return values[i].Trim();
-        }
-
-        return null;
+        return column is >= 0 && column.Value < values.Count && !string.IsNullOrWhiteSpace(values[column.Value])
+            ? values[column.Value].Trim()
+            : null;
     }
 
     private static string NormalizeHeader(string value)
     {
-        return value.Trim().ToLowerInvariant().Replace(" ", string.Empty, StringComparison.Ordinal);
+        var normalized = value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(normalized.Length);
+
+        foreach (var ch in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.NonSpacingMark ||
+                ch is ' ' or '-' or '_' or '\u00ad')
+            {
+                continue;
+            }
+
+            if (ch <= 127)
+                builder.Append(ch);
+        }
+
+        return builder.ToString();
     }
 
     private static bool IsEmail(string? value)
@@ -186,6 +320,47 @@ public sealed class CrmLeadImportService
         var text = value.Trim();
         return text.Length <= maxLength ? text : text[..maxLength].TrimEnd();
     }
+}
+
+internal sealed record CsvDocument(
+    char Delimiter,
+    bool HasHeader,
+    IReadOnlyList<string> Lines,
+    IReadOnlyList<string> DataLines,
+    IReadOnlyList<string> Columns,
+    CrmLeadColumnMapping SuggestedMapping)
+{
+    public static CsvDocument Empty { get; } = new(',', true, [], [], [], CrmLeadColumnMapping.Empty);
+}
+
+public sealed record CsvLeadPreview(
+    char Delimiter,
+    bool HasHeader,
+    IReadOnlyList<CsvColumnPreview> Columns,
+    IReadOnlyList<IReadOnlyList<string>> SampleRows,
+    CrmLeadColumnMapping SuggestedMapping)
+{
+    public static CsvLeadPreview Empty { get; } = new(',', true, [], [], CrmLeadColumnMapping.Empty);
+}
+
+public sealed record CsvColumnPreview(int Index, string Label, string? SampleValue);
+
+public sealed record CrmLeadColumnMapping(
+    int? ExternalIdColumn,
+    int? ContactNameColumn,
+    int? EmailColumn,
+    int? PhoneColumn,
+    int? CompanyNameColumn,
+    int? RoleColumn,
+    int? IndustryColumn,
+    int? CountryColumn,
+    int? CityColumn,
+    int? StageColumn,
+    int? TagsColumn,
+    int? SourceColumn,
+    int? NotesColumn)
+{
+    public static CrmLeadColumnMapping Empty { get; } = new(null, null, null, null, null, null, null, null, null, null, null, null, null);
 }
 
 public sealed record CrmLeadImportRow(

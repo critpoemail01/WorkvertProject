@@ -2,7 +2,7 @@
 @using Alivert.Models
 @model Alivert.Pages.App.Alerts.AlertsIndexModel
 @{
-    ViewData["Title"] = "Campaigns";
+    ViewData["Title"] = "Campanhas";
     var primaryGroup = Model.AlertGroups.FirstOrDefault();
     var primaryAlert = primaryGroup?.Alerts.OrderByDescending(a => a.IsEnabled).ThenBy(a => a.Id).FirstOrDefault();
     var primaryGroupIsEnabled = primaryGroup?.Alerts.Any(a => a.IsEnabled) == true;
@@ -11,16 +11,16 @@
 <div class="alerts-board">
     <div class="alerts-toolbar">
         <div>
-            <span class="tag mb-2">Campaign center</span>
-            <h1 class="fw-bold mb-0">Campaigns</h1>
-            <p class="muted mb-0">Create, organize and measure campaigns for applications, companies and business ideas.</p>
+            <span class="tag mb-2">Centro de campanhas</span>
+            <h1 class="fw-bold mb-0">Campanhas</h1>
+            <p class="muted mb-0">Cria, organiza e mede campanhas para aplicacoes, empresas e ideias de negocio.</p>
         </div>
         <div class="alerts-actions">
             <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config">
-                <i class="bi bi-plus-lg me-1"></i> New campaign
+                <i class="bi bi-plus-lg me-1"></i> Nova campanha
             </a>
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
-                <i class="bi bi-clock me-1"></i> Delivery window
+                <i class="bi bi-clock me-1"></i> Janela de entrega
             </button>
             <a class="btn btn-outline-secondary btn-icon" asp-page="/App/Settings" title="Marketing channels">
                 <i class="bi bi-broadcast-pin"></i>
@@ -38,25 +38,25 @@
         <section class="alerts-group ai-campaigns-panel mt-4">
             <div class="alerts-group-title">
                 <div>
-                    <span>AI-generated campaigns</span>
-                    <div class="small muted">Campaign plans ready to review, approve and schedule.</div>
+                    <span>Campanhas geradas</span>
+                    <div class="small muted">Planos prontos para rever, aprovar e agendar.</div>
                 </div>
                 <div class="alerts-group-title-actions">
-                    <span class="muted small">@Model.AiCampaigns.Count campaign@(Model.AiCampaigns.Count == 1 ? "" : "s")</span>
-                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Generate another</a>
+                    <span class="muted small">@Model.AiCampaigns.Count campanha@(Model.AiCampaigns.Count == 1 ? "" : "s")</span>
+                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Gerar outra</a>
                 </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm align-middle alerts-table ai-campaigns-table">
                     <thead>
                         <tr>
-                            <th>Campaign</th>
-                            <th>Period</th>
-                            <th>Region</th>
-                            <th>Channels</th>
-                            <th>Output</th>
-                            <th>Funnel</th>
-                            <th>Status</th>
+                            <th>Campanha</th>
+                            <th>Periodo</th>
+                            <th>Regiao</th>
+                            <th>Canais</th>
+                            <th>Conteudo</th>
+                            <th>Funil</th>
+                            <th>Estado</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -86,19 +86,19 @@
                             <td>@campaign.Platforms.Replace(",", ", ")</td>
                             <td>@campaign.Posts.Count posts / @campaign.Emails.Count emails / @campaign.Leads.Count leads</td>
                             <td>
-                                <span class="ai-campaign-funnel">@reach reached</span>
-                                <span class="ai-campaign-funnel">@interactions interactions</span>
-                                <span class="ai-campaign-funnel">@conversions conversions</span>
+                                <span class="ai-campaign-funnel">@reach alcance</span>
+                                <span class="ai-campaign-funnel">@interactions interacoes</span>
+                                <span class="ai-campaign-funnel">@conversions conversoes</span>
                             </td>
                             <td>
                                 <span class="badge @AiStatusClass(campaign.Status)">@campaign.Status</span>
                                 @if (publishedPosts + sentEmails > 0)
                                 {
-                                    <div class="small muted">@publishedPosts live posts / @sentEmails sent emails</div>
+                                    <div class="small muted">@publishedPosts posts live / @sentEmails emails enviados</div>
                                 }
                             </td>
                             <td class="text-end">
-                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@campaign.Id">Open</a>
+                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@campaign.Id">Abrir</a>
                             </td>
                         </tr>
                     }
@@ -151,7 +151,7 @@
                         <span>Activity history</span>
                         <strong>@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)</strong>
                     </div>
-                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Open full log</a>
+                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Abrir log completo</a>
                 </div>
                 @if (primaryGroup.TriggerHistory.Any())
                 {
@@ -219,12 +219,12 @@
                         <table class="table table-sm align-middle alerts-table">
                             <thead>
                                 <tr>
-                                    <th>Asset</th>
-                                    <th>Goal</th>
-                                    <th>Cadence</th>
-                                    <th>Channel</th>
-                                    <th>Status</th>
-                                    <th>Last activity</th>
+                        <th>Asset</th>
+                        <th>Objetivo</th>
+                        <th>Cadencia</th>
+                        <th>Canal</th>
+                        <th>Estado</th>
+                        <th>Ultima atividade</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -240,15 +240,15 @@
                                     <td>@CadenceLabel(alert.Timeframe)</td>
                                     <td>@alert.Channel</td>
                                     <td>
-                                        <span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "Active" : "Paused")</span>
+                                        <span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "Ativa" : "Pausada")</span>
                                     </td>
                                     <td class="text-muted">@(alert.LastTriggeredAtUtc is null ? "Never" : alert.LastTriggeredAtUtc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
                                     <td class="text-end">
                                         <div class="alerts-row-actions">
-                                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Edit</a>
+                                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Editar</a>
                                             <form class="alerts-inline-form" method="post" asp-page-handler="ToggleAlert">
                                                 <input type="hidden" name="id" value="@alert.Id" />
-                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pause" : "Activate")</button>
+                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pausar" : "Ativar")</button>
                                             </form>
                                             <button class="btn btn-sm btn-outline-danger" type="button"
                                                     data-bs-toggle="modal"
@@ -277,30 +277,30 @@
             <div class="alerts-promo-body">
                 <h2>@Model.PlanPromoTitle</h2>
                 <p>@Model.PlanPromoText</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Billing">View plan</a>
+                <a class="btn btn-outline-secondary" asp-page="/App/Billing">Ver plano</a>
             </div>
         </article>
         <article class="alerts-promo-card">
             <div class="alerts-promo-visual visual-star"><i class="bi bi-camera-video"></i></div>
             <div class="alerts-promo-body">
-                <h2>Posts and videos</h2>
-                <p>Create hooks, scripts and captions for TikTok, Instagram, Facebook and LinkedIn.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Create campaign</a>
+                <h2>Posts e videos</h2>
+                <p>Cria hooks, scripts e captions para TikTok, Instagram, Facebook e LinkedIn.</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Criar campanha</a>
             </div>
         </article>
         <article class="alerts-promo-card">
             <div class="alerts-promo-visual visual-phone"><i class="bi bi-envelope-paper"></i></div>
             <div class="alerts-promo-body">
-                <h2>Email and SMS</h2>
-                <p>Prepare personalized messages for potential-client lists and promotional follow-up.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Settings">Channels</a>
+                <h2>Email e SMS</h2>
+                <p>Prepara mensagens personalizadas para listas de potenciais clientes e follow-up promocional.</p>
+                <a class="btn btn-outline-secondary" asp-page="/App/Settings">Canais</a>
             </div>
         </article>
         <article class="alerts-promo-card">
             <div class="alerts-promo-visual visual-chart"><i class="bi bi-graph-up-arrow"></i></div>
             <div class="alerts-promo-body">
-                <h2>Measurable funnel</h2>
-                <p>Track reach, interaction and conversions before deciding which campaign to scale.</p>
+                <h2>Funil mensuravel</h2>
+                <p>Acompanha alcance, interacao e conversoes antes de decidir que campanha escalar.</p>
                 <a class="btn btn-outline-secondary" asp-page="/App/Dashboard">Dashboard</a>
             </div>
         </article>
@@ -493,12 +493,12 @@
         {
             var place = string.Join(", ", new[] { campaign.AudienceCity, campaign.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
             if (string.IsNullOrWhiteSpace(place))
-                place = "Selected city";
+                place = "Cidade selecionada";
 
             return campaign.AudienceRadiusKm is > 0 ? $"{place} + {campaign.AudienceRadiusKm} km" : place;
         }
 
-        return "Worldwide";
+        return "Mundo";
     }
 
     private bool DayChecked(string day)

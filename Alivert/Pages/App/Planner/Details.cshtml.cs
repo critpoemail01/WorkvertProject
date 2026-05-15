@@ -85,7 +85,30 @@ public class DetailsModel : PageModel
         Plan.Status = "Review";
         await _db.SaveChangesAsync();
 
-        return RedirectToPage(new { id });
+        return RedirectToPage(null, null, new { id }, "post-review");
+    }
+
+    public async Task<IActionResult> OnPostRejectPostAsync(int id, int postId)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        var post = Plan.Posts.FirstOrDefault(x => x.Id == postId);
+        if (post is null) return NotFound();
+
+        if (post.Status is "Scheduled" or "Published")
+        {
+            StatusMessage = "This post is already scheduled or live and cannot be rejected here.";
+            return RedirectToPage(null, null, new { id }, "post-review");
+        }
+
+        post.Status = "Rejected";
+        post.ApprovedAtUtc = null;
+        Plan.Status = "Review";
+        StatusMessage = "Post rejected. It will not be scheduled unless you approve it later.";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(null, null, new { id }, "post-review");
     }
 
     public async Task<IActionResult> OnPostApproveEmailAsync(int id, int emailId)
@@ -169,7 +192,7 @@ public class DetailsModel : PageModel
         StatusMessage = "Post updated. Review it again before approving.";
         await _db.SaveChangesAsync();
 
-        return RedirectToPage(new { id });
+        return RedirectToPage(null, null, new { id }, "post-review");
     }
 
     public async Task<IActionResult> OnPostUpdateEmailAsync(
@@ -307,6 +330,27 @@ public class DetailsModel : PageModel
         await _db.SaveChangesAsync();
 
         return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostApproveAllPostsAsync(int id)
+    {
+        var loaded = await LoadPlanAsync(id, tracked: true);
+        if (!loaded) return NotFound();
+
+        var now = DateTime.UtcNow;
+        foreach (var post in Plan.Posts.Where(x => x.Status is "Draft" or "Rejected"))
+        {
+            post.Status = "Approved";
+            post.ApprovedAtUtc = now;
+        }
+
+        Plan.Status = Plan.Posts.Any(x => x.Status == "Draft" || x.Status == "Rejected")
+            ? "Review"
+            : "Approved";
+        StatusMessage = "All generated posts are approved. You can now schedule the approved posts.";
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage(null, null, new { id }, "post-review");
     }
 
     public async Task<IActionResult> OnPostScheduleApprovedAsync(int id)
@@ -634,7 +678,7 @@ public class DetailsModel : PageModel
 
     private static bool CanEditDraft(string status)
     {
-        return status is "Draft" or "Approved";
+        return status is "Draft" or "Approved" or "Rejected";
     }
 
     private static void ResetApproval(MarketingPostSuggestion post)
@@ -697,12 +741,12 @@ public class DetailsModel : PageModel
         {
             var place = string.Join(", ", new[] { plan.AudienceCity, plan.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
             if (string.IsNullOrWhiteSpace(place))
-                place = "Selected city";
+                place = "Cidade selecionada";
 
             return plan.AudienceRadiusKm is > 0 ? $"{place} + {plan.AudienceRadiusKm} km" : place;
         }
 
-        return "Worldwide";
+        return "Mundo";
     }
 
     private static CampaignBusinessReport EmptyBusinessReport()

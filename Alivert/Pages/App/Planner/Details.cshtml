@@ -1,20 +1,26 @@
 @page "{id:int}"
 @model Alivert.Pages.App.Planner.DetailsModel
 @{
-    ViewData["Title"] = "AI plan";
+    ViewData["Title"] = "Rever posts";
+    var totalPosts = Model.Plan.Posts.Count;
+    var draftPosts = Model.Plan.Posts.Count(x => x.Status == "Draft");
+    var approvedPosts = Model.Plan.Posts.Count(x => x.Status == "Approved");
+    var rejectedPosts = Model.Plan.Posts.Count(x => x.Status == "Rejected");
+    var scheduledPosts = Model.Plan.Posts.Count(x => x.Status == "Scheduled");
+    var publishedPosts = Model.Plan.Posts.Count(x => x.Status == "Published");
 }
 
 <section class="app-page-hero ai-planner-hero">
     <div>
-        <span class="tag mb-3">AI plan</span>
+        <span class="tag mb-3">Revisao de posts</span>
         <h1 class="hero-title fw-bold mb-2">@Model.Plan.ProductName</h1>
-        <p class="lead muted mb-0">@Model.Plan.TargetAudience</p>
+        <p class="lead muted mb-0">Reve os posts gerados para @Model.Plan.TargetAudience. Aprova o que esta pronto e rejeita o que nao deve ser agendado.</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Campaigns</a>
-        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-fragment="campaign-config"><i class="bi bi-arrow-repeat me-1"></i>Next campaign</a>
-        <form method="post" asp-page-handler="ApproveAll" asp-route-id="@Model.Plan.Id">
-            <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Approve all</button>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Campanhas</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Planner/Index" asp-route-sourcePlanId="@Model.Plan.Id" asp-fragment="campaign-config"><i class="bi bi-arrow-repeat me-1"></i>Proxima campanha</a>
+        <form method="post" asp-page-handler="ApproveAllPosts" asp-route-id="@Model.Plan.Id">
+            <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2-all me-1"></i>Aprovar todos</button>
         </form>
         <button class="btn btn-outline-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#deleteCampaignModal">
             <i class="bi bi-trash3 me-1"></i>Eliminar
@@ -31,37 +37,147 @@
     <div class="dashboard-plan-main">
         <span class="app-stat-icon dashboard-plan-icon"><i class="bi bi-stars"></i></span>
         <div>
-            <div class="app-stat-label">Plan status</div>
+            <div class="app-stat-label">Estado de aprovacao</div>
             <h2>@Model.Plan.Status</h2>
             @if (Model.Plan.CrmLeadSourceCount > 0)
             {
-                <p class="mb-1"><i class="bi bi-database-check me-1"></i>@Model.Plan.CrmLeadSourceCount imported CRM lead email@(Model.Plan.CrmLeadSourceCount == 1 ? "" : "s") included@(string.IsNullOrWhiteSpace(Model.Plan.CrmLeadFilter) ? "" : $" for '{Model.Plan.CrmLeadFilter}'").</p>
+                <p class="mb-1"><i class="bi bi-database-check me-1"></i>@Model.Plan.CrmLeadSourceCount email@(Model.Plan.CrmLeadSourceCount == 1 ? "" : "s") de leads CRM incluido@(Model.Plan.CrmLeadSourceCount == 1 ? "" : "s")@(string.IsNullOrWhiteSpace(Model.Plan.CrmLeadFilter) ? "" : $" para '{Model.Plan.CrmLeadFilter}'").</p>
             }
             <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>@LocationLabel()</p>
             <p>@Model.Plan.StartDate.ToString("MMM d, yyyy") - @Model.Plan.EndDate.ToString("MMM d, yyyy") · @Model.Plan.Platforms.Replace(",", ", ") · @FrequencyLabel(Model.Plan.Frequency) · @Model.PlanCreditUnits credit@(Model.PlanCreditUnits == 1 ? "" : "s") when scheduled</p>
         </div>
     </div>
     <div class="planner-metric-strip">
-        <div><strong>@Model.Metrics.Drafts</strong><span>draft</span></div>
-        <div><strong>@Model.Metrics.Approved</strong><span>approved</span></div>
-        <div><strong>@Model.Metrics.Scheduled</strong><span>scheduled</span></div>
-        <div><strong>@Model.Metrics.Published</strong><span>live/sent</span></div>
+        <div><strong>@totalPosts</strong><span>posts</span></div>
+        <div><strong>@draftPosts</strong><span>rascunho</span></div>
+        <div><strong>@approvedPosts</strong><span>aprovados</span></div>
+        <div><strong>@rejectedPosts</strong><span>rejeitados</span></div>
+        <div><strong>@(scheduledPosts + publishedPosts)</strong><span>agendados/live</span></div>
     </div>
     <div class="dashboard-plan-actions">
         <form method="post" asp-page-handler="ScheduleApproved" asp-route-id="@Model.Plan.Id">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-calendar-check me-1"></i>Schedule approved</button>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-calendar-check me-1"></i>Agendar aprovados</button>
         </form>
         <form method="post" asp-page-handler="PublishDue" asp-route-id="@Model.Plan.Id">
-            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-send-check me-1"></i>Publish due now</button>
+            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-send-check me-1"></i>Publicar vencidos</button>
         </form>
     </div>
 </section>
 
+<section id="post-review" class="surface app-panel mt-4 post-review-panel">
+    <div class="app-panel-header">
+        <div>
+            <h2>Posts gerados</h2>
+            <p>Estes sao os posts gerados para as plataformas e datas selecionadas. Aprova os rascunhos que podem ser agendados ou rejeita os que ficam fora da campanha.</p>
+        </div>
+        <form method="post" asp-page-handler="ApproveAllPosts" asp-route-id="@Model.Plan.Id">
+            <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-check2-all me-1"></i>Aprovar todos</button>
+        </form>
+    </div>
+
+    <div class="planner-calendar">
+        @foreach (var day in Model.Plan.Posts.GroupBy(x => x.ScheduledForUtc.Date))
+        {
+            <article class="planner-day">
+                <div class="planner-day-head">
+                    <strong>@day.Key.ToString("ddd, MMM d")</strong>
+                    <span>@day.Count() post@(day.Count() == 1 ? "" : "s")</span>
+                </div>
+                <div class="planner-post-grid">
+                    @foreach (var post in day)
+                    {
+                        <div class="planner-post-card @(post.Status == "Rejected" ? "is-rejected" : "")">
+                            <div class="planner-post-head">
+                                <span class="planner-platform">@PlatformIcon(post.Platform) @post.Platform</span>
+                                <span class="badge @StatusClass(post.Status)">@post.Status</span>
+                            </div>
+                            <h3>@post.Title</h3>
+                            <p class="planner-hook">@post.Hook</p>
+                            <p>@post.Caption</p>
+                            <small>@post.CreativeBrief</small>
+                            <div class="planner-tags">@post.Hashtags</div>
+                            @if (post.Status is "Draft" or "Approved" or "Rejected")
+                            {
+                                <details class="planner-editor">
+                                    <summary><i class="bi bi-pencil-square"></i>Editar</summary>
+                                    <form method="post" asp-page-handler="UpdatePost" asp-route-id="@Model.Plan.Id" class="planner-editor-form">
+                                        <input type="hidden" name="postId" value="@post.Id" />
+                                        <div class="planner-editor-grid">
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Titulo</span>
+                                                <input class="form-control" name="title" maxlength="140" value="@post.Title" />
+                                            </label>
+                                            <label class="planner-editor-field">
+                                                <span>Data de publicacao</span>
+                                                <input class="form-control" type="datetime-local" name="scheduledForLocal" value="@post.ScheduledForUtc.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")" />
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Hook</span>
+                                                <textarea class="form-control" name="hook" maxlength="300" rows="2">@post.Hook</textarea>
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Caption</span>
+                                                <textarea class="form-control" name="caption" maxlength="1600" rows="5">@post.Caption</textarea>
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Brief criativo</span>
+                                                <textarea class="form-control" name="creativeBrief" maxlength="900" rows="3">@post.CreativeBrief</textarea>
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>Hashtags</span>
+                                                <input class="form-control" name="hashtags" maxlength="300" value="@post.Hashtags" />
+                                            </label>
+                                            <label class="planner-editor-field planner-editor-field-full">
+                                                <span>CTA</span>
+                                                <input class="form-control" name="callToAction" maxlength="180" value="@post.CallToAction" />
+                                            </label>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-save2 me-1"></i>Guardar alteracoes</button>
+                                    </form>
+                                </details>
+                            }
+                            <div class="planner-card-footer">
+                                <span>@post.EstimatedReach alcance - @post.EstimatedInteractions interacoes - @post.EstimatedConversions conversoes</span>
+                                @if (post.Status is "Draft" or "Rejected")
+                                {
+                                    <div class="planner-post-actions">
+                                        <form method="post" asp-page-handler="ApprovePost" asp-route-id="@Model.Plan.Id">
+                                            <input type="hidden" name="postId" value="@post.Id" />
+                                            <button class="btn btn-sm btn-primary" type="submit">Aprovar</button>
+                                        </form>
+                                        @if (post.Status == "Draft")
+                                        {
+                                            <form method="post" asp-page-handler="RejectPost" asp-route-id="@Model.Plan.Id">
+                                                <input type="hidden" name="postId" value="@post.Id" />
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Rejeitar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                                else if (post.Status == "Approved")
+                                {
+                                    <form method="post" asp-page-handler="RejectPost" asp-route-id="@Model.Plan.Id">
+                                        <input type="hidden" name="postId" value="@post.Id" />
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Rejeitar</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
+<details class="advanced-campaign-details mt-4">
+    <summary><i class="bi bi-sliders"></i>Detalhes avancados da campanha</summary>
+
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Promovert operating modules</h2>
-            <p>This campaign is managed as one complete funnel, from Business DNA to publication, lead capture, report and next campaign.</p>
+            <h2>Modulos operacionais Promovert</h2>
+            <p>Esta campanha e gerida como um funil completo: Business DNA, publicacao, captacao de leads, relatorio e proxima campanha.</p>
         </div>
         <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-sliders me-1"></i>Configure modules</a>
     </div>
@@ -473,7 +589,7 @@
                 }
             </div>
             <div class="planner-card-footer">
-                <span>@Model.Plan.LandingPage.ViewCount views Â· @Model.Plan.LandingPage.Leads.Count captured leads</span>
+                <span>@Model.Plan.LandingPage.ViewCount visualizacoes - @Model.Plan.LandingPage.Leads.Count leads captadas</span>
                 @if (Model.Plan.LandingPage.Status == "Draft")
                 {
                     <form method="post" asp-page-handler="ApproveLanding" asp-route-id="@Model.Plan.Id">
@@ -566,7 +682,7 @@
     </section>
 }
 
-<section class="surface app-panel mt-4">
+<section class="surface app-panel mt-4 d-none">
     <div class="app-panel-header">
         <div>
             <h2>Suggested social calendar</h2>
@@ -785,6 +901,8 @@
     </section>
 </div>
 
+</details>
+
 <div class="modal fade" id="deleteCampaignModal" tabindex="-1" aria-labelledby="deleteCampaignModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content account-modal campaign-delete-modal">
@@ -839,6 +957,7 @@
             "Published" or "Sent" => "text-bg-success",
             "Scheduled" => "text-bg-info",
             "Approved" or "Accepted" => "text-bg-primary",
+            "Rejected" => "text-bg-danger",
             "NeedsAuthorization" => "text-bg-warning",
             _ => "text-bg-secondary"
         };
@@ -866,12 +985,12 @@
         {
             var place = string.Join(", ", new[] { Model.Plan.AudienceCity, Model.Plan.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
             if (string.IsNullOrWhiteSpace(place))
-                place = "Selected city";
+                place = "Cidade selecionada";
 
             return Model.Plan.AudienceRadiusKm is > 0 ? $"{place} + {Model.Plan.AudienceRadiusKm} km" : place;
         }
 
-        return "Worldwide";
+        return "Mundo";
     }
 
     private string BuildUtmUrl(string slug, string source, string medium)

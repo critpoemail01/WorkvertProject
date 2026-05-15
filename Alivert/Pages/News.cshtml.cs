@@ -9,19 +9,19 @@ public sealed class NewsModel : PageModel
     public List<Post> Posts { get; } = new()
     {
         new Post(
-            "Promovert Plus is live: credit packs for campaign launches",
-            "Product",
-            "Buy credit packs and keep running campaigns without a subscription.",
+            "Pacotes de creditos para lancamentos de campanha",
+            "Produto",
+            "Compra pacotes de creditos e continua a correr campanhas sem subscricao mensal.",
             DateTime.UtcNow.AddDays(-7)),
         new Post(
-            "Campaign control: cadence and delivery windows",
-            "Engineering",
-            "We improved scheduling so outreach stays inside the delivery window you choose.",
+            "Controlo de campanha: cadencia e janelas de entrega",
+            "Produto",
+            "Melhoramos o agendamento para manter outreach dentro da janela de entrega escolhida.",
             DateTime.UtcNow.AddDays(-14)),
         new Post(
-            "Roadmap: social publishing and SMS delivery",
+            "Roadmap: publicacao social e envio SMS",
             "Roadmap",
-            "Next channels are coming. Same campaign workflow, more places to distribute it.",
+            "Novos canais estao a caminho. O mesmo workflow de campanha, com mais sitios para distribuir.",
             DateTime.UtcNow.AddDays(-30)),
     };
 

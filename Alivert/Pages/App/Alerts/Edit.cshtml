@@ -1,14 +1,14 @@
 @page "{id:int}"
 @model Alivert.Pages.App.Alerts.EditAlertModel
 @{
-    ViewData["Title"] = "Edit campaign";
+    ViewData["Title"] = "Editar campanha";
 }
 
 <div class="alert-form-page">
     <section class="app-page-hero">
         <div>
             <span class="tag mb-3">Campaign builder</span>
-            <h1 class="hero-title fw-bold mb-2">Edit campaign</h1>
+            <h1 class="hero-title fw-bold mb-2">Editar campanha</h1>
             <p class="lead muted mb-0">Update the source, asset, cadence and delivery channel for this marketing push.</p>
         </div>
         <div class="app-page-hero-actions">
@@ -27,11 +27,11 @@
                     <div class="market-segment" role="radiogroup" aria-label="Source type">
                         <button class="market-segment-option @(Model.Input.MarketType == MarketType.Crypto ? "active" : "")" type="button" data-market-option="Crypto" aria-pressed="@(Model.Input.MarketType == MarketType.Crypto ? "true" : "false")">
                             <i class="bi bi-link-45deg"></i>
-                            <span>Application URL</span>
+                            <span>URL da aplicacao</span>
                         </button>
                         <button class="market-segment-option @(Model.Input.MarketType == MarketType.Traditional ? "active" : "")" type="button" data-market-option="Traditional" aria-pressed="@(Model.Input.MarketType == MarketType.Traditional ? "true" : "false")">
                             <i class="bi bi-building"></i>
-                            <span>Company or idea</span>
+                            <span>Empresa ou ideia</span>
                         </button>
                     </div>
                     <span asp-validation-for="Input.MarketType" class="text-danger"></span>
@@ -96,7 +96,7 @@
                 <div class="col-md-6" data-alert-field="ema">
                     <label asp-for="Input.SlowEmaPeriod" class="form-label"></label>
                     <input asp-for="Input.SlowEmaPeriod" class="form-control" />
-                    <div class="form-text">Follow-up touches after the first post, email or SMS.</div>
+                    <div class="form-text">Follow-ups depois do primeiro post, email ou SMS.</div>
                     <span asp-validation-for="Input.SlowEmaPeriod" class="text-danger"></span>
                 </div>
 
@@ -123,7 +123,7 @@
                 <div class="col-12">
                     <label asp-for="Input.AudienceList" class="form-label"></label>
                     <textarea asp-for="Input.AudienceList" class="form-control" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;+351 900 000 000"></textarea>
-                    <div class="form-text">Add one potential client email or phone number per line for personalized email and SMS outreach.</div>
+                    <div class="form-text">Adiciona um email ou telefone por linha para outreach personalizado por email e SMS.</div>
                     <span asp-validation-for="Input.AudienceList" class="text-danger"></span>
                 </div>
             </div>

@@ -20,7 +20,7 @@
     var dashboardActive = isActive("/App/Dashboard");
 }
 <!DOCTYPE html>
-<html lang="en-US" data-bs-theme="dark">
+<html lang="pt-PT" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -46,10 +46,10 @@
                 </span>
                 <span class="brand-wordmark">
                     <span class="brand-title">Promovert<sup>TM</sup></span>
-                    <span class="brand-subtitle">Online Campaign Engine</span>
+                    <span class="brand-subtitle">Motor de Campanhas Online</span>
                 </span>
             </a>
-            <button class="navbar-toggler alivert-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Open navigation menu">
+            <button class="navbar-toggler alivert-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Abrir menu de navegacao">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -57,10 +57,10 @@
 
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link @(pricingActive ? "active" : "")" asp-page="/Pricing" aria-current="@(pricingActive ? "page" : null)"><i class="bi bi-credit-card-2-front"></i><span>Pricing</span></a></li>
-                    <li class="nav-item"><a class="nav-link @(howItWorksActive ? "active" : "")" asp-page="/HowItWorks" aria-current="@(howItWorksActive ? "page" : null)"><i class="bi bi-diagram-3"></i><span>How it works</span></a></li>
-                    <li class="nav-item"><a class="nav-link @(aboutActive ? "active" : "")" asp-page="/About" aria-current="@(aboutActive ? "page" : null)"><i class="bi bi-info-circle"></i><span>About</span></a></li>
-                    <li class="nav-item"><a class="nav-link @(newsActive ? "active" : "")" asp-page="/News" aria-current="@(newsActive ? "page" : null)"><i class="bi bi-megaphone"></i><span>News</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(pricingActive ? "active" : "")" asp-page="/Pricing" aria-current="@(pricingActive ? "page" : null)"><i class="bi bi-credit-card-2-front"></i><span>Precos</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(howItWorksActive ? "active" : "")" asp-page="/HowItWorks" aria-current="@(howItWorksActive ? "page" : null)"><i class="bi bi-diagram-3"></i><span>Como funciona</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(aboutActive ? "active" : "")" asp-page="/About" aria-current="@(aboutActive ? "page" : null)"><i class="bi bi-info-circle"></i><span>Sobre</span></a></li>
+                    <li class="nav-item"><a class="nav-link @(newsActive ? "active" : "")" asp-page="/News" aria-current="@(newsActive ? "page" : null)"><i class="bi bi-megaphone"></i><span>Novidades</span></a></li>
 
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
@@ -88,50 +88,50 @@
                     </span>
                     <span class="brand-wordmark">
                         <span class="brand-title">Promovert<sup>TM</sup></span>
-                        <span class="brand-subtitle">Online Campaign Engine</span>
+                        <span class="brand-subtitle">Motor de Campanhas Online</span>
                     </span>
                 </a>
-                <p>Campaign creation, social content, personalized outreach and conversion tracking for online applications.</p>
+                <p>Criacao de campanhas, conteudo social, outreach personalizado e tracking de conversao para aplicacoes online.</p>
                 <div class="footer-badges">
-                    <span><i class="bi bi-lightning-charge-fill"></i> Campaign workflow</span>
-                    <span><i class="bi bi-shield-check"></i> Secure account area</span>
+                    <span><i class="bi bi-lightning-charge-fill"></i> Workflow de campanha</span>
+                    <span><i class="bi bi-shield-check"></i> Area segura</span>
                 </div>
             </div>
 
             <nav class="footer-nav-grid" aria-label="Footer navigation">
                 <div>
-                    <h2>Product</h2>
-                    <a class="footer-link" asp-page="/Pricing">Pricing</a>
-                    <a class="footer-link" asp-page="/HowItWorks">How it works</a>
-                    <a class="footer-link" asp-page="/News">News & updates</a>
+                    <h2>Produto</h2>
+                    <a class="footer-link" asp-page="/Pricing">Precos</a>
+                    <a class="footer-link" asp-page="/HowItWorks">Como funciona</a>
+                    <a class="footer-link" asp-page="/News">Novidades</a>
                 </div>
                 <div>
-                    <h2>Platform</h2>
-                    <a class="footer-link" asp-page="/About">About</a>
+                    <h2>Plataforma</h2>
+                    <a class="footer-link" asp-page="/About">Sobre</a>
                     <a class="footer-link" asp-page="/App/HelpDesk">Help desk</a>
-                    <a class="footer-link" asp-page="/App/Settings">Marketing channels</a>
+                    <a class="footer-link" asp-page="/App/Settings">Canais de marketing</a>
                 </div>
                 <div>
                     <h2>Account</h2>
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
                         <a class="footer-link" asp-page="/App/Dashboard">Dashboard</a>
-                        <a class="footer-link" asp-page="/App/Alerts/Index">Campaigns</a>
-                        <a class="footer-link" asp-page="/App/Billing">Subscription</a>
+                        <a class="footer-link" asp-page="/App/Alerts/Index">Campanhas</a>
+                        <a class="footer-link" asp-page="/App/Billing">Subscricao</a>
                     }
                     else
                     {
-                        <button type="button" class="footer-link footer-button-link" data-auth-open="register">Create account</button>
-                        <button type="button" class="footer-link footer-button-link" data-auth-open="login">Sign in</button>
-                        <a class="footer-link" asp-page="/Pricing">Compare plans</a>
+                        <button type="button" class="footer-link footer-button-link" data-auth-open="register">Criar conta</button>
+                        <button type="button" class="footer-link footer-button-link" data-auth-open="login">Entrar</button>
+                        <a class="footer-link" asp-page="/Pricing">Comparar precos</a>
                     }
                 </div>
             </nav>
         </div>
 
         <div class="footer-bottom">
-            <span>&copy; @DateTime.Now.Year Promovert. All rights reserved.</span>
-            <span>Marketing workspace for campaign planning and measurement.</span>
+            <span>&copy; @DateTime.Now.Year Promovert. Todos os direitos reservados.</span>
+            <span>Workspace de marketing para planear, aprovar e medir campanhas.</span>
         </div>
     </div>
 </footer>
@@ -152,20 +152,20 @@
             </span>
             <span class="brand-wordmark">
               <span class="brand-title">Promovert<sup>TM</sup></span>
-              <span class="brand-subtitle">Online Campaign Engine</span>
+              <span class="brand-subtitle">Motor de Campanhas Online</span>
             </span>
-            <span class="auth-security-badge">Secure access</span>
+            <span class="auth-security-badge">Acesso seguro</span>
           </div>
 
           <ul class="nav nav-pills auth-tabs" id="authTabs" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="tab-register" data-bs-toggle="pill" data-bs-target="#pane-register" type="button" role="tab">
-                Get Started
+                Criar conta
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login" type="button" role="tab">
-                Sign In
+                Entrar
               </button>
             </li>
           </ul>
@@ -173,8 +173,8 @@
           <div class="tab-content">
             <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
               <div class="auth-copy">
-                <h2>Welcome back</h2>
-                <p>Sign in to manage campaigns, billing and marketing channels.</p>
+                <h2>Bem-vindo de volta</h2>
+                <p>Entra para gerir campanhas, faturacao e canais de marketing.</p>
               </div>
 
               <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
@@ -197,22 +197,22 @@
                 <div class="auth-options">
                   <label class="form-check">
                     <input class="form-check-input" type="checkbox" name="RememberMe" />
-                    <span class="form-check-label">Remember me</span>
+                    <span class="form-check-label">Lembrar-me</span>
                   </label>
-                  <a class="small" asp-area="Identity" asp-page="/Account/ForgotPassword">Forgot password?</a>
+                  <a class="small" asp-area="Identity" asp-page="/Account/ForgotPassword">Esqueceste a password?</a>
                 </div>
                 <button class="btn btn-primary auth-submit" type="submit">
                   <i class="bi bi-box-arrow-in-right"></i>
-                  Sign in
+                  Entrar
                 </button>
                 <a class="btn auth-google @(googleConfigured ? "" : "disabled")" href="/auth/google" data-google-auth aria-disabled="@(!googleConfigured)">
-                  <i class="bi bi-google"></i> Continue with Google
+                  <i class="bi bi-google"></i> Continuar com Google
                 </a>
                 @if (!googleConfigured)
                 {
                     <div class="auth-provider-note">
                       <i class="bi bi-info-circle"></i>
-                      Google sign-in needs Authentication:Google credentials.
+                      O login Google precisa das credenciais Authentication:Google.
                     </div>
                 }
               </form>
@@ -220,8 +220,8 @@
 
             <div class="tab-pane fade" id="pane-register" role="tabpanel">
               <div class="auth-copy">
-                <h2>Create your account</h2>
-                <p>Start with free credits and upgrade when your campaign workflow grows.</p>
+                <h2>Cria a tua conta</h2>
+                <p>Comeca com creditos gratis e faz upgrade quando o workflow de campanhas crescer.</p>
               </div>
 
               <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
@@ -238,25 +238,25 @@
                   <label class="form-label" for="authRegisterPassword">Password</label>
                   <div class="auth-field">
                     <i class="bi bi-lock"></i>
-                    <input id="authRegisterPassword" name="Password" type="password" class="form-control" minlength="6" placeholder="Minimum 6 characters" required />
+                    <input id="authRegisterPassword" name="Password" type="password" class="form-control" minlength="6" placeholder="Minimo 6 caracteres" required />
                   </div>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label" for="authRegisterConfirm">Confirm password</label>
+                  <label class="form-label" for="authRegisterConfirm">Confirmar password</label>
                   <div class="auth-field">
                     <i class="bi bi-shield-check"></i>
-                    <input id="authRegisterConfirm" name="ConfirmPassword" type="password" class="form-control" minlength="6" placeholder="Repeat your password" required />
+                    <input id="authRegisterConfirm" name="ConfirmPassword" type="password" class="form-control" minlength="6" placeholder="Repete a password" required />
                   </div>
                 </div>
                 <div class="auth-terms">
-                  By creating an account, you agree to our terms and privacy policy.
+                  Ao criar conta, aceitas os termos e politica de privacidade.
                 </div>
                 <button class="btn btn-primary auth-submit" type="submit">
                   <i class="bi bi-person-plus"></i>
-                  Create account
+                  Criar conta
                 </button>
                 <a class="btn auth-google @(googleConfigured ? "" : "disabled")" href="/auth/google" data-google-auth aria-disabled="@(!googleConfigured)">
-                  <i class="bi bi-google"></i> Continue with Google
+                  <i class="bi bi-google"></i> Continuar com Google
                 </a>
               </form>
             </div>
@@ -266,26 +266,26 @@
         <aside class="auth-aside">
           <div class="auth-aside-badge">
             <i class="bi bi-lightning-charge-fill"></i>
-            Growth campaigns
+            Campanhas de crescimento
           </div>
-          <h3>Turn any product idea into an AI-managed acquisition workflow.</h3>
-          <p>Generate a posting calendar, approve platform-specific drafts, run email sequences and track reach, engagement and conversions.</p>
+          <h3>Transforma qualquer ideia de produto num workflow de aquisicao gerido por IA.</h3>
+          <p>Gera calendario de posts, aprova rascunhos por plataforma, prepara emails e mede alcance, interacoes e conversoes.</p>
 
           <div class="auth-metric-grid">
             <div>
               <span>5</span>
-              <small>free campaigns</small>
+              <small>creditos gratis</small>
             </div>
             <div>
               <span>EUR 49.99</span>
-              <small>monthly unlimited</small>
+              <small>ilimitado mensal</small>
             </div>
           </div>
 
           <div class="auth-aside-list">
-            <div><i class="bi bi-check2"></i> URL, company or business idea input</div>
-            <div><i class="bi bi-check2"></i> AI calendar for TikTok, Instagram, Facebook, LinkedIn, email and SMS</div>
-            <div><i class="bi bi-check2"></i> Annual unlimited plan for EUR 299</div>
+            <div><i class="bi bi-check2"></i> URL, empresa ou ideia de negocio</div>
+            <div><i class="bi bi-check2"></i> Calendario IA para TikTok, Instagram, Facebook, LinkedIn, email e SMS</div>
+            <div><i class="bi bi-check2"></i> Plano anual ilimitado por EUR 299</div>
           </div>
         </div>
         </aside>

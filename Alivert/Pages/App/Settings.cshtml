@@ -1,17 +1,17 @@
 @page
 @model Alivert.Pages.App.SettingsModel
 @{
-    ViewData["Title"] = "Marketing channels";
+    ViewData["Title"] = "Canais de marketing";
 }
 
 <div class="account-page">
     <div class="account-heading">
         <div>
-            <span class="tag mb-2">Account & settings</span>
-            <h1 class="fw-bold mb-0">Marketing channels</h1>
-            <p class="muted mb-0">Choose where Promovert prepares and sends campaign activity.</p>
+            <span class="tag mb-2">Conta e definicoes</span>
+            <h1 class="fw-bold mb-0">Canais de marketing</h1>
+            <p class="muted mb-0">Escolhe onde a Promovert prepara, agenda e envia atividade de campanha.</p>
         </div>
-        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Back to campaigns</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Voltar a campanhas</a>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
@@ -23,14 +23,14 @@
         <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
 
         <section class="account-section mt-4">
-            <div class="account-section-title">Official publishing integrations</div>
+            <div class="account-section-title">Integracoes oficiais de publicacao</div>
             <div class="official-integration-intro">
                 <div>
-                    <span class="tag">Authorized publishing only</span>
-                    <h2>Publish only through official OAuth connections</h2>
-                    <p>Promovert only marks social content as published when the account, page or provider is authorized. LinkedIn, Instagram and Facebook require official page/account permissions; unsupported networks stay as creative briefs until a provider is connected.</p>
+                    <span class="tag">Publicacao autorizada</span>
+                    <h2>Publicar apenas atraves de ligacoes OAuth oficiais</h2>
+                    <p>A Promovert so marca conteudo social como publicado quando a conta, pagina ou fornecedor esta autorizado. LinkedIn, Instagram e Facebook exigem permissoes oficiais; redes sem integracao ficam como brief criativo ate existir fornecedor ligado.</p>
                 </div>
-                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index"><i class="bi bi-calendar-check me-1"></i>Review campaigns</a>
+                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index"><i class="bi bi-calendar-check me-1"></i>Rever campanhas</a>
             </div>
 
             <div class="official-integration-grid">
@@ -255,7 +255,7 @@
                     <h2>Prepare outreach where customers already react</h2>
                     <p>Email and SMS cover direct outreach, social channels cover distribution, and webhooks connect campaigns to CRMs or automation workflows.</p>
                 </div>
-                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
+                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> Nova campanha</a>
             </div>
 
             <div class="notification-channel-grid">

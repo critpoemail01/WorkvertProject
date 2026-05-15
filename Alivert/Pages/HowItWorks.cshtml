@@ -1,7 +1,7 @@
 @page
 @model Alivert.Pages.HowItWorksModel
 @{
-    ViewData["Title"] = "How it works";
+    ViewData["Title"] = "Como funciona";
 }
 
 <section class="hero-section">
@@ -11,20 +11,20 @@
                 <div>
                     <div class="hero-kicker mb-3">
                         <i class="bi bi-diagram-3-fill"></i>
-                        <span>Setup in minutes</span>
+                        <span>Da empresa a uma campanha pronta</span>
                     </div>
-                    <h1 class="hero-title display-5 fw-bold mb-3">From product idea to live marketing campaign without friction.</h1>
+                    <h1 class="hero-title display-5 fw-bold mb-3">Transforma o website da empresa numa campanha completa.</h1>
                     <p class="lead muted mb-4">
-                        Promovert turns a URL, company or business idea into social content, personalized outreach and a dashboard for reach, interaction and conversion.
+                        A Promovert analisa o URL, cria o Business DNA, sugere campanhas por setor, gera posts, emails, landing page, formulario, tracking e relatorio.
                     </p>
                     <div class="hero-actions">
-                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
-                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">Compare plans</a>
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar gratis</button>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">Ver precos</a>
                     </div>
                     <div class="micro-proof-row">
-                        <span><i class="bi bi-check2"></i> 5 free platform credits</span>
-                        <span><i class="bi bi-check2"></i> Social, email and SMS</span>
-                        <span><i class="bi bi-check2"></i> Funnel metrics</span>
+                        <span><i class="bi bi-check2"></i> 5 creditos gratis</span>
+                        <span><i class="bi bi-check2"></i> Posts, emails e landing page</span>
+                        <span><i class="bi bi-check2"></i> Leads, conversoes e relatorio</span>
                     </div>
                 </div>
 
@@ -32,22 +32,29 @@
                     <div class="proof-row">
                         <i class="bi bi-link-45deg"></i>
                         <div>
-                            <strong>Add a source</strong>
-                            <span>Use an application URL, company name or short business idea.</span>
+                            <strong>Comeca pelo URL</strong>
+                            <span>Insere o website, nome da empresa ou ideia de negocio.</span>
                         </div>
                     </div>
                     <div class="proof-row">
-                        <i class="bi bi-camera-video"></i>
+                        <i class="bi bi-stars"></i>
                         <div>
-                            <strong>Choose the campaign asset</strong>
-                            <span>Posts, short videos, LinkedIn content, personalized email or SMS.</span>
+                            <strong>A IA cria o plano</strong>
+                            <span>Objetivo, publico, oferta, canais, calendario e mensagens.</span>
+                        </div>
+                    </div>
+                    <div class="proof-row">
+                        <i class="bi bi-check2-square"></i>
+                        <div>
+                            <strong>Aprovas antes de publicar</strong>
+                            <span>Nada sai sem aprovacao do utilizador ou da equipa.</span>
                         </div>
                     </div>
                     <div class="proof-row">
                         <i class="bi bi-graph-up-arrow"></i>
                         <div>
-                            <strong>Measure the funnel</strong>
-                            <span>See reached, engaged and converted users in the dashboard.</span>
+                            <strong>Mede o resultado</strong>
+                            <span>Alcance, interacoes, leads, subscricoes e vendas.</span>
                         </div>
                     </div>
                 </div>
@@ -56,40 +63,65 @@
 
         <section class="mt-5">
             <div class="section-header">
-                <span class="section-eyebrow"><i class="bi bi-lightning-charge-fill"></i> Workflow</span>
-                <h2 class="section-title">A simple system for repeatable campaign setup.</h2>
-                <p class="section-copy">Every screen is designed to reduce the time between a marketing idea and a measurable campaign.</p>
+                <span class="section-eyebrow"><i class="bi bi-lightning-charge-fill"></i> Fluxo principal</span>
+                <h2 class="section-title">A campanha e a unidade principal, nao o post isolado.</h2>
+                <p class="section-copy">Cada campanha nasce de uma empresa, tem uma estrategia, conteudos por canal, uma pagina de conversao e medicao de negocio.</p>
             </div>
 
-            <div class="step-grid">
+            <div class="step-grid workflow-step-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
-                    <h2>Create your account</h2>
-                    <p class="mb-0">Start with 5 free credits. No payment is needed until you want more active campaign-platforms or Unlimited.</p>
+                    <h2>URL da empresa</h2>
+                    <p class="mb-0">A Promovert usa o website para perceber produto, proposta de valor, publico e contexto visual.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
-                    <h2>Build the campaign</h2>
-                    <p class="mb-0">Pick the source, asset type, cadence, goal and channel.</p>
+                    <h2>Business DNA</h2>
+                    <p class="mb-0">Cria um perfil comercial com problema, promessa, segmentos, tom e canais provaveis.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <h2>Track results</h2>
-                    <p class="mb-0">Review reach, interaction and subscriptions or purchases before scaling.</p>
+                    <h2>Campanhas sugeridas</h2>
+                    <p class="mb-0">Sugere campanhas por setor, objetivo e maturidade: leads, marcacoes, vendas, lancamento ou prova social.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h2>Conteudo por canal</h2>
+                    <p class="mb-0">Gera posts para LinkedIn, Instagram, Facebook, TikTok e emails adaptados ao periodo escolhido.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">5</div>
+                    <h2>Landing page</h2>
+                    <p class="mb-0">Cria uma pagina de conversao com CTA, formulario, UTM e tracking para captar leads.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">6</div>
+                    <h2>Aprovacao</h2>
+                    <p class="mb-0">O utilizador aprova, rejeita ou edita os posts antes de agendar qualquer publicacao.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">7</div>
+                    <h2>Publicacao autorizada</h2>
+                    <p class="mb-0">A publicacao oficial acontece apenas em contas, paginas ou fornecedores autorizados.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">8</div>
+                    <h2>Relatorio e proxima campanha</h2>
+                    <p class="mb-0">O dashboard mostra alcance, interacoes e conversoes, depois recomenda o proximo passo.</p>
                 </div>
             </div>
         </section>
 
-        <div class="conversion-band mt-4">
+        <section class="conversion-band mt-4">
             <div>
-                <span class="tag mb-2">Best next step</span>
-                <h2 class="h3 fw-bold mb-2">Create your first campaign and validate the workflow.</h2>
-                <p class="mb-0 muted">The fastest path is to start with free credits, then upgrade only when campaigns become part of your routine.</p>
+                <span class="tag mb-2">MVP recomendado</span>
+                <h2 class="h3 fw-bold mb-2">Comeca com uma campanha de 14 dias.</h2>
+                <p class="mb-0 muted">URL da empresa, Business DNA, 3 campanhas sugeridas, 5 posts LinkedIn, 5 posts Instagram, 3 emails, 1 landing page, UTM, captacao de leads e dashboard simples.</p>
             </div>
             <div class="conversion-actions">
-                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
-                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">See pricing</a>
+                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar gratis</button>
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">Ver precos</a>
             </div>
-        </div>
+        </section>
     </div>
 </section>

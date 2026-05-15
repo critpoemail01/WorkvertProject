@@ -13,6 +13,8 @@ namespace Alivert.Pages.App.Crm;
 [Authorize]
 public class IndexModel : PageModel
 {
+    private const long MaxCsvUploadBytes = 1_000_000;
+
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly CrmLeadImportService _importer;
@@ -34,6 +36,7 @@ public class IndexModel : PageModel
     public int AuthorizedContacts { get; private set; }
     public int SuppressedContacts { get; private set; }
     public List<CapturedLandingLeadRow> CapturedLandingLeads { get; private set; } = new();
+    public CsvLeadPreview? CsvPreview { get; private set; }
     public IReadOnlyList<string> ConsentStatusOptions => CrmConsentPolicy.Statuses;
 
     [TempData]
@@ -43,7 +46,7 @@ public class IndexModel : PageModel
     {
         [Display(Name = "Lead source")]
         [StringLength(120)]
-        public string Source { get; set; } = "CSV import";
+        public string Source { get; set; } = string.Empty;
 
         [Display(Name = "Consent status")]
         [StringLength(24)]
@@ -53,9 +56,50 @@ public class IndexModel : PageModel
         [StringLength(180)]
         public string? ConsentSource { get; set; }
 
-        [Display(Name = "Paste CRM leads")]
-        [Required, StringLength(20000)]
-        public string RawLeads { get; set; } = string.Empty;
+        [Display(Name = "CSV file")]
+        public IFormFile? CsvFile { get; set; }
+
+        [StringLength(1000000)]
+        public string? RawCsv { get; set; }
+
+        [Display(Name = "External ID")]
+        public int? ExternalIdColumn { get; set; }
+
+        [Display(Name = "Contact name")]
+        public int? ContactNameColumn { get; set; }
+
+        [Display(Name = "Email")]
+        public int? EmailColumn { get; set; }
+
+        [Display(Name = "Phone")]
+        public int? PhoneColumn { get; set; }
+
+        [Display(Name = "Company")]
+        public int? CompanyNameColumn { get; set; }
+
+        [Display(Name = "Role")]
+        public int? RoleColumn { get; set; }
+
+        [Display(Name = "Industry")]
+        public int? IndustryColumn { get; set; }
+
+        [Display(Name = "Country")]
+        public int? CountryColumn { get; set; }
+
+        [Display(Name = "City")]
+        public int? CityColumn { get; set; }
+
+        [Display(Name = "Stage")]
+        public int? StageColumn { get; set; }
+
+        [Display(Name = "Tags")]
+        public int? TagsColumn { get; set; }
+
+        [Display(Name = "Source")]
+        public int? SourceColumn { get; set; }
+
+        [Display(Name = "Notes")]
+        public int? NotesColumn { get; set; }
     }
 
     public record CrmLeadRow(
@@ -91,9 +135,49 @@ public class IndexModel : PageModel
         await LoadAsync();
     }
 
+    public async Task<IActionResult> OnPostPreviewCsvAsync()
+    {
+        ModelState.Clear();
+
+        if (Import.CsvFile is null || Import.CsvFile.Length == 0)
+        {
+            ModelState.AddModelError("Import.CsvFile", "Choose a CSV file first.");
+            await LoadAsync();
+            return Page();
+        }
+
+        if (Import.CsvFile.Length > MaxCsvUploadBytes)
+        {
+            ModelState.AddModelError("Import.CsvFile", "Use a CSV file up to 1 MB.");
+            await LoadAsync();
+            return Page();
+        }
+
+        Import.Source = BuildCsvSource(Import.CsvFile.FileName);
+        Import.RawCsv = await ReadCsvAsync(Import.CsvFile);
+        CsvPreview = _importer.Preview(Import.RawCsv);
+        if (!CsvPreview.Columns.Any())
+        {
+            ModelState.AddModelError("Import.CsvFile", "No CSV columns were found in this file.");
+            await LoadAsync();
+            return Page();
+        }
+
+        ApplySuggestedMapping(CsvPreview.SuggestedMapping);
+        await LoadAsync();
+        return Page();
+    }
+
     public async Task<IActionResult> OnPostImportLeadsAsync()
     {
         var userId = _userManager.GetUserId(User) ?? string.Empty;
+        CsvPreview = _importer.Preview(Import.RawCsv);
+
+        if (string.IsNullOrWhiteSpace(Import.RawCsv))
+            ModelState.AddModelError("Import.CsvFile", "Choose and preview a CSV file before importing.");
+
+        if (Import.EmailColumn is null)
+            ModelState.AddModelError("Import.EmailColumn", "Match the email column before importing.");
 
         if (!ModelState.IsValid)
         {
@@ -101,11 +185,21 @@ public class IndexModel : PageModel
             return Page();
         }
 
-        var rows = _importer.Parse(Import.RawLeads, Import.Source);
+        Import.Source = string.IsNullOrWhiteSpace(Import.Source) ? "CSV import" : Import.Source;
+
+        var mapping = BuildMapping();
+        var rows = _importer.Parse(Import.RawCsv, Import.Source, mapping);
+        if (rows.Count == 0)
+        {
+            ModelState.AddModelError("Import.EmailColumn", "No valid lead emails were found with this column mapping.");
+            await LoadAsync();
+            return Page();
+        }
+
         var imported = 0;
         var updated = 0;
-        var importedConsentStatus = CrmConsentPolicy.Normalize(Import.ConsentStatus);
-        var importedConsentSource = Clean(Import.ConsentSource) ?? Clean(Import.Source);
+        const string importedConsentStatus = CrmConsentPolicy.Unknown;
+        string? importedConsentSource = null;
 
         foreach (var row in rows)
         {
@@ -277,5 +371,53 @@ public class IndexModel : PageModel
     private static string? Clean(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static async Task<string> ReadCsvAsync(IFormFile file)
+    {
+        await using var stream = file.OpenReadStream();
+        using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+        return await reader.ReadToEndAsync();
+    }
+
+    private CrmLeadColumnMapping BuildMapping()
+    {
+        return new CrmLeadColumnMapping(
+            Import.ExternalIdColumn,
+            Import.ContactNameColumn,
+            Import.EmailColumn,
+            Import.PhoneColumn,
+            Import.CompanyNameColumn,
+            Import.RoleColumn,
+            Import.IndustryColumn,
+            Import.CountryColumn,
+            Import.CityColumn,
+            Import.StageColumn,
+            Import.TagsColumn,
+            null,
+            Import.NotesColumn);
+    }
+
+    private void ApplySuggestedMapping(CrmLeadColumnMapping mapping)
+    {
+        Import.ExternalIdColumn = mapping.ExternalIdColumn;
+        Import.ContactNameColumn = mapping.ContactNameColumn;
+        Import.EmailColumn = mapping.EmailColumn;
+        Import.PhoneColumn = mapping.PhoneColumn;
+        Import.CompanyNameColumn = mapping.CompanyNameColumn;
+        Import.RoleColumn = mapping.RoleColumn;
+        Import.IndustryColumn = mapping.IndustryColumn;
+        Import.CountryColumn = mapping.CountryColumn;
+        Import.CityColumn = mapping.CityColumn;
+        Import.StageColumn = mapping.StageColumn;
+        Import.TagsColumn = mapping.TagsColumn;
+        Import.SourceColumn = null;
+        Import.NotesColumn = mapping.NotesColumn;
+    }
+
+    private static string BuildCsvSource(string? fileName)
+    {
+        var cleanFileName = Path.GetFileName(Clean(fileName) ?? string.Empty);
+        return string.IsNullOrWhiteSpace(cleanFileName) ? "CSV import" : cleanFileName.Length > 120 ? cleanFileName[..120] : cleanFileName;
     }
 }

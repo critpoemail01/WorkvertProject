@@ -8,7 +8,7 @@
 }
 
 <!DOCTYPE html>
-<html lang="en-US" data-bs-theme="dark">
+<html lang="pt-PT" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,20 +34,20 @@
             </span>
             <span class="brand-wordmark">
                 <span class="brand-title">Promovert<sup>TM</sup></span>
-                <span class="brand-subtitle">Online Campaign Engine</span>
+                <span class="brand-subtitle">Motor de Campanhas Online</span>
             </span>
         </a>
 
         <nav class="app-nav mt-4" aria-label="App navigation">
-            <div class="app-nav-section">Main menu</div>
+            <div class="app-nav-section">Menu principal</div>
             <a class="app-nav-link" asp-page="/Index">
                 <i class="bi bi-arrow-left"></i>
-                <span>Back to website</span>
+                <span>Voltar ao site</span>
             </a>
             <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index")" method="post">
                 <button type="submit" class="app-nav-link app-nav-button">
                     <i class="bi bi-box-arrow-right"></i>
-                    <span>Sign out</span>
+                    <span>Sair</span>
                 </button>
             </form>
 
@@ -58,33 +58,33 @@
             </a>
             <a class="app-nav-link @(isActivePrefix("/App/Crm") ? "active" : "")" asp-page="/App/Crm/Index">
                 <i class="bi bi-database-add"></i>
-                <span>CRM leads</span>
+                <span>Leads CRM</span>
             </a>
             <a class="app-nav-link @(isCampaignArea ? "active" : "")" asp-page="/App/Alerts/Index">
-                <i class="bi bi-bell-fill"></i>
-                <span>Campaigns</span>
+                <i class="bi bi-megaphone-fill"></i>
+                <span>Campanhas</span>
             </a>
             <a class="app-nav-link @(isActive("/App/Log") ? "active" : "")" asp-page="/App/Log">
                 <i class="bi bi-clock-history"></i>
-                <span>Activity log</span>
+                <span>Atividade</span>
             </a>
 
-            <div class="app-nav-section">Account & settings</div>
+            <div class="app-nav-section">Conta e definicoes</div>
             <a class="app-nav-link @(isActivePrefix("/App/Account") ? "active" : "")" asp-page="/App/Account/Index">
                 <i class="bi bi-person-fill"></i>
-                <span>Personal details</span>
+                <span>Dados pessoais</span>
             </a>
             <a class="app-nav-link @(isActive("/App/Billing") ? "active" : "")" asp-page="/App/Billing">
                 <i class="bi bi-credit-card-2-front"></i>
-                <span>Subscription</span>
+                <span>Subscricao</span>
             </a>
             <a class="app-nav-link @(isActive("/App/Settings") ? "active" : "")" asp-page="/App/Settings">
                 <i class="bi bi-broadcast-pin"></i>
-                <span>Marketing channels</span>
+                <span>Canais</span>
             </a>
             <a class="app-nav-link @(isActive("/App/HelpDesk") ? "active" : "")" asp-page="/App/HelpDesk">
                 <i class="bi bi-chat-left-text-fill"></i>
-                <span>Help desk</span>
+                <span>Ajuda</span>
             </a>
         </nav>
 
@@ -97,12 +97,12 @@
     <div class="app-main">
         <header class="app-topbar">
             <div class="app-topbar-status">
-                <span class="app-status-badge"><i class="bi bi-lightning-charge-fill"></i>Campaign workspace active</span>
+                <span class="app-status-badge"><i class="bi bi-lightning-charge-fill"></i>Workspace de campanhas ativo</span>
                 @await Component.InvokeAsync("AppPlanBadge")
             </div>
             <div class="app-topbar-actions">
-                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Account/Index"><i class="bi bi-person-circle me-1"></i>My account</a>
-                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> New campaign</a>
+                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Account/Index"><i class="bi bi-person-circle me-1"></i>A minha conta</a>
+                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> Nova campanha</a>
             </div>
         </header>
 

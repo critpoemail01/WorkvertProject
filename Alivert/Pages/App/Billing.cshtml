@@ -1,23 +1,23 @@
 @page
 @model Alivert.Pages.App.BillingModel
 @{
-    ViewData["Title"] = "Subscription";
+    ViewData["Title"] = "Subscricao";
 }
 
 <div class="account-page">
     <div class="account-heading">
         <div>
-            <span class="tag mb-2">Account & settings</span>
-            <h1 class="fw-bold mb-0">Subscription details</h1>
-            <p class="muted mb-0">Review your plan, payment options and campaign-platform capacity.</p>
+            <span class="tag mb-2">Conta e definicoes</span>
+            <h1 class="fw-bold mb-0">Detalhes da subscricao</h1>
+            <p class="muted mb-0">Revê o plano, pagamentos e capacidade de campanhas-plataformas.</p>
         </div>
         @if (Model.IsUnlimited)
         {
-            <span class="tag"><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
+            <span class="tag"><i class="bi bi-check2-circle me-1"></i>Ilimitado ativo</span>
         }
         else
         {
-            <a class="btn btn-primary" href="#change-subscription">Upgrade plan</a>
+            <a class="btn btn-primary" href="#change-subscription">Fazer upgrade</a>
         }
     </div>
 
@@ -27,14 +27,14 @@
     }
 
     <section class="account-section mt-4">
-        <div class="account-section-title">Subscription details</div>
+        <div class="account-section-title">Detalhes da subscricao</div>
         <div class="account-rows">
             <div class="account-row">
-                <span>Subscription type</span>
+                <span>Tipo de subscricao</span>
                 <strong>@Model.SubscriptionType</strong>
                 @if (Model.IsUnlimited)
                 {
-                    <span class="account-state-pill"><i class="bi bi-check2-circle"></i>Active</span>
+                    <span class="account-state-pill"><i class="bi bi-check2-circle"></i>Ativa</span>
                 }
                 else
                 {
@@ -42,15 +42,15 @@
                 }
             </div>
             <div class="account-row">
-                <span>Purchased on</span>
+                <span>Comprado em</span>
                 <strong>@Model.PurchasedOnUtc.ToLocalTime().ToString("MMMM d, yyyy")</strong>
             </div>
             <div class="account-row">
-                <span>Expires on</span>
+                <span>Expira em</span>
                 <strong>@(Model.ExpiresOnUtc is null ? "-" : Model.ExpiresOnUtc.Value.ToLocalTime().ToString("MMMM d, yyyy"))</strong>
             </div>
             <div class="account-row">
-                <span>Days remaining</span>
+                <span>Dias restantes</span>
                 <strong>@(Model.DaysRemaining is null ? "-" : Model.DaysRemaining)</strong>
             </div>
             @if (Model.CanManuallyConfirm)
@@ -76,56 +76,56 @@
     <div class="row g-3 mt-3">
         <div class="col-md-4">
             <div class="surface metric-card">
-                <div class="small muted">Credit capacity</div>
-                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.Capacity)</div>
+                <div class="small muted">Capacidade de creditos</div>
+                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Ilimitado" : Model.Capacity)</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="surface metric-card">
-                <div class="small muted">Active platform credits</div>
+                <div class="small muted">Creditos-plataforma ativos</div>
                 <div class="display-6 fw-bold">@Model.ActiveAlerts</div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="surface metric-card">
-                <div class="small muted">Remaining credits</div>
-                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.RemainingSlots)</div>
+                <div class="small muted">Creditos restantes</div>
+                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Ilimitado" : Model.RemainingSlots)</div>
             </div>
         </div>
     </div>
 
     <section class="account-section mt-4">
-        <div class="account-section-title">Payment details</div>
+        <div class="account-section-title">Pagamento</div>
         <div class="billing-payment-panel">
             <div class="billing-payment-icon">
                 <i class="bi bi-credit-card-2-front"></i>
             </div>
             <div>
-                <h2 class="h5 fw-bold mb-1">Secure card checkout</h2>
-                <p class="muted mb-0">Choose a plan or credit pack, confirm the billing details and complete payment through the configured card processor. Promovert never stores raw card numbers.</p>
+                <h2 class="h5 fw-bold mb-1">Checkout seguro por cartao</h2>
+                <p class="muted mb-0">Escolhe plano ou pacote, confirma detalhes e completa o pagamento pelo processador configurado. A Promovert nunca guarda numeros de cartao.</p>
             </div>
             <div class="billing-payment-actions">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCreditCardModal">
-                    <i class="bi bi-credit-card-2-front me-1"></i> Add credit card
+                    <i class="bi bi-credit-card-2-front me-1"></i> Adicionar cartao
                 </button>
-                <a class="btn btn-outline-secondary" href="#change-subscription">Choose plan</a>
-                <a class="btn btn-outline-secondary" href="#credit-packs">Buy credits</a>
+                <a class="btn btn-outline-secondary" href="#change-subscription">Escolher plano</a>
+                <a class="btn btn-outline-secondary" href="#credit-packs">Comprar creditos</a>
             </div>
         </div>
     </section>
 
     <section class="account-section mt-4" id="change-subscription">
-        <div class="account-section-title">Change subscription</div>
+        <div class="account-section-title">Alterar subscricao</div>
         <div class="subscription-choice-grid">
             <div class="subscription-choice">
-                <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexible</div>
-                <h2 class="h3 fw-bold mb-1">Unlimited monthly</h2>
-                <div class="plan-price">@Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)<span class="fs-6 muted">/month</span></div>
-                <p class="muted mt-2">Unlimited campaigns, platforms, channels and cadences with 30-day access.</p>
+                <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexivel</div>
+                <h2 class="h3 fw-bold mb-1">Ilimitado mensal</h2>
+                <div class="plan-price">@Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)<span class="fs-6 muted">/mes</span></div>
+                <p class="muted mt-2">Campanhas, plataformas, canais e cadencias ilimitadas com acesso de 30 dias.</p>
                 <ul class="muted">
-                    <li>No long-term commitment</li>
-                    <li>Social, email and SMS campaign assets</li>
-                    <li>Renews manually through checkout</li>
+                    <li>Sem compromisso anual</li>
+                    <li>Assets sociais, email e SMS</li>
+                    <li>Renovacao manual pelo checkout</li>
                 </ul>
                 <div class="d-grid gap-2 mt-3">
                     <button type="button"
@@ -136,23 +136,23 @@
                             data-checkout-kind="unlimited"
                             data-checkout-plan="monthly"
                             data-checkout-pack=""
-                            data-checkout-title="Unlimited monthly"
-                            data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)}/month")"
-                            data-checkout-detail="Unlimited active campaign-platforms for 30 days. Best when you want to keep every channel active month to month.">
-                        <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
+                            data-checkout-title="Ilimitado mensal"
+                            data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)}/mes")"
+                            data-checkout-detail="Campanhas-plataformas ativas ilimitadas durante 30 dias.">
+                        <i class="bi bi-credit-card-2-front me-1"></i> Pagar mensal
                     </button>
                 </div>
             </div>
 
             <div class="subscription-choice subscription-choice-highlight">
-                <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Best value</div>
-                <h2 class="h3 fw-bold mb-1">Unlimited annual</h2>
-                <div class="plan-price">@Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)<span class="fs-6 muted">/year</span></div>
-                <p class="muted mt-2">One year of unlimited campaign-platforms with more than 50% saved versus paying monthly.</p>
+                <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Melhor valor</div>
+                <h2 class="h3 fw-bold mb-1">Ilimitado anual</h2>
+                <div class="plan-price">@Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)<span class="fs-6 muted">/ano</span></div>
+                <p class="muted mt-2">Um ano de campanhas-plataformas ilimitadas com mais de 50% poupado face ao mensal.</p>
                 <ul class="muted">
-                    <li>Unlimited active campaign-platforms for 1 year</li>
-                    <li>Best option for active growth workflows</li>
-                    <li>No campaign counting or capacity checks</li>
+                    <li>Campanhas-plataformas ativas ilimitadas por 1 ano</li>
+                    <li>Melhor opcao para workflows de crescimento ativos</li>
+                    <li>Sem contagem de campanhas ou checks de capacidade</li>
                 </ul>
                 <div class="d-grid gap-2 mt-3">
                     <button type="button"
@@ -163,10 +163,10 @@
                             data-checkout-kind="unlimited"
                             data-checkout-plan="annual"
                             data-checkout-pack=""
-                            data-checkout-title="Unlimited annual"
-                            data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)}/year")"
-                            data-checkout-detail="One year of unlimited campaigns with the best committed-growth price.">
-                        <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
+                            data-checkout-title="Ilimitado anual"
+                            data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)}/ano")"
+                            data-checkout-detail="Um ano de campanhas ilimitadas com o melhor preco.">
+                        <i class="bi bi-credit-card-2-front me-1"></i> Pagar anual
                     </button>
                 </div>
             </div>
@@ -174,8 +174,8 @@
     </section>
 
     <section class="account-section mt-4" id="credit-packs">
-        <div class="account-section-title">Credit packs</div>
-        <p class="muted mb-4">1 paid credit = 1 active campaign on 1 platform for @Model.CreditPackValidityDays days after payment confirmation. Packs are useful when you need a fixed short-term campaign batch without a subscription.</p>
+        <div class="account-section-title">Pacotes de creditos</div>
+        <p class="muted mb-4">1 credito pago = 1 campanha ativa em 1 plataforma durante @Model.CreditPackValidityDays dias depois da confirmacao de pagamento. Os pacotes servem campanhas pontuais sem subscricao.</p>
         <div class="row g-3">
             @foreach (var pack in Model.Packs)
             {
@@ -183,17 +183,17 @@
                     <div class="credit-pack h-100">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
-                                <div class="fw-semibold">@pack.Credits credits</div>
-                                <div class="muted small">Adds @pack.Credits active campaign-platform credits for @Model.CreditPackValidityDays days</div>
+                                <div class="fw-semibold">@pack.Credits creditos</div>
+                                <div class="muted small">Adiciona @pack.Credits creditos-plataforma ativos durante @Model.CreditPackValidityDays dias</div>
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold">@Model.FormatMoney(pack.Amount, pack.Currency)</div>
-                                <div class="muted small">@pack.Currency @((pack.Amount / pack.Credits).ToString("0.00"))/credit</div>
+                                <div class="muted small">@pack.Currency @((pack.Amount / pack.Credits).ToString("0.00"))/credito</div>
                             </div>
                         </div>
                         <div class="credit-validity-note mt-3">
                             <i class="bi bi-hourglass-split"></i>
-                            <span>Expires @Model.CreditPackValidityDays days after payment. Choose Unlimited for continuous capacity.</span>
+                            <span>Expira @Model.CreditPackValidityDays dias depois do pagamento. Escolhe ilimitado para capacidade continua.</span>
                         </div>
                         <div class="d-grid gap-2 mt-3">
                             <button type="button"
@@ -204,10 +204,10 @@
                                     data-checkout-kind="credits"
                                     data-checkout-plan=""
                                     data-checkout-pack="@pack.Id"
-                                    data-checkout-title="@($"{pack.Credits} credits")"
+                                    data-checkout-title="@($"{pack.Credits} creditos")"
                                     data-checkout-price="@Model.FormatMoney(pack.Amount, pack.Currency)"
-                                    data-checkout-detail="@($"Adds {pack.Credits} active campaign-platform credits for {Model.CreditPackValidityDays} days after payment confirmation.")">
-                                <i class="bi bi-credit-card-2-front me-1"></i> Pay by card
+                                    data-checkout-detail="@($"Adiciona {pack.Credits} creditos-plataforma ativos durante {Model.CreditPackValidityDays} dias apos confirmacao de pagamento.")">
+                                <i class="bi bi-credit-card-2-front me-1"></i> Comprar @pack.Credits creditos
                             </button>
                         </div>
                     </div>
@@ -217,12 +217,12 @@
     </section>
 
     <section class="account-section mt-4">
-        <div class="account-section-title">Purchase history</div>
+        <div class="account-section-title">Historico de compras</div>
         @if (!Model.Purchases.Any())
         {
             <div class="empty-state compact">
                 <i class="bi bi-receipt"></i>
-                <span>No purchases yet.</span>
+                <span>Ainda nao existem compras.</span>
             </div>
         }
         else
@@ -231,11 +231,11 @@
                 <table class="table table-sm align-middle">
                     <thead>
                         <tr>
-                            <th>When</th>
-                            <th>Provider</th>
-                            <th>Plan</th>
-                            <th>Amount</th>
-                            <th>Status</th>
+                            <th>Quando</th>
+                            <th>Fornecedor</th>
+                            <th>Plano</th>
+                            <th>Valor</th>
+                            <th>Estado</th>
                             <th></th>
                         </tr>
                     </thead>

@@ -1,14 +1,14 @@
 @page
 @model Alivert.Pages.App.Planner.IndexModel
 @{
-    ViewData["Title"] = "New campaign";
+    ViewData["Title"] = "Nova campanha";
 }
 
 <section class="app-page-hero ai-planner-hero">
     <div>
         <span class="tag mb-3">Campaign builder</span>
-        <h1 class="hero-title fw-bold mb-2">Configure a complete campaign funnel.</h1>
-        <p class="lead muted mb-0">Add the company URL, target audience and channels. Promovert builds the Business DNA, posts, emails, landing page, approval workflow, lead capture and report.</p>
+        <h1 class="hero-title fw-bold mb-2">Configura uma campanha completa.</h1>
+        <p class="lead muted mb-0">Adiciona o URL da empresa, publico-alvo e canais. A Promovert cria Business DNA, posts, emails, landing page, aprovacao, captacao de leads e relatorio.</p>
     </div>
     <div class="app-page-hero-actions">
         <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard"><i class="bi bi-bar-chart me-1"></i>Dashboard</a>
@@ -38,47 +38,48 @@
         }
         <div class="app-panel-header">
             <div>
-                <h2>Campaign configuration</h2>
-                <p>Add a URL and let Promovert suggest the brief, then adjust anything before generating posts, emails, a landing page and lead capture.</p>
+                <h2>Configuracao da campanha</h2>
+                <p>Comeca pelo URL. A Promovert sugere o briefing e tu ajustas antes de gerar posts para aprovacao.</p>
             </div>
         </div>
         <input asp-for="Input.DetectedApplicationType" type="hidden" />
+        <input asp-for="Input.SelectedTemplateKey" type="hidden" data-selected-template-key />
 
         <div class="row g-3">
             <div class="col-12">
-                <section class="mvp-funnel-panel">
+                <section id="mvp-funnel" class="mvp-funnel-panel">
                     <div>
-                        <span class="tag">Recommended MVP</span>
-                        <h3>14-day complete campaign funnel</h3>
-                        <p>Use this to keep the first version focused: company URL, Business DNA, 3 suggested campaigns, one selected campaign, 5 LinkedIn posts, 5 Instagram posts, 3 emails, 1 landing page, UTM links, lead capture and a simple results dashboard.</p>
+                        <span class="tag">MVP recomendado</span>
+                        <h3>Campanha completa de 14 dias</h3>
+                        <p>Usa isto para manter a primeira versao focada: URL da empresa, Business DNA, 3 campanhas sugeridas, uma campanha escolhida, 5 posts LinkedIn, 5 posts Instagram, 3 emails, 1 landing page, links UTM, captacao de leads e dashboard simples.</p>
                     </div>
                     <div class="mvp-funnel-actions">
-                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=UseMvp" formnovalidate>
-                            <i class="bi bi-magic me-1"></i>Use MVP funnel
+                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=UseMvp#mvp-funnel" formnovalidate>
+                            <i class="bi bi-magic me-1"></i>Usar MVP
                         </button>
-                        <span>Initial integrations: LinkedIn, Instagram/Facebook, Brevo or Mailchimp, Google Analytics/Pixel/UTM.</span>
+                        <span>Integracoes iniciais: LinkedIn, Instagram/Facebook, Brevo ou Mailchimp, Google Analytics/Pixel/UTM.</span>
                     </div>
                 </section>
             </div>
             <div class="col-md-6">
                 <label asp-for="Input.ProductName" class="form-label"></label>
-                <input asp-for="Input.ProductName" class="form-control" placeholder="Promovert, Acme CRM, AI invoicing..." />
+                    <input asp-for="Input.ProductName" class="form-control" placeholder="Promovert, Acme CRM, faturacao com IA..." />
                 <span asp-validation-for="Input.ProductName" class="text-danger"></span>
             </div>
             <div class="col-md-6">
                 <label asp-for="Input.ProductUrl" class="form-label"></label>
                 <div class="planner-url-row">
                     <input asp-for="Input.ProductUrl" class="form-control" placeholder="https://app.example.com" />
-                    <button class="btn btn-outline-secondary" type="submit" formaction="?handler=Suggest" formnovalidate>
-                        <i class="bi bi-magic me-1"></i>Suggest from URL
+                    <button class="btn btn-outline-secondary" type="submit" formaction="?handler=Suggest#campaign-config" formnovalidate>
+                        <i class="bi bi-magic me-1"></i>Sugerir pelo URL
                     </button>
                 </div>
-                <div class="form-text">Use this to auto-fill the campaign brief from the application website.</div>
+                <div class="form-text">Usa isto para preencher automaticamente o briefing com base no website.</div>
                 <span asp-validation-for="Input.ProductUrl" class="text-danger"></span>
             </div>
             <div class="col-12">
                 <label asp-for="Input.CompanyOrIdea" class="form-label"></label>
-                <textarea asp-for="Input.CompanyOrIdea" class="form-control" rows="3" placeholder="What the company/app does, business model and current stage"></textarea>
+                <textarea asp-for="Input.CompanyOrIdea" class="form-control" rows="3" placeholder="O que a empresa/app faz, modelo de negocio e fase atual"></textarea>
                 <span asp-validation-for="Input.CompanyOrIdea" class="text-danger"></span>
             </div>
             @if (Model.CompanyLearning.HasData)
@@ -88,34 +89,34 @@
                         <div class="company-learning-head">
                             <span><i class="bi bi-graph-up-arrow"></i></span>
                             <div>
-                                <h3>Company learning</h3>
+                                <h3>Aprendizagem da empresa</h3>
                                 <p>@Model.CompanyLearning.Summary</p>
                             </div>
                         </div>
                         <div class="company-learning-grid">
                             <article>
                                 <strong>@Model.CompanyLearning.CampaignsAnalyzed</strong>
-                                <span>campaigns learned</span>
+                                <span>campanhas analisadas</span>
                             </article>
                             <article>
                                 <strong>@Model.CompanyLearning.LeadsGenerated</strong>
-                                <span>leads attributed</span>
+                                <span>leads atribuidas</span>
                             </article>
                             <article>
                                 <strong>@string.Join(", ", Model.CompanyLearning.PreferredPlatforms)</strong>
-                                <span>preferred channels</span>
+                                <span>canais preferidos</span>
                             </article>
                         </div>
                         <div class="company-learning-columns">
                             <div>
-                                <strong>This company converts better with</strong>
+                                <strong>Esta empresa converte melhor com</strong>
                                 @foreach (var pattern in Model.CompanyLearning.WinningPatterns)
                                 {
                                     <span><i class="bi bi-check2"></i>@pattern</span>
                                 }
                             </div>
                             <div>
-                                <strong>Next campaign adaptation</strong>
+                                <strong>Adaptacao da proxima campanha</strong>
                                 @foreach (var adaptation in Model.CompanyLearning.RecommendedAdaptations)
                                 {
                                     <span><i class="bi bi-arrow-repeat"></i>@adaptation</span>
@@ -132,42 +133,59 @@
             @if (Model.CampaignRecommendations.Any())
             {
                 <div class="col-12">
-                    <section class="campaign-library-panel">
+                    <section id="campaign-library" class="campaign-library-panel">
                         <div class="lead-discovery-head">
                             <div>
-                                <h3>Campaign library</h3>
-                                <p class="form-text mb-0">Suggested complete campaigns matched to the company signals, sector and objective. Apply one to replace the generic plan with a more relevant campaign.</p>
+                                <h3>Biblioteca de campanhas</h3>
+                                <p class="form-text mb-0">Campanhas completas sugeridas com base no setor, sinais da empresa e objetivo. Escolhe uma ou usa a opcao customizada.</p>
                             </div>
                         </div>
                         <div class="campaign-library-grid">
-                            <article class="campaign-template-card custom">
+                            @{
+                                var customActive = Model.ActiveCampaignTemplateKey == "custom";
+                            }
+                            <article class="campaign-template-card custom @(customActive ? "is-active" : "")" data-campaign-template-card data-template-key="custom">
                                 <span class="tag">Customizado</span>
+                                <span class="campaign-active-badge" hidden="@(!customActive)"><i class="bi bi-check2"></i>Selecionada</span>
                                 <h4>Campanha customizada</h4>
-                                <p>Usa os campos da configuracao para definir objetivo, oferta, publico, canais, duracao, emails, landing page e tracking sem aplicar um template de setor.</p>
+                                <p>Usa os campos da configuracao para definir objetivo, oferta, publico, canais, duracao e tracking sem aplicar um template de setor.</p>
                                 <dl>
-                                    <div><dt>Goal</dt><dd>definido por ti</dd></div>
-                                    <div><dt>Offer</dt><dd>usa a tua proposta de valor</dd></div>
-                                    <div><dt>Channels</dt><dd>os canais selecionados abaixo</dd></div>
-                                    <div><dt>Duration</dt><dd>a duracao configurada</dd></div>
+                                    <div><dt>Objetivo</dt><dd>definido por ti</dd></div>
+                                    <div><dt>Oferta</dt><dd>usa a tua proposta de valor</dd></div>
+                                    <div><dt>Canais</dt><dd>os canais selecionados abaixo</dd></div>
+                                    <div><dt>Duracao</dt><dd>a duracao configurada</dd></div>
                                 </dl>
-                                <button class="btn btn-sm btn-outline-secondary" type="submit" formaction="?handler=UseCustom" formnovalidate>
-                                    Use custom
+                                <button class="btn btn-sm @(customActive ? "btn-primary" : "btn-outline-secondary")" type="button" data-campaign-template-button disabled="@customActive">
+                                    @(customActive ? "Selecionada" : "Usar customizado")
                                 </button>
                             </article>
                             @foreach (var recommendation in Model.CampaignRecommendations)
                             {
-                                <article class="campaign-template-card">
+                                var templateActive = Model.ActiveCampaignTemplateKey == recommendation.Key;
+                                <article class="campaign-template-card @(templateActive ? "is-active" : "")"
+                                    data-campaign-template-card
+                                    data-template-key="@recommendation.Key"
+                                    data-template-sector="@recommendation.Sector"
+                                    data-template-title="@recommendation.Title"
+                                    data-template-strategy="@recommendation.Strategy"
+                                    data-template-goal="@recommendation.Goal"
+                                    data-template-offer="@recommendation.Offer"
+                                    data-template-audience="@recommendation.Audience"
+                                    data-template-duration="@recommendation.DurationDays"
+                                    data-template-frequency="@recommendation.Frequency"
+                                    data-template-platforms="@string.Join("|", recommendation.Platforms)">
                                     <span class="tag">@recommendation.Sector</span>
+                                    <span class="campaign-active-badge" hidden="@(!templateActive)"><i class="bi bi-check2"></i>Selecionada</span>
                                     <h4>@recommendation.Title</h4>
                                     <p>@recommendation.Strategy</p>
                                     <dl>
-                                        <div><dt>Goal</dt><dd>@recommendation.Goal</dd></div>
-                                        <div><dt>Offer</dt><dd>@recommendation.Offer</dd></div>
-                                        <div><dt>Channels</dt><dd>@string.Join(" + ", recommendation.Platforms)</dd></div>
-                                        <div><dt>Duration</dt><dd>@recommendation.DurationDays days</dd></div>
+                                        <div><dt>Objetivo</dt><dd>@recommendation.Goal</dd></div>
+                                        <div><dt>Oferta</dt><dd>@recommendation.Offer</dd></div>
+                                        <div><dt>Canais</dt><dd>@string.Join(" + ", recommendation.Platforms)</dd></div>
+                                        <div><dt>Duracao</dt><dd>@recommendation.DurationDays dias</dd></div>
                                     </dl>
-                                    <button class="btn btn-sm btn-outline-secondary" type="submit" formaction="?handler=UseTemplate&templateKey=@recommendation.Key" formnovalidate>
-                                        Apply campaign
+                                    <button class="btn btn-sm @(templateActive ? "btn-primary" : "btn-outline-secondary")" type="button" data-campaign-template-button disabled="@templateActive">
+                                        @(templateActive ? "Selecionada" : "Aplicar campanha")
                                     </button>
                                 </article>
                             }
@@ -177,36 +195,36 @@
             }
             <div class="col-md-6">
                 <label asp-for="Input.TargetAudience" class="form-label"></label>
-                <textarea asp-for="Input.TargetAudience" class="form-control" rows="4" placeholder="Founders, local clinics, B2B SaaS teams, ecommerce managers..."></textarea>
+                <textarea asp-for="Input.TargetAudience" class="form-control" rows="4" placeholder="Fundadores, clinicas locais, equipas B2B SaaS, ecommerce managers..."></textarea>
                 <span asp-validation-for="Input.TargetAudience" class="text-danger"></span>
             </div>
             <div class="col-md-6">
                 <label asp-for="Input.ValueProposition" class="form-label"></label>
-                <textarea asp-for="Input.ValueProposition" class="form-control" rows="4" placeholder="The main result, pain solved and why people should care"></textarea>
+                <textarea asp-for="Input.ValueProposition" class="form-control" rows="4" placeholder="Resultado principal, problema resolvido e porque devem agir"></textarea>
                 <span asp-validation-for="Input.ValueProposition" class="text-danger"></span>
             </div>
             <div class="col-12">
                 <section class="planner-location" data-location-targeting>
                     <div class="planner-location-head">
                         <div>
-                            <label class="form-label mb-1">Audience region</label>
-                            <p class="form-text mb-0">Choose whether this campaign targets the world, a country, or a city with a radius.</p>
+                            <label class="form-label mb-1">Regiao do publico</label>
+                            <p class="form-text mb-0">Escolhe se a campanha e mundial, por pais ou por cidade com raio em km.</p>
                         </div>
-                        <span class="planner-location-summary" data-location-summary>Worldwide campaign</span>
+                        <span class="planner-location-summary" data-location-summary>Campanha mundial</span>
                     </div>
 
                     <div class="planner-location-modes" role="radiogroup" aria-label="Audience region">
                         <label>
                             <input type="radio" name="Input.AudienceLocationScope" value="World" checked="@(Model.Input.AudienceLocationScope == "World")" />
-                            <span><i class="bi bi-globe2"></i>World</span>
+                            <span><i class="bi bi-globe2"></i>Mundo</span>
                         </label>
                         <label>
                             <input type="radio" name="Input.AudienceLocationScope" value="Country" checked="@(Model.Input.AudienceLocationScope == "Country")" />
-                            <span><i class="bi bi-flag"></i>Country</span>
+                            <span><i class="bi bi-flag"></i>Pais</span>
                         </label>
                         <label>
                             <input type="radio" name="Input.AudienceLocationScope" value="City" checked="@(Model.Input.AudienceLocationScope == "City")" />
-                            <span><i class="bi bi-geo-alt"></i>City radius</span>
+                            <span><i class="bi bi-geo-alt"></i>Cidade + raio</span>
                         </label>
                     </div>
                     <span asp-validation-for="Input.AudienceLocationScope" class="text-danger"></span>
@@ -214,14 +232,14 @@
                     <div class="planner-location-grid mt-3">
                         <div class="planner-location-country" data-location-panel="country">
                             <label asp-for="Input.AudienceCountry" class="form-label"></label>
-                            <input asp-for="Input.AudienceCountry" class="form-control" list="audienceCountryOptions" autocomplete="country-name" placeholder="Portugal, Spain, United States..." data-location-country />
+                            <input asp-for="Input.AudienceCountry" class="form-control" list="audienceCountryOptions" autocomplete="country-name" placeholder="Portugal, Espanha, Estados Unidos..." data-location-country />
                             <datalist id="audienceCountryOptions" data-location-country-list></datalist>
                             <div class="planner-location-autocomplete" data-location-country-menu hidden></div>
                             <span asp-validation-for="Input.AudienceCountry" class="text-danger"></span>
                         </div>
                         <div class="planner-location-city" data-location-panel="city">
                             <label asp-for="Input.AudienceCity" class="form-label"></label>
-                            <input asp-for="Input.AudienceCity" class="form-control" list="audienceCityOptions" autocomplete="address-level2" placeholder="Lisbon, Porto, Madrid..." data-location-city />
+                            <input asp-for="Input.AudienceCity" class="form-control" list="audienceCityOptions" autocomplete="address-level2" placeholder="Lisboa, Porto, Madrid..." data-location-city />
                             <datalist id="audienceCityOptions" data-location-city-list></datalist>
                             <div class="planner-location-autocomplete" data-location-city-menu hidden></div>
                             <span asp-validation-for="Input.AudienceCity" class="text-danger"></span>
@@ -240,8 +258,8 @@
                     <div class="planner-map-wrap mt-3" data-location-panel="city">
                         <div class="planner-map" data-location-map></div>
                         <div class="planner-map-meta">
-                            <span>Click the map to set the campaign center.</span>
-                            <span data-location-coordinates>No point selected yet.</span>
+                            <span>Clica no mapa para definir o centro da campanha.</span>
+                            <span data-location-coordinates>Nenhum ponto selecionado.</span>
                         </div>
                     </div>
 
@@ -253,7 +271,7 @@
             </div>
             <div class="col-md-4">
                 <label asp-for="Input.CampaignGoal" class="form-label"></label>
-                <input asp-for="Input.CampaignGoal" class="form-control" list="campaignGoalOptions" placeholder="subscriptions, demos, purchases..." />
+                <input asp-for="Input.CampaignGoal" class="form-control" list="campaignGoalOptions" placeholder="subscricoes, demos, compras..." />
                 <datalist id="campaignGoalOptions">
                     @foreach (var goal in Model.GoalOptions)
                     {
@@ -264,7 +282,7 @@
             </div>
             <div class="col-md-4">
                 <label asp-for="Input.Tone" class="form-label"></label>
-                <input asp-for="Input.Tone" class="form-control" placeholder="direct, premium, educational..." />
+                <input asp-for="Input.Tone" class="form-control" placeholder="direto, premium, educativo..." />
                 <span asp-validation-for="Input.Tone" class="text-danger"></span>
             </div>
             <div class="col-md-4">
@@ -275,27 +293,27 @@
             <div class="col-md-4">
                 <label asp-for="Input.DurationDays" class="form-label"></label>
                 <select asp-for="Input.DurationDays" class="form-select">
-                    <option value="7">1 week</option>
-                    <option value="14">2 weeks</option>
-                    <option value="30">1 month</option>
-                    <option value="60">2 months</option>
-                    <option value="90">3 months</option>
+                    <option value="7">1 semana</option>
+                    <option value="14">2 semanas</option>
+                    <option value="30">1 mes</option>
+                    <option value="60">2 meses</option>
+                    <option value="90">3 meses</option>
                 </select>
                 <span asp-validation-for="Input.DurationDays" class="text-danger"></span>
             </div>
             <div class="col-md-4">
                 <label asp-for="Input.Frequency" class="form-label"></label>
                 <select asp-for="Input.Frequency" class="form-select">
-                    <option value="Daily">Every day</option>
-                    <option value="Weekdays">Weekdays</option>
-                    <option value="ThreePerWeek">3 times per week</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Mvp14">MVP: 5 LinkedIn + 5 Instagram over 14 days</option>
+                    <option value="Daily">Todos os dias</option>
+                    <option value="Weekdays">Dias uteis</option>
+                    <option value="ThreePerWeek">3 vezes por semana</option>
+                    <option value="Weekly">Semanal</option>
+                    <option value="Mvp14">MVP: 5 LinkedIn + 5 Instagram em 14 dias</option>
                 </select>
                 <span asp-validation-for="Input.Frequency" class="text-danger"></span>
             </div>
             <div class="col-md-4">
-                <label class="form-label">Networks</label>
+                <label class="form-label">Redes</label>
                 <div class="planner-platforms">
                     @foreach (var platform in Model.PlatformOptions)
                     {
@@ -312,26 +330,26 @@
                     <label class="crm-focus-toggle crm-optional-toggle">
                         <input asp-for="Input.UseCrmLeads" data-crm-leads-toggle />
                         <span>
-                            <strong>Focus this campaign on imported CRM leads</strong>
-                            <small>Optional. Select this only when the campaign should use contacts from your CRM or prospecting team.</small>
+                            <strong>Focar esta campanha em leads CRM importadas</strong>
+                            <small>Opcional. Usa apenas quando a campanha deve trabalhar contactos ja importados pela equipa.</small>
                         </span>
                     </label>
                     <div class="crm-focus-grid crm-optional-fields mt-3 @(Model.Input.UseCrmLeads ? "is-open" : "")" data-crm-leads-fields aria-hidden="@(Model.Input.UseCrmLeads ? "false" : "true")">
                         <div class="crm-optional-info">
                             <label asp-for="Input.UseCrmLeads" class="form-label mb-1"></label>
-                            <p class="form-text mb-0">@Model.CrmLeadEmails CRM lead email@(Model.CrmLeadEmails == 1 ? "" : "s") available after consent/exclusion filtering from @Model.CrmLeadCount imported contact@(Model.CrmLeadCount == 1 ? "" : "s"). Select only leads that were imported before opening this campaign builder.</p>
-                            <p class="form-text mb-0 mt-2">CSV import stays in the CRM leads area; this campaign only chooses from contacts that already exist.</p>
+                            <p class="form-text mb-0">@Model.CrmLeadEmails email@(Model.CrmLeadEmails == 1 ? "" : "s") de leads CRM disponivel@(Model.CrmLeadEmails == 1 ? "" : "s") depois dos filtros de consentimento/exclusao, a partir de @Model.CrmLeadCount contacto@(Model.CrmLeadCount == 1 ? "" : "s") importado@(Model.CrmLeadCount == 1 ? "" : "s").</p>
+                            <p class="form-text mb-0 mt-2">A importacao CSV fica na area CRM leads; aqui apenas escolhes contactos que ja existem.</p>
                         </div>
                         <div class="crm-lead-picker">
                             <div class="crm-lead-picker-head">
-                                <span>Imported leads available</span>
-                                <strong>@Model.AvailableCrmLeads.Count shown</strong>
+                                <span>Leads importadas disponiveis</span>
+                                <strong>@Model.AvailableCrmLeads.Count visiveis</strong>
                             </div>
                             @if (!Model.AvailableCrmLeads.Any())
                             {
                                 <div class="empty-state compact">
                                     <i class="bi bi-database-x"></i>
-                                    <span>No imported CRM leads available. Import the CSV in CRM leads first, then return to create the campaign.</span>
+                                    <span>Nao existem leads CRM disponiveis. Importa primeiro o CSV em CRM leads e volta para criar a campanha.</span>
                                 </div>
                             }
                             else
@@ -339,7 +357,7 @@
                                 <div class="crm-lead-list">
                                     @foreach (var lead in Model.AvailableCrmLeads)
                                     {
-                                        var leadMeta = string.Join(" · ", new[] { lead.CompanyName, lead.Role, lead.Industry, lead.Country, lead.City, lead.Stage }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                                        var leadMeta = string.Join(" - ", new[] { lead.CompanyName, lead.Role, lead.Industry, lead.Country, lead.City, lead.Stage }.Where(x => !string.IsNullOrWhiteSpace(x)));
                                         <label class="crm-lead-option">
                                             <input type="checkbox" name="Input.SelectedCrmLeadIds" value="@lead.Id" checked="@Model.Input.SelectedCrmLeadIds.Contains(lead.Id)" />
                                             <span>
@@ -360,18 +378,18 @@
                 </section>
             </div>
             <div class="col-12">
-                <section class="lead-discovery-panel lead-email-builder">
+                <section id="lead-emails" class="lead-discovery-panel lead-email-builder">
                     <div class="lead-discovery-head">
                         <div>
                             <label asp-for="Input.EmailAudience" class="form-label mb-1"></label>
-                            <p class="form-text mb-0">Type emails manually, or let Promovert suggest public contact emails based on product, audience and location.</p>
+                            <p class="form-text mb-0">Escreve emails manualmente ou deixa a Promovert sugerir contactos publicos com base no produto, publico e localizacao.</p>
                         </div>
-                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=SuggestLeadEmails" formnovalidate>
-                            <i class="bi bi-search me-1"></i>Suggest emails
+                        <button class="btn btn-outline-secondary" type="submit" formaction="?handler=SuggestLeadEmails#lead-emails" formnovalidate>
+                            <i class="bi bi-search me-1"></i>Sugerir emails
                         </button>
                     </div>
                     <textarea asp-for="Input.EmailAudience" class="form-control mt-3" rows="5" placeholder="ana@example.com&#10;joao@example.com&#10;marketing@empresa.pt"></textarea>
-                    <div class="form-text">One email per line. Suggested emails are added here for review before generating the campaign.</div>
+                    <div class="form-text">Um email por linha. Os emails sugeridos ficam aqui para revisao antes de gerar a campanha.</div>
                     <span asp-validation-for="Input.EmailAudience" class="text-danger"></span>
 
                     @if (Model.LeadSearchQueries.Any() || Model.DiscoveredLeadEmails.Any() || Model.LeadDiscoveryWarnings.Any())
@@ -380,7 +398,7 @@
                             @if (Model.LeadSearchQueries.Any())
                             {
                                 <div>
-                                    <strong>Prospecting searches</strong>
+                                    <strong>Pesquisas de prospecao</strong>
                                     <div class="lead-query-list">
                                         @foreach (var query in Model.LeadSearchQueries)
                                         {
@@ -393,7 +411,7 @@
                             @if (Model.DiscoveredLeadEmails.Any())
                             {
                                 <div>
-                                    <strong>Public emails found</strong>
+                                    <strong>Emails publicos encontrados</strong>
                                     <div class="lead-email-list">
                                         @foreach (var leadEmail in Model.DiscoveredLeadEmails)
                                         {
@@ -419,60 +437,60 @@
         </div>
 
         <div class="alert-form-actions mt-4">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-stars me-1"></i>Generate AI plan</button>
-            <span class="muted">Suggestions stay in draft until you approve them.</span>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-stars me-1"></i>Gerar rascunhos de posts</button>
+            <span class="muted">Reve os posts gerados e aprova ou rejeita cada um antes de agendar.</span>
         </div>
     </form>
 
     <aside class="surface app-panel planner-side">
-        <span class="tag">What gets generated</span>
+        <span class="tag">O que e gerado</span>
         <div class="planner-feature">
             <i class="bi bi-rocket-takeoff"></i>
             <div>
-                <strong>MVP funnel</strong>
-                <span>14 days with 5 LinkedIn posts, 5 Instagram posts, 3 emails, 1 landing page and UTM tracking.</span>
+                <strong>Funil MVP</strong>
+                <span>14 dias com 5 posts LinkedIn, 5 posts Instagram, 3 emails, 1 landing page e tracking UTM.</span>
             </div>
         </div>
         <div class="planner-feature">
             <i class="bi bi-calendar2-week"></i>
             <div>
-                <strong>Publishing calendar</strong>
-                <span>Posts and video scripts for each selected network across the selected period.</span>
+                <strong>Calendario de publicacao</strong>
+                <span>Posts e scripts de video para cada rede selecionada ao longo do periodo.</span>
             </div>
         </div>
         <div class="planner-feature">
             <i class="bi bi-check2-square"></i>
             <div>
-                <strong>Approval workflow</strong>
-                <span>Review drafts, approve all, schedule approved content and publish due items.</span>
+                <strong>Workflow de aprovacao</strong>
+                <span>Reve rascunhos, aprova em massa, agenda conteudo aprovado e publica itens vencidos.</span>
             </div>
         </div>
         <div class="planner-feature">
             <i class="bi bi-envelope-paper"></i>
             <div>
-                <strong>Email sequence</strong>
-                <span>Multiple templates for different days, personalized with first-name placeholders.</span>
+                <strong>Sequencia de emails</strong>
+                <span>Templates para dias diferentes, personalizados com placeholders de primeiro nome.</span>
             </div>
         </div>
         <div class="planner-feature">
             <i class="bi bi-building-add"></i>
             <div>
-                <strong>Lead ideas</strong>
-                <span>Suggested industries, roles and search prompts for prospecting.</span>
+                <strong>Ideias de leads</strong>
+                <span>Setores, cargos e pesquisas sugeridas para prospecao.</span>
             </div>
         </div>
         <div class="planner-feature">
             <i class="bi bi-window-stack"></i>
             <div>
-                <strong>Landing page + form</strong>
-                <span>A campaign page captures leads after authorized publication.</span>
+                <strong>Landing page + formulario</strong>
+                <span>Uma pagina de campanha capta leads depois da publicacao autorizada.</span>
             </div>
         </div>
         <div class="planner-feature">
             <i class="bi bi-database-add"></i>
             <div>
-                <strong>CRM audience</strong>
-                <span>Imported CRM leads can become the focus of the campaign.</span>
+                <strong>Publico CRM</strong>
+                <span>Leads CRM importadas podem ser o foco da campanha.</span>
             </div>
         </div>
     </aside>
@@ -481,8 +499,8 @@
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Recent AI plans</h2>
-            <p>Open a plan to approve, schedule or inspect suggested content.</p>
+            <h2>Campanhas recentes</h2>
+            <p>Abre uma campanha para aprovar, agendar ou rever os posts sugeridos.</p>
         </div>
     </div>
 
@@ -490,7 +508,7 @@
     {
         <div class="empty-state compact">
             <i class="bi bi-stars"></i>
-            <span>No AI plans yet.</span>
+            <span>Ainda nao existem campanhas geradas.</span>
         </div>
     }
     else
@@ -499,13 +517,13 @@
             <table class="table table-sm align-middle">
                 <thead>
                     <tr>
-                        <th>Product</th>
-                        <th>Period</th>
-                        <th>Region</th>
-                        <th>Platforms</th>
-                        <th>Output</th>
-                        <th>Status</th>
-                        <th class="text-end">Action</th>
+                        <th>Produto</th>
+                        <th>Periodo</th>
+                        <th>Regiao</th>
+                        <th>Plataformas</th>
+                        <th>Conteudo</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acao</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -520,7 +538,7 @@
                         <td><span class="badge text-bg-secondary">@plan.Status</span></td>
                         <td class="text-end">
                             <div class="campaign-row-actions">
-                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Open</a>
+                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Abrir</a>
                                 <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#deletePlanModal-@plan.Id">Eliminar</button>
                             </div>
                         </td>
@@ -579,6 +597,107 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/alivert-location-targeting.js" asp-append-version="true"></script>
     <script>
+        (() => {
+            const library = document.querySelector('[data-selected-template-key]')?.closest('form')?.querySelector('#campaign-library');
+            if (!library) return;
+
+            const form = library.closest('form');
+            const fields = {
+                selectedTemplateKey: form.querySelector('[data-selected-template-key]'),
+                detectedType: form.querySelector('[name="Input.DetectedApplicationType"]'),
+                campaignGoal: form.querySelector('[name="Input.CampaignGoal"]'),
+                valueProposition: form.querySelector('[name="Input.ValueProposition"]'),
+                targetAudience: form.querySelector('[name="Input.TargetAudience"]'),
+                companyOrIdea: form.querySelector('[name="Input.CompanyOrIdea"]'),
+                durationDays: form.querySelector('[name="Input.DurationDays"]'),
+                frequency: form.querySelector('[name="Input.Frequency"]'),
+                tone: form.querySelector('[name="Input.Tone"]')
+            };
+            const cards = Array.from(library.querySelectorAll('[data-campaign-template-card]'));
+            const platformInputs = Array.from(form.querySelectorAll('input[name="Input.Platforms"]'));
+
+            const setValue = (input, value) => {
+                if (!input || value === undefined || value === null) return;
+                input.value = value;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            };
+
+            const optionExists = (select, value) => {
+                return select && Array.from(select.options).some((option) => option.value === value);
+            };
+
+            const setActiveCard = (activeCard) => {
+                cards.forEach((card) => {
+                    const active = card === activeCard;
+                    card.classList.toggle('is-active', active);
+
+                    const badge = card.querySelector('.campaign-active-badge');
+                    if (badge) badge.hidden = !active;
+
+                    const button = card.querySelector('[data-campaign-template-button]');
+                    if (!button) return;
+
+                    button.disabled = active;
+                    button.classList.toggle('btn-primary', active);
+                    button.classList.toggle('btn-outline-secondary', !active);
+                    button.textContent = active
+                        ? 'Selecionada'
+                        : (card.dataset.templateKey === 'custom' ? 'Usar customizado' : 'Aplicar campanha');
+                });
+            };
+
+            const applyTemplate = (card) => {
+                const key = card.dataset.templateKey || 'custom';
+                setValue(fields.selectedTemplateKey, key);
+                setActiveCard(card);
+
+                if (key === 'custom') {
+                    setValue(fields.detectedType, 'Customizado');
+                    return;
+                }
+
+                const baseValue = fields.valueProposition?.dataset.baseValue ?? fields.valueProposition?.value ?? '';
+                if (fields.valueProposition && fields.valueProposition.dataset.baseValue === undefined) {
+                    fields.valueProposition.dataset.baseValue = fields.valueProposition.value || '';
+                }
+
+                setValue(fields.campaignGoal, card.dataset.templateGoal || '');
+                setValue(fields.detectedType, card.dataset.templateSector || '');
+                setValue(fields.tone, `${(card.dataset.templateSector || '').toLowerCase()}, practical and conversion-focused`.slice(0, 80));
+
+                const offer = card.dataset.templateOffer || '';
+                setValue(fields.valueProposition, baseValue.trim() ? `${baseValue.trim()}. Campaign offer: ${offer}`.slice(0, 700) : offer.slice(0, 700));
+
+                if (fields.targetAudience && !fields.targetAudience.value.trim()) {
+                    setValue(fields.targetAudience, (card.dataset.templateAudience || '').slice(0, 700));
+                }
+
+                if (fields.companyOrIdea && !fields.companyOrIdea.value.trim()) {
+                    setValue(fields.companyOrIdea, `${card.dataset.templateSector || 'Campaign'} campaign: ${card.dataset.templateStrategy || ''}`.slice(0, 400));
+                }
+
+                setValue(fields.durationDays, card.dataset.templateDuration || fields.durationDays?.value);
+                const frequency = card.dataset.templateFrequency || 'ThreePerWeek';
+                setValue(fields.frequency, optionExists(fields.frequency, frequency) ? frequency : 'ThreePerWeek');
+
+                const platforms = (card.dataset.templatePlatforms || '')
+                    .split('|')
+                    .map((value) => value.trim().toLowerCase())
+                    .filter(Boolean);
+                platformInputs.forEach((input) => {
+                    input.checked = platforms.includes(input.value.toLowerCase());
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            };
+
+            cards.forEach((card) => {
+                const button = card.querySelector('[data-campaign-template-button]');
+                if (!button) return;
+                button.addEventListener('click', () => applyTemplate(card));
+            });
+        })();
+
         document.querySelectorAll('[data-crm-leads-panel]').forEach((panel) => {
             const toggle = panel.querySelector('[data-crm-leads-toggle]');
             const fields = panel.querySelector('[data-crm-leads-fields]');

@@ -6,21 +6,21 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-        <a class="nav-link" asp-page="/App/Account/Index"><i class="bi bi-person-circle"></i><span>Hi, @User.Identity?.Name</span></a>
+        <a class="nav-link" asp-page="/App/Account/Index"><i class="bi bi-person-circle"></i><span>Ola, @User.Identity?.Name</span></a>
     </li>
     <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index")" method="post">
-            <button type="submit" class="btn nav-cta nav-cta-secondary"><i class="bi bi-box-arrow-right"></i> Sign out</button>
+            <button type="submit" class="btn nav-cta nav-cta-secondary"><i class="bi bi-box-arrow-right"></i> Sair</button>
         </form>
     </li>
 }
 else
 {
     <li class="nav-item">
-        <button type="button" class="btn nav-cta nav-cta-primary" data-auth-open="register"><i class="bi bi-lightning-charge-fill"></i> Get started</button>
+        <button type="button" class="btn nav-cta nav-cta-primary" data-auth-open="register"><i class="bi bi-lightning-charge-fill"></i> Comecar</button>
     </li>
     <li class="nav-item">
-        <button type="button" class="btn nav-cta nav-cta-secondary" data-auth-open="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</button>
+        <button type="button" class="btn nav-cta nav-cta-secondary" data-auth-open="login"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
     </li>
 }
 </ul>
