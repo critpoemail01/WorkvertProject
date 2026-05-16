@@ -1,12 +1,12 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using System.Net;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class AlertDispatcherTests
 {
@@ -96,7 +96,7 @@ public class AlertDispatcherTests
         Assert.Equal("Slack", delivery.Channel);
         Assert.Equal("Slack webhook", delivery.Destination);
         Assert.Equal("https://hooks.slack.test/services/T000/B000/secret", request?.RequestUri?.ToString());
-        Assert.Contains("Promovert campaign", requestBody);
+        Assert.Contains("Dealvert price alert", requestBody);
         Assert.Contains("BTCUSDT", requestBody);
     }
 

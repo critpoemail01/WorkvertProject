@@ -1,11 +1,11 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.ViewComponents;
+namespace Dealvert.ViewComponents;
 
 public sealed class AppPlanBadgeViewComponent : ViewComponent
 {
@@ -70,7 +70,7 @@ public sealed class AppPlanBadgeViewComponent : ViewComponent
 
             var meta = daysRemaining is null
                 ? "Active now"
-                : $"{daysRemaining} day{(daysRemaining == 1 ? string.Empty : "s")} left";
+                : $"{daysRemaining} day{(daysRemaining == 1 ? string.Empty : "s")} remaining";
 
             return new AppPlanBadgeModel(planName, meta, "bi-stars", "unlimited");
         }
@@ -78,10 +78,10 @@ public sealed class AppPlanBadgeViewComponent : ViewComponent
         var capacity = Math.Max(0, limits.Capacity);
         var remaining = Math.Max(0, limits.RemainingSlots);
         var isFree = capacity <= 5;
-        var name = isFree ? "Basic (Free)" : "Credit pack";
+        var name = isFree ? "Free basic" : "Credit pack";
         var metaText = isFree
-            ? $"{capacity} free platform credits"
-            : $"{remaining} of {capacity} platform credits free";
+            ? $"{capacity} free alerts"
+            : $"{remaining} of {capacity} alerts free";
 
         return new AppPlanBadgeModel(name, metaText, isFree ? "bi-wallet2" : "bi-credit-card-2-front", isFree ? "basic" : "credits");
     }

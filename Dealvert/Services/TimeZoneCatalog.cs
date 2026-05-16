@@ -1,4 +1,4 @@
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed record ScheduleTimeZoneChoice(string Id, string Label);
 

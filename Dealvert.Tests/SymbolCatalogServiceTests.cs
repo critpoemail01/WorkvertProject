@@ -1,10 +1,10 @@
 using System.Net;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class SymbolCatalogServiceTests
 {

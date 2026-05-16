@@ -1,9 +1,9 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Workers;
+namespace Dealvert.Workers;
 
 public sealed class AlertEvaluatorWorker : BackgroundService
 {
@@ -64,15 +64,16 @@ public sealed class AlertEvaluatorWorker : BackgroundService
 
                 foreach (var group in alerts.GroupBy(a => a.Symbol))
                 {
-                    var snapshotCache = new Dictionary<MarketType, MarketSnapshot>();
+                    var snapshotCache = new Dictionary<string, MarketSnapshot>(StringComparer.OrdinalIgnoreCase);
 
                     foreach (var alert in group)
                     {
-                        if (!snapshotCache.TryGetValue(alert.MarketType, out var snapshot))
+                        var snapshotKey = $"{alert.MarketType}|{alert.AudienceList}";
+                        if (!snapshotCache.TryGetValue(snapshotKey, out var snapshot))
                         {
                             try
                             {
-                                snapshot = await _market.GetSnapshotAsync(group.Key, alert.MarketType, stoppingToken);
+                                snapshot = await _market.GetSnapshotAsync(group.Key, alert.MarketType, stoppingToken, alert);
                             }
                             catch (OperationCanceledException)
                             {
@@ -95,7 +96,7 @@ public sealed class AlertEvaluatorWorker : BackgroundService
                                 continue;
                             }
 
-                            snapshotCache[alert.MarketType] = snapshot;
+                            snapshotCache[snapshotKey] = snapshot;
                         }
 
                         var isCoolingDown = alert.LastTriggeredAtUtc is not null &&

@@ -1,230 +1,139 @@
 @page
-@using Alivert.Models
-@model Alivert.Pages.App.Alerts.AlertsIndexModel
+@using Dealvert.Models
+@model Dealvert.Pages.App.Alerts.AlertsIndexModel
 @{
-    ViewData["Title"] = "Campanhas";
-    var primaryGroup = Model.AlertGroups.FirstOrDefault();
-    var primaryAlert = primaryGroup?.Alerts.OrderByDescending(a => a.IsEnabled).ThenBy(a => a.Id).FirstOrDefault();
-    var primaryGroupIsEnabled = primaryGroup?.Alerts.Any(a => a.IsEnabled) == true;
+    ViewData["Title"] = "Price alerts";
+    var activeAlerts = Model.Alerts.Count(a => a.IsEnabled);
+    var dailyReports = Model.Alerts.Count(a => a.RuleType == AlertRuleType.DailyOpportunityReport);
+    var uniqueProducts = Model.AlertGroups.Count;
 }
 
-<div class="alerts-board">
-    <div class="alerts-toolbar">
+<div class="alerts-board product-watch-board">
+    <section class="app-page-hero product-hero">
         <div>
-            <span class="tag mb-2">Centro de campanhas</span>
-            <h1 class="fw-bold mb-0">Campanhas</h1>
-            <p class="muted mb-0">Cria, organiza e mede campanhas para aplicacoes, empresas e ideias de negocio.</p>
+            <span class="tag mb-3">Deal intelligence</span>
+            <h1 class="hero-title fw-bold mb-2">Price alerts and opportunities</h1>
+            <p class="lead muted mb-0">Monitor products by URL, filter by region, and receive email when a trusted store drops below your target.</p>
         </div>
-        <div class="alerts-actions">
-            <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config">
-                <i class="bi bi-plus-lg me-1"></i> Nova campanha
+        <div class="app-page-hero-actions">
+            <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create">
+                <i class="bi bi-plus-lg me-1"></i>New alert
             </a>
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
-                <i class="bi bi-clock me-1"></i> Janela de entrega
+            <button class="btn btn-outline-secondary btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                <i class="bi bi-clock me-1"></i>Email window
             </button>
-            <a class="btn btn-outline-secondary btn-icon" asp-page="/App/Settings" title="Marketing channels">
-                <i class="bi bi-broadcast-pin"></i>
-            </a>
         </div>
-    </div>
+    </section>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
         <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
     }
 
-    @if (Model.AiCampaigns.Any())
-    {
-        <section class="alerts-group ai-campaigns-panel mt-4">
-            <div class="alerts-group-title">
-                <div>
-                    <span>Campanhas geradas</span>
-                    <div class="small muted">Planos prontos para rever, aprovar e agendar.</div>
-                </div>
-                <div class="alerts-group-title-actions">
-                    <span class="muted small">@Model.AiCampaigns.Count campanha@(Model.AiCampaigns.Count == 1 ? "" : "s")</span>
-                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Gerar outra</a>
-                </div>
+    <div class="product-watch-stats mt-4">
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-bag-check"></i></span>
+            <div>
+                <div class="app-stat-label">Watched products</div>
+                <div class="app-stat-value">@uniqueProducts</div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-sm align-middle alerts-table ai-campaigns-table">
-                    <thead>
-                        <tr>
-                            <th>Campanha</th>
-                            <th>Periodo</th>
-                            <th>Regiao</th>
-                            <th>Canais</th>
-                            <th>Conteudo</th>
-                            <th>Funil</th>
-                            <th>Estado</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var campaign in Model.AiCampaigns)
-                    {
-                        var publishedPosts = campaign.Posts.Count(x => x.Status == "Published");
-                        var sentEmails = campaign.Emails.Count(x => x.Status == "Sent");
-                        var reach = campaign.Posts.Where(x => x.Status == "Published").Sum(x => x.EstimatedReach) +
-                            campaign.Emails.Where(x => x.Status == "Sent").Sum(x => x.EstimatedReach);
-                        var interactions = campaign.Posts.Where(x => x.Status == "Published").Sum(x => x.EstimatedInteractions) +
-                            campaign.Emails.Where(x => x.Status == "Sent").Sum(x => x.EstimatedInteractions);
-                        var conversions = campaign.Posts.Where(x => x.Status == "Published").Sum(x => x.EstimatedConversions) +
-                            campaign.Emails.Where(x => x.Status == "Sent").Sum(x => x.EstimatedConversions);
-                        <tr>
-                            <td>
-                                <div class="ai-campaign-title">
-                                    <i class="bi bi-stars text-success"></i>
-                                    <div>
-                                        <strong>@campaign.ProductName</strong>
-                                        <span>@campaign.CampaignGoal</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>@campaign.StartDate.ToString("MMM d") - @campaign.EndDate.ToString("MMM d")</td>
-                            <td>@AiLocationLabel(campaign)</td>
-                            <td>@campaign.Platforms.Replace(",", ", ")</td>
-                            <td>@campaign.Posts.Count posts / @campaign.Emails.Count emails / @campaign.Leads.Count leads</td>
-                            <td>
-                                <span class="ai-campaign-funnel">@reach alcance</span>
-                                <span class="ai-campaign-funnel">@interactions interacoes</span>
-                                <span class="ai-campaign-funnel">@conversions conversoes</span>
-                            </td>
-                            <td>
-                                <span class="badge @AiStatusClass(campaign.Status)">@campaign.Status</span>
-                                @if (publishedPosts + sentEmails > 0)
-                                {
-                                    <div class="small muted">@publishedPosts posts live / @sentEmails emails enviados</div>
-                                }
-                            </td>
-                            <td class="text-end">
-                                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@campaign.Id">Abrir</a>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
+        </article>
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-bell-fill"></i></span>
+            <div>
+                <div class="app-stat-label">Active alerts</div>
+                <div class="app-stat-value">@activeAlerts</div>
+            </div>
+        </article>
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-newspaper"></i></span>
+            <div>
+                <div class="app-stat-label">Daily reports</div>
+                <div class="app-stat-value">@dailyReports</div>
+            </div>
+        </article>
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-shield-check"></i></span>
+            <div>
+                <div class="app-stat-label">Plan</div>
+                <div class="app-stat-value">@Model.PlanPromoTitle</div>
+            </div>
+        </article>
+    </div>
+
+    @if (!Model.AlertGroups.Any())
+    {
+        <section class="surface product-empty-state mt-4">
+            <div class="product-empty-copy">
+                <span class="tag">Start with a URL</span>
+                <h2>Add a product from Amazon.es, Worten, Fnac, or another store.</h2>
+                <p>Set target price, margin, country/city, and category. Dealvert creates email alerts and a daily resale opportunity report.</p>
+                <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>Create first alert</a>
+            </div>
+            <div class="product-empty-panel" aria-hidden="true">
+                <div><strong>PlayStation 5 Slim</strong><span>Amazon.es</span><em>-12%</em></div>
+                <div><strong>iPhone 14 128GB</strong><span>Worten</span><em>EUR 72 margin</em></div>
+                <div><strong>AirPods Pro</strong><span>Fnac / OLX</span><em>high resale</em></div>
             </div>
         </section>
     }
-
-    @if (primaryGroup is not null)
+    else
     {
-        var primaryHistoryId = GroupHistoryId(primaryGroup.MarketType, primaryGroup.Symbol);
-        <div class="alerts-market-bar mt-4">
-            <div class="d-flex align-items-center gap-2">
-                <button class="alerts-history-trigger collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@primaryHistoryId" aria-expanded="false" aria-controls="@primaryHistoryId" title="Show activity history" aria-label="Show activity history">
-                    <i class="bi bi-chevron-down"></i>
-                </button>
-                <span class="alerts-coin"><i class="bi bi-megaphone-fill"></i></span>
-                <div>
-                    <strong>@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)</strong>
-                    <div class="small muted">@SourceKind(primaryGroup.MarketType)</div>
-                </div>
-            </div>
-            <div class="alerts-market-tools">
-                @if (primaryAlert is not null)
-                {
-                    <a class="btn-clean" asp-page="/App/Alerts/Edit" asp-route-id="@primaryAlert.Id" title="Edit campaign" aria-label="Edit campaign"><i class="bi bi-pencil-square"></i></a>
-                }
-                <button class="btn-clean danger" type="button" title="Delete source" aria-label="Delete source"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteLegacyCampaignModal"
-                        data-delete-handler="DeleteGroup"
-                        data-delete-kind="fonte"
-                        data-delete-title="@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)"
-                        data-delete-market="@primaryGroup.MarketType"
-                        data-delete-symbol="@primaryGroup.Symbol">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                <form class="alerts-inline-form" method="post" asp-page-handler="ToggleGroup">
-                    <input type="hidden" name="marketType" value="@primaryGroup.MarketType" />
-                    <input type="hidden" name="symbol" value="@primaryGroup.Symbol" />
-                    <button class="alerts-toggle @(primaryGroupIsEnabled ? "on" : "off")" type="submit" title="@(primaryGroupIsEnabled ? "Pause campaigns" : "Activate campaigns")" aria-label="@(primaryGroupIsEnabled ? "Pause campaigns" : "Activate campaigns")"></button>
-                </form>
-            </div>
-        </div>
-        <div class="collapse alerts-history-collapse" id="@primaryHistoryId">
-            <section class="alerts-trigger-history">
-                <div class="alerts-trigger-history-head">
-                    <div>
-                        <span>Activity history</span>
-                        <strong>@GroupTitle(primaryGroup.MarketType, primaryGroup.Symbol)</strong>
-                    </div>
-                    <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Abrir log completo</a>
-                </div>
-                @if (primaryGroup.TriggerHistory.Any())
-                {
-                    <div class="alerts-trigger-list">
-                        @foreach (var trigger in primaryGroup.TriggerHistory)
-                        {
-                            <div class="alerts-trigger-item">
-                                <span class="alerts-trigger-icon @RuleClass(trigger.RuleType)">
-                                    <i class="bi @RuleIcon(trigger.RuleType)"></i>
-                                </span>
-                                <div class="alerts-trigger-copy">
-                                    <strong>@RuleDisplayName(trigger.RuleType)</strong>
-                                    <span>@trigger.Message</span>
-                                    <small>@CadenceLabel(trigger.Timeframe) &middot; goal @trigger.Threshold</small>
-                                </div>
-                                <time datetime="@trigger.TriggeredAtUtc.ToString("O")">@trigger.TriggeredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</time>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="alerts-trigger-empty">
-                        <i class="bi bi-megaphone"></i>
-                        <span>No activity recorded for this source yet.</span>
-                    </div>
-                }
-            </section>
-        </div>
-    }
-
-    @if (Model.AlertGroups.Any())
-    {
-        <div class="alerts-groups mt-3">
+        <div class="product-watch-list mt-4">
             @foreach (var group in Model.AlertGroups)
             {
-                <section class="alerts-group">
-                    <div class="alerts-group-title">
-                        <div>
-                            <span>@GroupTitle(group.MarketType, group.Symbol)</span>
-                            <div class="small muted">@SourceKind(group.MarketType)</div>
+                var firstAlert = group.Alerts.OrderByDescending(a => a.IsEnabled).First();
+                var metadata = ProductWatchMetadata.Parse(firstAlert.AudienceList);
+                var historyId = GroupHistoryId(group.MarketType, group.Symbol);
+                var enabled = group.Alerts.Any(a => a.IsEnabled);
+
+                <section class="surface product-watch-card">
+                    <div class="product-watch-card-head">
+                        <div class="product-watch-title">
+                            <span class="product-watch-icon"><i class="bi bi-box-seam"></i></span>
+                            <div>
+                                <span class="tag">@metadata.Category</span>
+                                <h2>@ProductTitle(group.Symbol)</h2>
+                                <p>@HostLabel(group.Symbol) · @metadata.LocationLabel()</p>
+                            </div>
                         </div>
-                        <div class="alerts-group-title-actions">
-                            <span class="muted small">@group.Alerts.Count campaign@(group.Alerts.Count == 1 ? "" : "s")</span>
+                        <div class="product-watch-actions">
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@firstAlert.Id"><i class="bi bi-pencil-square me-1"></i>Edit</a>
                             <form class="alerts-inline-form" method="post" asp-page-handler="ToggleGroup">
                                 <input type="hidden" name="marketType" value="@group.MarketType" />
                                 <input type="hidden" name="symbol" value="@group.Symbol" />
-                                <button class="btn btn-sm btn-outline-secondary" type="submit">
-                                    @(group.Alerts.Any(a => a.IsEnabled) ? "Pause source" : "Activate source")
-                                </button>
+                                <button class="btn btn-sm @(enabled ? "btn-outline-secondary" : "btn-primary")" type="submit">@(enabled ? "Pause" : "Activate")</button>
                             </form>
                             <button class="btn btn-sm btn-outline-danger" type="button"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#deleteLegacyCampaignModal"
+                                    data-bs-target="#deleteProductWatchModal"
                                     data-delete-handler="DeleteGroup"
-                                    data-delete-kind="fonte"
-                                    data-delete-title="@GroupTitle(group.MarketType, group.Symbol)"
+                                    data-delete-kind="product"
+                                    data-delete-title="@ProductTitle(group.Symbol)"
                                     data-delete-market="@group.MarketType"
                                     data-delete-symbol="@group.Symbol">
-                                Eliminar
+                                Delete
                             </button>
                         </div>
                     </div>
+
+                    <div class="product-watch-meta">
+                        <span><i class="bi bi-shop"></i>@metadata.TrustedStores</span>
+                        <span><i class="bi bi-arrow-repeat"></i>@metadata.SecondHandSites</span>
+                        <span><i class="bi bi-envelope"></i>@(string.IsNullOrWhiteSpace(metadata.ReportEmail) ? "Account email" : metadata.ReportEmail)</span>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-sm align-middle alerts-table">
                             <thead>
                                 <tr>
-                        <th>Asset</th>
-                        <th>Objetivo</th>
-                        <th>Cadencia</th>
-                        <th>Canal</th>
-                        <th>Estado</th>
-                        <th>Ultima atividade</th>
+                                    <th>Rule</th>
+                                    <th>Target</th>
+                                    <th>Margin</th>
+                                    <th>Frequency</th>
+                                    <th>Channel</th>
+                                    <th>Status</th>
+                                    <th>Last alert</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -232,32 +141,28 @@
                             @foreach (var alert in group.Alerts)
                             {
                                 <tr>
-                                    <td>
-                                        <i class="bi @RuleIcon(alert.RuleType) me-2 @RuleClass(alert.RuleType)"></i>
-                                        @RuleLabel(alert)
-                                    </td>
-                                    <td>@alert.Threshold</td>
+                                    <td><i class="bi @RuleIcon(alert.RuleType) me-2 @RuleClass(alert.RuleType)"></i>@alert.RuleType.DisplayName()</td>
+                                    <td>@ThresholdLabel(alert)</td>
+                                    <td>@MarginLabel(alert)</td>
                                     <td>@CadenceLabel(alert.Timeframe)</td>
                                     <td>@alert.Channel</td>
-                                    <td>
-                                        <span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "Ativa" : "Pausada")</span>
-                                    </td>
+                                    <td><span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "Active" : "Paused")</span></td>
                                     <td class="text-muted">@(alert.LastTriggeredAtUtc is null ? "Never" : alert.LastTriggeredAtUtc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
                                     <td class="text-end">
                                         <div class="alerts-row-actions">
-                                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Editar</a>
+                                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Edit</a>
                                             <form class="alerts-inline-form" method="post" asp-page-handler="ToggleAlert">
                                                 <input type="hidden" name="id" value="@alert.Id" />
-                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pausar" : "Ativar")</button>
+                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pause" : "Activate")</button>
                                             </form>
                                             <button class="btn btn-sm btn-outline-danger" type="button"
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#deleteLegacyCampaignModal"
+                                                    data-bs-target="#deleteProductWatchModal"
                                                     data-delete-handler="DeleteAlert"
-                                                    data-delete-kind="campanha"
-                                                    data-delete-title="@RuleLabel(alert)"
+                                                    data-delete-kind="alert"
+                                                    data-delete-title="@alert.RuleType.DisplayName()"
                                                     data-delete-id="@alert.Id">
-                                                Eliminar
+                                                Delete
                                             </button>
                                         </div>
                                     </td>
@@ -266,78 +171,75 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <button class="product-history-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#@historyId" aria-expanded="false" aria-controls="@historyId">
+                        <i class="bi bi-clock-history"></i> Recent history
+                    </button>
+                    <div class="collapse alerts-history-collapse" id="@historyId">
+                        @if (group.TriggerHistory.Any())
+                        {
+                            <div class="alerts-trigger-list mt-3">
+                                @foreach (var trigger in group.TriggerHistory)
+                                {
+                                    <div class="alerts-trigger-item">
+                                        <span class="alerts-trigger-icon @RuleClass(trigger.RuleType)">
+                                            <i class="bi @RuleIcon(trigger.RuleType)"></i>
+                                        </span>
+                                        <div class="alerts-trigger-copy">
+                                            <strong>@trigger.RuleType.DisplayName()</strong>
+                                            <span>@trigger.Message</span>
+                                            <small>@CadenceLabel(trigger.Timeframe) · @trigger.Threshold</small>
+                                        </div>
+                                        <time datetime="@trigger.TriggeredAtUtc.ToString("O")">@trigger.TriggeredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</time>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state compact mt-3">
+                                <i class="bi bi-bell"></i>
+                                <span>No alerts for this product yet.</span>
+                            </div>
+                        }
+                    </div>
                 </section>
             }
         </div>
     }
-
-    <div class="alerts-promo-grid mt-4">
-        <article class="alerts-promo-card @(Model.IsAnnualUnlimitedPlan ? "plan-included" : "")">
-            <div class="alerts-promo-visual @(Model.IsAnnualUnlimitedPlan ? "visual-star" : "visual-lock")"><i class="bi @(Model.IsAnnualUnlimitedPlan ? "bi-check2-circle" : "bi-lock-fill")"></i></div>
-            <div class="alerts-promo-body">
-                <h2>@Model.PlanPromoTitle</h2>
-                <p>@Model.PlanPromoText</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Billing">Ver plano</a>
-            </div>
-        </article>
-        <article class="alerts-promo-card">
-            <div class="alerts-promo-visual visual-star"><i class="bi bi-camera-video"></i></div>
-            <div class="alerts-promo-body">
-                <h2>Posts e videos</h2>
-                <p>Cria hooks, scripts e captions para TikTok, Instagram, Facebook e LinkedIn.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Criar campanha</a>
-            </div>
-        </article>
-        <article class="alerts-promo-card">
-            <div class="alerts-promo-visual visual-phone"><i class="bi bi-envelope-paper"></i></div>
-            <div class="alerts-promo-body">
-                <h2>Email e SMS</h2>
-                <p>Prepara mensagens personalizadas para listas de potenciais clientes e follow-up promocional.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Settings">Canais</a>
-            </div>
-        </article>
-        <article class="alerts-promo-card">
-            <div class="alerts-promo-visual visual-chart"><i class="bi bi-graph-up-arrow"></i></div>
-            <div class="alerts-promo-body">
-                <h2>Funil mensuravel</h2>
-                <p>Acompanha alcance, interacao e conversoes antes de decidir que campanha escalar.</p>
-                <a class="btn btn-outline-secondary" asp-page="/App/Dashboard">Dashboard</a>
-            </div>
-        </article>
-    </div>
 </div>
 
-<div class="modal fade" id="deleteLegacyCampaignModal" tabindex="-1" aria-labelledby="deleteLegacyCampaignModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteProductWatchModal" tabindex="-1" aria-labelledby="deleteProductWatchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content account-modal campaign-delete-modal">
             <div class="modal-header border-0">
                 <div>
-                    <span class="tag">Eliminar campanha</span>
-                    <h2 class="modal-title h3 mt-2 mb-0" id="deleteLegacyCampaignModalLabel">Confirmar eliminacao</h2>
+                    <span class="tag">Delete monitoring</span>
+                    <h2 class="modal-title h3 mt-2 mb-0" id="deleteProductWatchModalLabel">Confirm deletion</h2>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="campaign-delete-warning">
                     <span><i class="bi bi-exclamation-triangle"></i></span>
                     <div>
-                        <strong>Esta acao nao pode ser desfeita.</strong>
-                        <p data-delete-legacy-message>Vais apagar esta campanha e o historico associado.</p>
+                        <strong>This action cannot be undone.</strong>
+                        <p data-delete-product-message>You will delete this alert and its associated history.</p>
                     </div>
                 </div>
                 <dl class="campaign-delete-summary">
-                    <div><dt>Tipo</dt><dd data-delete-legacy-kind>campanha</dd></div>
-                    <div><dt>Nome</dt><dd data-delete-legacy-title>Campanha</dd></div>
+                    <div><dt>Type</dt><dd data-delete-product-kind>alert</dd></div>
+                    <div><dt>Name</dt><dd data-delete-product-title>Product</dd></div>
                 </dl>
             </div>
             <div class="modal-footer border-0 campaign-delete-actions">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form method="post" id="deleteLegacyCampaignForm">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" id="deleteProductWatchForm">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" data-delete-legacy-id />
-                    <input type="hidden" name="marketType" data-delete-legacy-market />
-                    <input type="hidden" name="symbol" data-delete-legacy-symbol />
-                    <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Eliminar</button>
+                    <input type="hidden" name="id" data-delete-product-id />
+                    <input type="hidden" name="marketType" data-delete-product-market />
+                    <input type="hidden" name="symbol" data-delete-product-symbol />
+                    <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Delete</button>
                 </form>
             </div>
         </div>
@@ -348,12 +250,12 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content account-modal alerts-modal">
             <div class="modal-header border-0">
-                <h2 class="modal-title h3">Delivery window</h2>
+                <h2 class="modal-title h3">Email delivery window</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" asp-page-handler="Schedule">
                 <div class="modal-body">
-                    <p class="fw-semibold mb-3">Run campaigns between...</p>
+                    <p class="fw-semibold mb-3">Send alerts between...</p>
                     <div class="row g-3">
                         <div class="col-5">
                             <input class="form-control" type="time" name="startTime" value="@(Model.ScheduleSettings?.AlertWindowStart ?? "09:00")" />
@@ -363,24 +265,13 @@
                             <input class="form-control" type="time" name="endTime" value="@(Model.ScheduleSettings?.AlertWindowEnd ?? "18:00")" />
                         </div>
                     </div>
-                    <label class="modal-field-label mt-3" for="scheduleTimeZone">Schedule time zone</label>
+                    <label class="modal-field-label mt-3" for="scheduleTimeZone">Time zone</label>
                     <select class="form-select" id="scheduleTimeZone" name="timeZone" data-combo>
                         @foreach (var zone in Model.ScheduleTimeZones)
                         {
                             <option value="@zone.Id" selected="@(zone.Id == Model.SelectedScheduleTimeZone)">@zone.Label</option>
                         }
                     </select>
-                    <div class="schedule-timezone-card">
-                        <div>
-                            <span>Detected on this device</span>
-                            <strong data-browser-timezone>Detecting browser time zone...</strong>
-                        </div>
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-use-browser-timezone disabled>Use detected</button>
-                        <div>
-                            <span>Selected schedule time</span>
-                            <strong data-selected-timezone-clock>Checking selected time...</strong>
-                        </div>
-                    </div>
 
                     <p class="fw-semibold mt-4 mb-3">On these days...</p>
                     <div class="schedule-days">
@@ -392,15 +283,13 @@
                             </label>
                         }
                     </div>
-                    <p class="small muted mt-4 mb-0">Use this window to avoid outreach outside the desired marketing hours.</p>
                 </div>
-                <div class="modal-footer border-0 schedule-footer @(Model.ScheduleSettings?.AlertScheduleEnabled == true ? "" : "schedule-footer-compact")">
+                <div class="modal-footer border-0 campaign-delete-actions">
                     @if (Model.ScheduleSettings?.AlertScheduleEnabled == true)
                     {
-                        <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary"><i class="bi bi-broadcast me-1"></i> Use 24/7 delivery</button>
+                        <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary">Use 24/7</button>
                     }
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise me-1"></i> Save delivery window</button>
-                    <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save window</button>
                 </div>
             </form>
         </div>
@@ -408,44 +297,41 @@
 </div>
 
 @functions {
-    private static string GroupTitle(MarketType market, string symbol)
+    private static string ProductTitle(string url)
     {
-        return string.IsNullOrWhiteSpace(symbol) ? SourceKind(market) : symbol;
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return url;
+
+        var segment = uri.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .FirstOrDefault(x => x.Length > 2 && x.Any(char.IsLetter));
+
+        if (string.IsNullOrWhiteSpace(segment))
+            return uri.Host;
+
+        return Uri.UnescapeDataString(segment).Replace("-", " ").Replace("_", " ");
     }
 
-    private static string SourceKind(MarketType market)
+    private static string HostLabel(string url)
     {
-        return market == MarketType.Crypto ? "Application URL" : "Company or idea";
+        return Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.Host.Replace("www.", "", StringComparison.OrdinalIgnoreCase) : url;
     }
 
     private static string GroupHistoryId(MarketType market, string symbol)
     {
         var safeSymbol = new string(symbol.Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '-').ToArray());
-        safeSymbol = string.IsNullOrWhiteSpace(safeSymbol) ? "campaign" : safeSymbol;
-        return $"campaign-history-{market.ToString().ToLowerInvariant()}-{safeSymbol}";
-    }
-
-    private static string RuleLabel(Alert alert)
-    {
-        return alert.RuleType.DisplayName();
-    }
-
-    private static string RuleDisplayName(AlertRuleType rule)
-    {
-        return rule.DisplayName();
+        return $"product-history-{market.ToString().ToLowerInvariant()}-{safeSymbol}";
     }
 
     private static string RuleIcon(AlertRuleType rule)
     {
         return rule switch
         {
-            AlertRuleType.PriceAbove => "bi-tiktok",
-            AlertRuleType.PriceBelow => "bi-instagram",
-            AlertRuleType.PercentDrop24h => "bi-facebook",
-            AlertRuleType.PercentRise24h => "bi-linkedin",
-            AlertRuleType.VolumeAbove24h => "bi-envelope",
-            AlertRuleType.PriceZone => "bi-phone-vibrate",
-            _ => "bi-megaphone"
+            AlertRuleType.PriceBelow => "bi-tag-fill",
+            AlertRuleType.PriceBelowMargin => "bi-graph-down-arrow",
+            AlertRuleType.PriceZone => "bi-bullseye",
+            AlertRuleType.DailyOpportunityReport => "bi-newspaper",
+            _ => "bi-bell-fill"
         };
     }
 
@@ -453,52 +339,41 @@
     {
         return rule switch
         {
-            AlertRuleType.PriceAbove or AlertRuleType.PriceBelow => "text-success",
-            AlertRuleType.PercentDrop24h or AlertRuleType.PercentRise24h => "text-info",
+            AlertRuleType.PriceBelow or AlertRuleType.PriceBelowMargin => "text-success",
+            AlertRuleType.DailyOpportunityReport => "text-info",
             AlertRuleType.PriceZone => "text-warning",
             _ => "text-primary"
         };
+    }
+
+    private static string ThresholdLabel(Alert alert)
+    {
+        return alert.RuleType == AlertRuleType.DailyOpportunityReport
+            ? $"score {alert.Threshold:0.##}+"
+            : $"EUR {alert.Threshold:0.##}";
+    }
+
+    private static string MarginLabel(Alert alert)
+    {
+        return alert.RuleType == AlertRuleType.PriceBelowMargin
+            ? $"{alert.ZonePercent:0.##}%"
+            : "-";
     }
 
     private static string CadenceLabel(string timeframe)
     {
         return timeframe switch
         {
+            "1h" => "Hourly",
+            "6h" => "6 hours",
+            "12h" => "12 hours",
             "1d" => "Daily",
-            "3d" => "Every 3 days",
+            "3d" => "3 days",
             "1wk" => "Weekly",
-            "2wk" => "Biweekly",
+            "2wk" => "Every 2 weeks",
             "1mo" => "Monthly",
             _ => timeframe
         };
-    }
-
-    private static string AiStatusClass(string status)
-    {
-        return status switch
-        {
-            "Published" => "text-bg-success",
-            "Scheduled" => "text-bg-info",
-            "Approved" or "Review" => "text-bg-primary",
-            _ => "text-bg-secondary"
-        };
-    }
-
-    private static string AiLocationLabel(MarketingPlan campaign)
-    {
-        if (campaign.AudienceLocationScope.Equals("Country", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(campaign.AudienceCountry))
-            return campaign.AudienceCountry;
-
-        if (campaign.AudienceLocationScope.Equals("City", StringComparison.OrdinalIgnoreCase))
-        {
-            var place = string.Join(", ", new[] { campaign.AudienceCity, campaign.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
-            if (string.IsNullOrWhiteSpace(place))
-                place = "Cidade selecionada";
-
-            return campaign.AudienceRadiusKm is > 0 ? $"{place} + {campaign.AudienceRadiusKm} km" : place;
-        }
-
-        return "Mundo";
     }
 
     private bool DayChecked(string day)
@@ -509,20 +384,20 @@
 }
 
 @section Scripts {
-    <script src="~/js/alivert-combos.js" asp-append-version="true"></script>
+    <script src="~/js/dealvert-combos.js" asp-append-version="true"></script>
     <script>
         (() => {
-            const modal = document.getElementById('deleteLegacyCampaignModal');
-            const form = document.getElementById('deleteLegacyCampaignForm');
+            const modal = document.getElementById('deleteProductWatchModal');
+            const form = document.getElementById('deleteProductWatchForm');
             if (!modal || !form) return;
 
             const fields = {
-                id: form.querySelector('[data-delete-legacy-id]'),
-                market: form.querySelector('[data-delete-legacy-market]'),
-                symbol: form.querySelector('[data-delete-legacy-symbol]'),
-                title: modal.querySelector('[data-delete-legacy-title]'),
-                kind: modal.querySelector('[data-delete-legacy-kind]'),
-                message: modal.querySelector('[data-delete-legacy-message]')
+                id: form.querySelector('[data-delete-product-id]'),
+                market: form.querySelector('[data-delete-product-market]'),
+                symbol: form.querySelector('[data-delete-product-symbol]'),
+                title: modal.querySelector('[data-delete-product-title]'),
+                kind: modal.querySelector('[data-delete-product-kind]'),
+                message: modal.querySelector('[data-delete-product-message]')
             };
 
             modal.addEventListener('show.bs.modal', event => {
@@ -530,8 +405,8 @@
                 if (!trigger) return;
 
                 const handler = trigger.getAttribute('data-delete-handler') || 'DeleteAlert';
-                const kind = trigger.getAttribute('data-delete-kind') || 'campanha';
-                const title = trigger.getAttribute('data-delete-title') || 'Campanha';
+                const kind = trigger.getAttribute('data-delete-kind') || 'alert';
+                const title = trigger.getAttribute('data-delete-title') || 'Product';
 
                 form.action = `${window.location.pathname}?handler=${encodeURIComponent(handler)}`;
                 fields.id.value = trigger.getAttribute('data-delete-id') || '';
@@ -540,8 +415,8 @@
                 fields.title.textContent = title;
                 fields.kind.textContent = kind;
                 fields.message.textContent = handler === 'DeleteGroup'
-                    ? 'Vais apagar todas as campanhas desta fonte e o historico associado.'
-                    : 'Vais apagar esta campanha e o historico associado.';
+                    ? 'You will delete all alerts for this product and their associated history.'
+                    : 'You will delete this alert and its associated history.';
             });
         })();
     </script>

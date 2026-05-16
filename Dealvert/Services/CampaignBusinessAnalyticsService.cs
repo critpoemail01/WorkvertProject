@@ -1,7 +1,7 @@
-using Alivert.Models;
+using Dealvert.Models;
 using System.Globalization;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class CampaignBusinessAnalyticsService : ICampaignBusinessAnalyticsService
 {

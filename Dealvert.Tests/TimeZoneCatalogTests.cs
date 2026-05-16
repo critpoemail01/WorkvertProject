@@ -1,6 +1,6 @@
-using Alivert.Services;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class TimeZoneCatalogTests
 {

@@ -1,12 +1,12 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace Alivert.Pages;
+namespace Dealvert.Pages;
 
 public class CampaignModel : PageModel
 {
@@ -25,7 +25,7 @@ public class CampaignModel : PageModel
     public string? AgencyName { get; private set; }
     public string? AgencyBrandColor { get; private set; }
     public string? AgencyReportFooter { get; private set; }
-    public string ConsentText => $"I agree to be contacted about {Plan.ProductName} and understand I can unsubscribe at any time.";
+    public string ConsentText => $"I agree to be contacted about this Dealvert product watch for {Plan.ProductName} and understand I can unsubscribe at any time.";
 
     [BindProperty]
     public LeadInput Input { get; set; } = new();
@@ -50,8 +50,8 @@ public class CampaignModel : PageModel
         [StringLength(800)]
         public string? Message { get; set; }
 
-        [Display(Name = "Marketing consent")]
-        [Range(typeof(bool), "true", "true", ErrorMessage = "Confirm consent before submitting the form.")]
+        [Display(Name = "Deal watch consent")]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Confirm consent before submitting the notification request.")]
         public bool MarketingConsentAccepted { get; set; }
     }
 
@@ -146,9 +146,9 @@ public class CampaignModel : PageModel
         crmLead.Phone = Clean(Input.Phone);
         crmLead.CompanyName = Clean(Input.Company);
         crmLead.Role = Clean(Input.Role);
-        crmLead.Stage = "Captured lead";
-        crmLead.Tags = Clip($"landing-page,{Plan.ProductName}", 300);
-        crmLead.Source = Clip($"Landing page: {Plan.ProductName} / {source}", 120);
+        crmLead.Stage = "Deal watch contact";
+        crmLead.Tags = Clip($"deal-watch,{Plan.ProductName}", 300);
+        crmLead.Source = Clip($"Deal watch page: {Plan.ProductName} / {source}", 120);
         crmLead.Notes = Clean(Input.Message);
         crmLead.Status = "Imported";
         crmLead.LastSyncedAtUtc = now;
@@ -156,7 +156,7 @@ public class CampaignModel : PageModel
         if (!string.Equals(crmLead.ConsentStatus, CrmConsentPolicy.Suppressed, StringComparison.OrdinalIgnoreCase))
         {
             crmLead.ConsentStatus = CrmConsentPolicy.Consented;
-            crmLead.ConsentSource = Clip($"Landing page form: {LandingPage.Slug}", 180);
+            crmLead.ConsentSource = Clip($"Deal watch form: {LandingPage.Slug}", 180);
             crmLead.ConsentedAtUtc = now;
             crmLead.UnsubscribedAtUtc = null;
         }
@@ -166,10 +166,10 @@ public class CampaignModel : PageModel
     {
         var source = Request.Query["utm_source"].ToString();
         var medium = Request.Query["utm_medium"].ToString();
-        var campaign = Request.Query["utm_campaign"].ToString();
-        var parts = new[] { source, medium, campaign }.Where(x => !string.IsNullOrWhiteSpace(x));
+        var sourceTag = Request.Query["utm_campaign"].ToString();
+        var parts = new[] { source, medium, sourceTag }.Where(x => !string.IsNullOrWhiteSpace(x));
         var label = string.Join(" / ", parts);
-        return string.IsNullOrWhiteSpace(label) ? "Landing page form" : label;
+        return string.IsNullOrWhiteSpace(label) ? "Deal watch page" : label;
     }
 
     private static string? Clean(string? value)

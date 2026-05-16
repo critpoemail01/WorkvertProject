@@ -1,16 +1,10 @@
-using System.Globalization;
-using System.Net;
-using System.Text.Json;
-using Alivert.Models;
+using Dealvert.Models;
 using Microsoft.Extensions.Options;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class MarketDataService : IMarketDataService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly FakeMarketDataService _fallback;
     private readonly IOptionsMonitor<MarketDataOptions> _options;
     private readonly ILogger<MarketDataService> _logger;
@@ -21,185 +15,129 @@ public sealed class MarketDataService : IMarketDataService
         IOptionsMonitor<MarketDataOptions> options,
         ILogger<MarketDataService> logger)
     {
-        _httpClientFactory = httpClientFactory;
         _fallback = fallback;
         _options = options;
         _logger = logger;
     }
 
-    public async Task<MarketSnapshot> GetSnapshotAsync(string symbol, MarketType marketType, CancellationToken ct)
+    public Task<MarketSnapshot> GetSnapshotAsync(string symbol, MarketType marketType, CancellationToken ct, Alert? alert = null)
     {
-        var options = _options.CurrentValue;
+        ct.ThrowIfCancellationRequested();
 
-        if (marketType == MarketType.Traditional &&
-            !string.Equals(options.Provider, "Fake", StringComparison.OrdinalIgnoreCase))
+        if (!LooksLikeProductUrl(symbol))
         {
-            return await GetYahooSnapshotAsync(symbol, ct);
+            _logger.LogDebug("Using fallback market snapshot for non-product source {Source}.", symbol);
+            return _fallback.GetSnapshotAsync(symbol, marketType, ct, alert);
         }
 
-        if (!string.Equals(options.Provider, "Binance", StringComparison.OrdinalIgnoreCase))
-        {
-            if (string.Equals(options.Provider, "Fake", StringComparison.OrdinalIgnoreCase))
-                return await _fallback.GetSnapshotAsync(symbol, marketType, ct);
-        }
+        var metadata = ProductWatchMetadata.Parse(alert?.AudienceList);
+        var uri = new Uri(symbol.Trim());
+        var sourceStore = NormalizeStoreName(uri.Host);
+        var trustedStores = metadata.TrustedStoreList();
+        var secondHandSites = metadata.SecondHandSiteList();
+        var store = PickStore(symbol, trustedStores.Count > 0 ? trustedStores : new[] { sourceStore });
+        var productName = ProductNameFromUrl(uri);
 
-        var normalized = NormalizeSymbol(symbol);
+        var seed = StableSeed($"{symbol}|{metadata.Country}|{metadata.City}|{metadata.Category}|{store}");
+        var basePrice = 24m + (seed % 160000) / 100m;
+        var storeAdjustment = ((seed / 97) % 2300 - 1050) / 100m;
+        var localAdjustment = metadata.Country.Equals("Portugal", StringComparison.OrdinalIgnoreCase) ? 1.5m : 0m;
+        var currentPrice = Math.Max(1m, basePrice * (1 + (storeAdjustment + localAdjustment) / 100m));
+        var dailyMove = ((seed / 193) % 1800 - 900) / 100m;
+        var score = Math.Clamp(Math.Abs(dailyMove) * 5m + (storeAdjustment < 0 ? Math.Abs(storeAdjustment) * 2m : 0m), 4m, 98m);
 
-        try
-        {
-            var baseUrl = options.BinanceBaseUrl.TrimEnd('/');
-            var requestUri = $"{baseUrl}/api/v3/ticker/24hr?symbol={Uri.EscapeDataString(normalized)}";
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(options.RequestTimeoutSeconds, 1, 30)));
+        var secondHandPremium = 7m + ((seed / 389) % 3600) / 100m;
+        var resaleBenchmark = currentPrice * (1 + secondHandPremium / 100m);
+        var margin = resaleBenchmark == 0 ? 0 : (resaleBenchmark - currentPrice) / resaleBenchmark * 100m;
 
-            using var response = await _httpClientFactory
-                .CreateClient("market-data")
-                .GetAsync(requestUri, timeout.Token);
+        var destination = metadata.LocationLabel();
+        var bestSecondHandSite = PickStore(symbol, secondHandSites.Count > 0 ? secondHandSites : new[] { "OLX", "Vinted", "Wallapop" });
+        var symbolLabel = $"{productName} @ {store}";
 
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.NotFound)
-                    throw new InvalidOperationException($"Binance symbol {normalized} was not found.");
-
-                _logger.LogWarning("Binance market data request failed for {Symbol} with status {StatusCode}.", normalized, (int)response.StatusCode);
-                return await FallbackOrThrowAsync(symbol, marketType, ct);
-            }
-
-            await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token);
-            var ticker = await JsonSerializer.DeserializeAsync<BinanceTickerResponse>(stream, JsonOptions, timeout.Token);
-            if (ticker is null ||
-                !TryDecimal(ticker.LastPrice, out var price) ||
-                !TryDecimal(ticker.PriceChangePercent, out var percentChange24h))
-            {
-                _logger.LogWarning("Binance market data response for {Symbol} was missing required price fields.", normalized);
-                return await FallbackOrThrowAsync(symbol, marketType, ct);
-            }
-
-            TryDecimal(ticker.QuoteVolume, out var volume24h);
-            return new MarketSnapshot(
-                ticker.Symbol ?? normalized,
-                decimal.Round(price, 8),
-                decimal.Round(percentChange24h, 4),
-                DateTime.UtcNow,
-                volume24h > 0 ? decimal.Round(volume24h, 2) : null);
-        }
-        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
-        {
-            _logger.LogWarning("Binance market data request timed out for {Symbol}.", normalized);
-            return await FallbackOrThrowAsync(symbol, marketType, ct);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("was not found", StringComparison.Ordinal))
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Binance market data request failed for {Symbol}.", normalized);
-            return await FallbackOrThrowAsync(symbol, marketType, ct);
-        }
+        return Task.FromResult(new MarketSnapshot(
+            symbolLabel,
+            decimal.Round(currentPrice, 2),
+            decimal.Round(dailyMove, 2),
+            DateTime.UtcNow,
+            decimal.Round(score, 2),
+            store,
+            productName,
+            symbol,
+            decimal.Round(resaleBenchmark, 2),
+            decimal.Round(margin, 2),
+            metadata.Country,
+            string.IsNullOrWhiteSpace(metadata.City) ? destination : metadata.City,
+            $"{metadata.Category} via {bestSecondHandSite}"));
     }
 
-    private async Task<MarketSnapshot> GetYahooSnapshotAsync(string symbol, CancellationToken ct)
+    private static bool LooksLikeProductUrl(string source)
     {
-        try
-        {
-            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var from = DateTimeOffset.UtcNow.AddDays(-10).ToUnixTimeSeconds();
-            var uri = $"https://query2.finance.yahoo.com/v8/finance/chart/{Uri.EscapeDataString(symbol)}?period1={from}&period2={now}&interval=1d&events=div,splits";
-
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(_options.CurrentValue.RequestTimeoutSeconds, 1, 30)));
-
-            using var response = await _httpClientFactory.CreateClient("market-data").GetAsync(uri, timeout.Token);
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.NotFound)
-                    throw new InvalidOperationException($"Yahoo Finance symbol {symbol} was not found.");
-
-                return await FallbackOrThrowAsync(symbol, MarketType.Traditional, ct);
-            }
-
-            await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token);
-            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: timeout.Token);
-            if (!doc.RootElement.TryGetProperty("chart", out var chart) ||
-                !chart.TryGetProperty("result", out var results) ||
-                results.ValueKind != JsonValueKind.Array ||
-                results.GetArrayLength() == 0)
-            {
-                return await FallbackOrThrowAsync(symbol, MarketType.Traditional, ct);
-            }
-
-            var quote = results[0].GetProperty("indicators").GetProperty("quote")[0];
-            var closes = quote.GetProperty("close")
-                .EnumerateArray()
-                .Where(x => x.ValueKind == JsonValueKind.Number)
-                .Select(x => x.GetDecimal())
-                .ToList();
-
-            if (closes.Count == 0)
-                return await FallbackOrThrowAsync(symbol, MarketType.Traditional, ct);
-
-            var price = closes[^1];
-            var previous = closes.Count > 1 ? closes[^2] : price;
-            var percentChange = previous == 0 ? 0 : ((price - previous) / previous) * 100m;
-
-            decimal? volume = null;
-            if (quote.TryGetProperty("volume", out var volumes))
-            {
-                var latestVolume = volumes.EnumerateArray().LastOrDefault(x => x.ValueKind == JsonValueKind.Number);
-                if (latestVolume.ValueKind == JsonValueKind.Number)
-                    volume = latestVolume.GetDecimal();
-            }
-
-            return new MarketSnapshot(
-                symbol.ToUpperInvariant(),
-                decimal.Round(price, 4),
-                decimal.Round(percentChange, 4),
-                DateTime.UtcNow,
-                volume);
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("was not found", StringComparison.Ordinal))
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Yahoo market data request failed for {Symbol}.", symbol);
-            return await FallbackOrThrowAsync(symbol, MarketType.Traditional, ct);
-        }
+        return Uri.TryCreate(source?.Trim(), UriKind.Absolute, out var uri) &&
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
     }
 
-    private Task<MarketSnapshot> FallbackOrThrowAsync(string symbol, MarketType marketType, CancellationToken ct)
+    private static string NormalizeStoreName(string host)
     {
-        if (_options.CurrentValue.FallbackToFake)
-            return _fallback.GetSnapshotAsync(symbol, marketType, ct);
+        var clean = host.ToLowerInvariant();
+        if (clean.StartsWith("www.", StringComparison.Ordinal))
+            clean = clean[4..];
 
-        throw new InvalidOperationException($"Could not fetch market data for {symbol}.");
+        return clean switch
+        {
+            var h when h.Contains("amazon.") => "Amazon",
+            var h when h.Contains("worten.") => "Worten",
+            var h when h.Contains("fnac.") => "Fnac",
+            var h when h.Contains("pccomponentes.") => "PcComponentes",
+            var h when h.Contains("mediamarkt.") => "MediaMarkt",
+            _ => clean
+        };
     }
 
-    private static string NormalizeSymbol(string symbol)
+    private static string ProductNameFromUrl(Uri uri)
     {
-        return new string((symbol ?? string.Empty)
-            .Trim()
-            .ToUpperInvariant()
-            .Where(char.IsLetterOrDigit)
-            .ToArray());
+        var segments = uri.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(segment => !segment.Equals("dp", StringComparison.OrdinalIgnoreCase))
+            .Where(segment => !segment.Equals("gp", StringComparison.OrdinalIgnoreCase))
+            .Where(segment => segment.Length > 2)
+            .ToArray();
+
+        var slug = segments.FirstOrDefault(segment => segment.Any(char.IsLetter)) ?? uri.Host;
+        slug = Uri.UnescapeDataString(slug)
+            .Replace("-", " ")
+            .Replace("_", " ")
+            .Trim();
+
+        return string.IsNullOrWhiteSpace(slug) ? uri.Host : CapitalizeWords(slug);
     }
 
-    private static bool TryDecimal(string? value, out decimal result)
+    private static string CapitalizeWords(string value)
     {
-        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out result);
+        var words = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return string.Join(' ', words.Select(word =>
+            word.Length <= 1
+                ? word.ToUpperInvariant()
+                : char.ToUpperInvariant(word[0]) + word[1..].ToLowerInvariant()));
     }
 
-    private sealed class BinanceTickerResponse
+    private static string PickStore(string key, IReadOnlyList<string> stores)
     {
-        public string? Symbol { get; set; }
-        public string? LastPrice { get; set; }
-        public string? PriceChangePercent { get; set; }
-        public string? QuoteVolume { get; set; }
+        if (stores.Count == 0)
+            return "Verified store";
+
+        var index = Math.Abs(StableSeed(key)) % stores.Count;
+        return stores[index];
+    }
+
+    private static int StableSeed(string value)
+    {
+        unchecked
+        {
+            var hash = 23;
+            foreach (var ch in value)
+                hash = (hash * 31) + ch;
+
+            return hash == int.MinValue ? 0 : Math.Abs(hash);
+        }
     }
 }

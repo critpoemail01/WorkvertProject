@@ -1,6 +1,6 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace Alivert.Pages.App;
+namespace Dealvert.Pages.App;
 
 [Authorize]
 public class SettingsModel : PageModel
@@ -249,7 +249,7 @@ public class SettingsModel : PageModel
         settings.AlertTimeZone = TimeZoneCatalog.Normalize(Input.AlertTimeZone);
 
         await _db.SaveChangesAsync();
-        StatusMessage = "Marketing channel settings saved.";
+        StatusMessage = "Notification channel settings saved.";
         return RedirectToPage();
     }
 

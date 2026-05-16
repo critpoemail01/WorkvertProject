@@ -1,6 +1,6 @@
-using Alivert.Services;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class TemplateAiMarketingPlannerServiceTests
 {
@@ -10,7 +10,7 @@ public class TemplateAiMarketingPlannerServiceTests
         var service = new TemplateAiMarketingPlannerService();
 
         var draft = service.Generate(new AiMarketingPlanRequest(
-            "Promovert",
+            "Dealvert",
             "https://promovert.example.com",
             "AI campaign software",
             "B2B founders",
@@ -37,17 +37,17 @@ public class TemplateAiMarketingPlannerServiceTests
     public void Generate_ClipsGeneratedTextToPersistedFieldLimits()
     {
         var service = new TemplateAiMarketingPlannerService();
-        var longAudience = "PME industriais, fabricas, empresas de producao, metalomecanicas, manutencao industrial, diretores operacionais, equipas comerciais B2B e gestores que precisam de reduzir tarefas manuais repetitivas";
-        var longValue = "automatizar processos comerciais, seguimento de oportunidades, comunicacao com clientes e campanhas recorrentes sem depender de trabalho manual diario";
+        var longAudience = "industrial SMBs, factories, production companies, metalworking businesses, industrial maintenance teams, operations directors, B2B sales teams, and managers who need to reduce repetitive manual tasks";
+        var longValue = "automate commercial processes, opportunity follow-up, customer communication, and recurring campaigns without relying on daily manual work";
 
         var draft = service.Generate(new AiMarketingPlanRequest(
             "SBI Flow",
             "https://sbiflow.example.com",
-            "Software para automatizar operacoes e marketing em empresas industriais.",
+            "Software to automate operations and marketing in industrial companies.",
             longAudience,
             longValue,
-            "subscricoes e pedidos de demonstracao",
-            "profissional, direto e orientado a resultados",
+            "subscriptions and demo requests",
+            "professional, direct, and results-oriented",
             ["TikTok", "Instagram", "Facebook", "LinkedIn", "X", "YouTube Shorts"],
             new DateOnly(2026, 5, 13),
             new DateOnly(2026, 6, 12),

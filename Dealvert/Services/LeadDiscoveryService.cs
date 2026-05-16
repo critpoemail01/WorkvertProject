@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class LeadDiscoveryService : ILeadDiscoveryService
 {

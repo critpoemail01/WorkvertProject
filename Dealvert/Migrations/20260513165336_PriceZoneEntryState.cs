@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Alivert.Migrations
+namespace Dealvert.Migrations
 {
     /// <inheritdoc />
     public partial class PriceZoneEntryState : Migration

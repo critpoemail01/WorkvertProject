@@ -1,12 +1,12 @@
-using Alivert.Data;
-using Alivert.Models;
+using Dealvert.Data;
+using Dealvert.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Pages.App.Alerts;
+namespace Dealvert.Pages.App.Alerts;
 
 [Authorize]
 public class DeleteAlertModel : PageModel

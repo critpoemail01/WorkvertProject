@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Alivert.Data;
+namespace Dealvert.Data;
 
 public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
@@ -11,7 +11,7 @@ public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Ap
         var appSettingsPath = Path.Combine(basePath, "appsettings.json");
         if (!File.Exists(appSettingsPath))
         {
-            var projectPath = Path.Combine(basePath, "Alivert");
+            var projectPath = Path.Combine(basePath, "Dealvert");
             if (File.Exists(Path.Combine(projectPath, "appsettings.json")))
                 basePath = projectPath;
         }

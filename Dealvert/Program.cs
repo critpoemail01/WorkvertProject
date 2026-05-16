@@ -1,6 +1,6 @@
-using Alivert.Data;
-using Alivert.Services;
-using Alivert.Workers;
+using Dealvert.Data;
+using Dealvert.Services;
+using Dealvert.Workers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.RateLimiting;
@@ -69,20 +69,20 @@ builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection
 builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection("Payments"));
 builder.Services.AddHttpClient("market-data", client =>
 {
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; Promovert/1.0; +https://promovert.local)");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; Dealvert/1.0; +https://dealvert.local)");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 });
 builder.Services.AddHttpClient("notifications");
 builder.Services.AddHttpClient<IUrlCampaignBriefSuggester, UrlCampaignBriefSuggester>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(12);
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PromovertUrlAnalyzer/1.0)");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; DealvertUrlAnalyzer/1.0)");
     client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
 });
 builder.Services.AddHttpClient<ILeadDiscoveryService, LeadDiscoveryService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(12);
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PromovertLeadDiscovery/1.0)");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; DealvertLeadDiscovery/1.0)");
     client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
 });
 
@@ -97,7 +97,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 
-// Campaign activity + delivery workflow (MVP: existing trigger engine + DB activity records)
+// Price alert activity + delivery workflow (MVP: existing trigger engine + DB activity records)
 builder.Services.AddSingleton<FakeMarketDataService>();
 builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
 builder.Services.AddSingleton<ITechnicalIndicatorService, TechnicalIndicatorService>();
@@ -116,7 +116,6 @@ builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 if (!EF.IsDesignTime)
 {
     builder.Services.AddHostedService<AlertEvaluatorWorker>();
-    builder.Services.AddHostedService<MarketingPublishingWorker>();
 }
 
 var app = builder.Build();

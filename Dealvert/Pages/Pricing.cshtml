@@ -1,23 +1,23 @@
 @page
-@model Alivert.Pages.PricingModel
+@model Dealvert.Pages.PricingModel
 @{
-    ViewData["Title"] = "Precos";
+    ViewData["Title"] = "Pricing";
 }
 
 <section class="hero-section">
     <div class="container">
         <div class="promo-strip mb-4">
             <div>
-                <span class="promo-label">Lancamento</span>
-                <span class="promo-copy">Campanhas ilimitadas por EUR 49.99/mes ou EUR 299/ano. O anual e a melhor opcao para marketing continuo.</span>
+                <span class="promo-label">Launch offer</span>
+                <span class="promo-copy">Unlimited price alerts for EUR 49.99/month or EUR 299/year. Annual is the best option for continuous deal monitoring.</span>
             </div>
             @if (User?.Identity?.IsAuthenticated == true)
             {
-                <a class="promo-link" asp-page="/App/Billing">Abrir faturacao <i class="bi bi-arrow-right-short"></i></a>
+                <a class="promo-link" asp-page="/App/Billing">Open billing <i class="bi bi-arrow-right-short"></i></a>
             }
             else
             {
-                <button type="button" class="promo-link promo-button" data-auth-open="register">Criar conta <i class="bi bi-arrow-right-short"></i></button>
+                <button type="button" class="promo-link promo-button" data-auth-open="register">Create account <i class="bi bi-arrow-right-short"></i></button>
             }
         </div>
 
@@ -26,13 +26,13 @@
                 <div>
                     <div class="hero-kicker mb-3">
                         <i class="bi bi-credit-card-2-front-fill"></i>
-                        <span>Precos simples para campanhas recorrentes</span>
+                        <span>Simple pricing for recurring deal monitoring</span>
                     </div>
-                    <h1 class="hero-title display-5 fw-bold mb-3">Comeca gratis e escala quando o marketing passa a ser continuo.</h1>
-                    <p class="lead muted mb-4">1 credito pago = 1 campanha ativa em 1 plataforma durante 30 dias. Compra pacotes a partir de EUR 24.99 ou escolhe ilimitado mensal/anual.</p>
+                    <h1 class="hero-title display-5 fw-bold mb-3">Start free and scale when price monitoring becomes continuous.</h1>
+                    <p class="lead muted mb-4">1 paid credit = 1 active product alert for 30 days. Buy packs from EUR 24.99 or choose monthly/annual unlimited.</p>
                     <div class="hero-actions">
-                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar com 5 creditos gratis</button>
-                        <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">Como funciona</a>
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start with 5 free credits</button>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
                     </div>
                 </div>
 
@@ -40,22 +40,22 @@
                     <div class="proof-row">
                         <i class="bi bi-gift"></i>
                         <div>
-                            <strong>Conta gratis primeiro</strong>
-                            <span>Usa 5 creditos para validar o fluxo de campanha antes de comprar capacidade.</span>
+                            <strong>Free account first</strong>
+                            <span>Use 5 credits to validate the alert workflow before buying capacity.</span>
                         </div>
                     </div>
                     <div class="proof-row">
                         <i class="bi bi-wallet2"></i>
                         <div>
-                            <strong>Creditos para campanhas ocasionais</strong>
-                            <span>Pacotes de 25, 50 e 100 creditos cobrem campanhas-plataformas ativas durante 30 dias.</span>
+                            <strong>Credits for occasional monitoring</strong>
+                            <span>Packs of 25, 50, and 100 credits cover active product alerts for 30 days.</span>
                         </div>
                     </div>
                     <div class="proof-row">
                         <i class="bi bi-stars"></i>
                         <div>
-                            <strong>Anual e melhor valor</strong>
-                            <span>EUR 299/ano poupa mais de 50% face ao pagamento mensal.</span>
+                            <strong>Annual is best value</strong>
+                            <span>EUR 299/year saves more than 50% compared with monthly billing.</span>
                         </div>
                     </div>
                 </div>
@@ -65,18 +65,18 @@
         <div class="row g-4 mt-4 pricing-grid">
             <div class="col-lg-3">
                 <div class="surface plan">
-                    <div class="plan-title">Gratis</div>
+                    <div class="plan-title">Free</div>
                     <div class="plan-price mt-2">EUR 0</div>
-                    <div class="muted mt-2">Valida o fluxo antes de pagar.</div>
+                    <div class="muted mt-2">Validate the workflow before paying.</div>
 
                     <ul class="mt-3 muted">
-                        <li>5 creditos para 5 campanhas-plataformas ativas</li>
-                        <li>Planeamento social, email e SMS</li>
-                        <li>Dashboard e historico de campanhas</li>
+                        <li>5 credits for 5 active product alerts</li>
+                        <li>Price targets, margin rules, and daily reports</li>
+                        <li>Dashboard and alert history</li>
                     </ul>
 
                     <div class="plan-footer">
-                        <button type="button" class="btn btn-outline-secondary w-100" data-auth-open="register">Criar conta gratis</button>
+                        <button type="button" class="btn btn-outline-secondary w-100" data-auth-open="register">Create free account</button>
                         <div class="plan-footer-note" aria-hidden="true"></div>
                     </div>
                 </div>
@@ -85,31 +85,31 @@
             <div class="col-lg-3">
                 <div class="surface plan">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="plan-title">Pacotes de creditos</div>
-                        <span class="plan-badge"><i class="bi bi-wallet2"></i> Flexivel</span>
+                        <div class="plan-title">Credit packs</div>
+                        <span class="plan-badge"><i class="bi bi-wallet2"></i> Flexible</span>
                     </div>
 
-                    <div class="plan-price mt-2">desde EUR 24.99</div>
-                    <div class="muted mt-2">Adiciona capacidade por 30 dias apenas quando precisares.</div>
+                    <div class="plan-price mt-2">from EUR 24.99</div>
+                    <div class="muted mt-2">Add 30-day capacity only when you need it.</div>
 
                     <ul class="mt-3 muted">
-                        <li>25 creditos por EUR 24.99</li>
-                        <li>50 creditos por EUR 34.99</li>
-                        <li>100 creditos por EUR 49.99</li>
-                        <li>Creditos expiram 30 dias depois do pagamento</li>
-                        <li>Pagamento por cartao</li>
+                        <li>25 credits for EUR 24.99</li>
+                        <li>50 credits for EUR 34.99</li>
+                        <li>100 credits for EUR 49.99</li>
+                        <li>Credits expire 30 days after payment</li>
+                        <li>Card payment</li>
                     </ul>
 
                     <div class="plan-footer">
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Comprar creditos</a>
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Buy credits</a>
                         }
                         else
                         {
-                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Comprar creditos</button>
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Buy credits</button>
                         }
-                        <div class="plan-footer-note small muted text-center">A capacidade do pacote fica ativa durante 30 dias.</div>
+                        <div class="plan-footer-note small muted text-center">Pack capacity stays active for 30 days.</div>
                     </div>
                 </div>
             </div>
@@ -117,29 +117,29 @@
             <div class="col-lg-3">
                 <div class="surface plan plan-highlight">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="plan-title">Ilimitado mensal</div>
-                        <span class="plan-badge"><i class="bi bi-arrow-repeat"></i> Flexivel</span>
+                        <div class="plan-title">Monthly unlimited</div>
+                        <span class="plan-badge"><i class="bi bi-arrow-repeat"></i> Flexible</span>
                     </div>
 
-                    <div class="plan-price mt-2">EUR 49.99<span class="fs-6 muted">/mes</span></div>
-                    <div class="muted mt-2">Para equipas que querem cobrir todos os produtos, canais e plataformas mes a mes.</div>
+                    <div class="plan-price mt-2">EUR 49.99<span class="fs-6 muted">/month</span></div>
+                    <div class="muted mt-2">For teams that want to cover all products, categories, and channels month to month.</div>
 
                     <ul class="mt-3 muted">
-                        <li>Campanhas-plataformas ativas ilimitadas</li>
-                        <li>Posts, emails e SMS planeados</li>
-                        <li>Pagamento por cartao</li>
+                        <li>Unlimited active product alerts</li>
+                        <li>Email, webhooks, and daily reports</li>
+                        <li>Card payment</li>
                     </ul>
 
                     <div class="plan-footer">
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscrever mensal</a>
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscribe monthly</a>
                         }
                         else
                         {
-                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscrever mensal</button>
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscribe monthly</button>
                         }
-                        <div class="plan-footer-note small muted text-center">O acesso mensal ativa depois da confirmacao de pagamento.</div>
+                        <div class="plan-footer-note small muted text-center">Monthly access activates after payment confirmation.</div>
                     </div>
                 </div>
             </div>
@@ -147,29 +147,29 @@
             <div class="col-lg-3">
                 <div class="surface plan plan-highlight">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="plan-title">Ilimitado anual</div>
-                        <span class="plan-badge plan-badge-warm"><i class="bi bi-stars"></i> Melhor valor</span>
+                        <div class="plan-title">Annual unlimited</div>
+                        <span class="plan-badge plan-badge-warm"><i class="bi bi-stars"></i> Best value</span>
                     </div>
 
-                    <div class="plan-price mt-2">EUR 299<span class="fs-6 muted">/ano</span></div>
-                    <div class="muted mt-2">Paga uma vez por ano e poupa mais de 50% face ao mensal.</div>
+                    <div class="plan-price mt-2">EUR 299<span class="fs-6 muted">/year</span></div>
+                    <div class="muted mt-2">Pay once per year and save more than 50% versus monthly billing.</div>
 
                     <ul class="mt-3 muted">
-                        <li>Campanhas-plataformas ativas ilimitadas durante 1 ano</li>
-                        <li>Todos os tipos de campanha social, email e SMS</li>
-                        <li>Melhor opcao para equipas com marketing continuo</li>
+                        <li>Unlimited active product alerts for 1 year</li>
+                        <li>All price alert and opportunity report types</li>
+                        <li>Best option for continuous deal monitoring</li>
                     </ul>
 
                     <div class="plan-footer">
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscrever anual</a>
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscribe annually</a>
                         }
                         else
                         {
-                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscrever anual</button>
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscribe annually</button>
                         }
-                        <div class="plan-footer-note small muted text-center">O acesso anual ativa depois da confirmacao de pagamento.</div>
+                        <div class="plan-footer-note small muted text-center">Annual access activates after payment confirmation.</div>
                     </div>
                 </div>
             </div>
@@ -177,19 +177,19 @@
 
         <div class="conversion-band mt-4">
             <div>
-                <span class="tag mb-2">Ainda em duvida?</span>
-                <h2 class="h3 fw-bold mb-2">Comeca gratis. Faz upgrade quando as campanhas forem rotina.</h2>
-                <p class="mb-0 muted">A maioria dos utilizadores comeca com 5 creditos gratis, depois escolhe pacotes de 30 dias ou ilimitado anual.</p>
+                <span class="tag mb-2">Still deciding?</span>
+                <h2 class="h3 fw-bold mb-2">Start free. Upgrade when monitoring becomes routine.</h2>
+                <p class="mb-0 muted">Most users start with 5 free credits, then choose 30-day packs or annual unlimited.</p>
             </div>
             <div class="conversion-actions">
-                <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">Como funciona</a>
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
                 @if (User?.Identity?.IsAuthenticated == true)
                 {
-                    <a class="btn btn-primary btn-lg" asp-page="/App/Billing">Ir para faturacao</a>
+                    <a class="btn btn-primary btn-lg" asp-page="/App/Billing">Go to billing</a>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar gratis</button>
+                    <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
                 }
             </div>
         </div>

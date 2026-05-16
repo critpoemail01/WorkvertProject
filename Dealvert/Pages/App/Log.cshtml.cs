@@ -1,18 +1,18 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Pages.App;
+namespace Dealvert.Pages.App;
 
 [Authorize]
 public class LogModel : PageModel
 {
-    private static readonly string[] SupportedTimeframes = ["1d", "3d", "1wk", "2wk", "1mo"];
+    private static readonly string[] SupportedTimeframes = ["1h", "6h", "12h", "1d"];
 
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
@@ -35,10 +35,10 @@ public class LogModel : PageModel
     public List<AlertOption> AlertOptions { get; private set; } = new();
     public List<LogRow> Rows { get; private set; } = new();
     public List<RuleFilterRow> RuleFilters { get; private set; } = new();
-    public string SelectedAlertName { get; private set; } = "All campaigns";
+    public string SelectedAlertName { get; private set; } = "All alerts";
     public string SelectedTimeframe { get; private set; } = "all";
     public bool IsUnlimitedPlan { get; private set; }
-    public string PlanCapacityLabel { get; private set; } = "5 active platform credits";
+    public string PlanCapacityLabel { get; private set; } = "5 active alerts";
 
     public record AlertOption(int Id, string Label);
     public record LogRow(
@@ -59,8 +59,8 @@ public class LogModel : PageModel
         var limits = await _accounts.GetLimitsAsync(userId);
         IsUnlimitedPlan = limits.IsUnlimited;
         PlanCapacityLabel = limits.IsUnlimited
-            ? "Unlimited active campaign-platforms"
-            : $"{limits.ActiveAlerts}/{limits.Capacity} active platform credits used";
+            ? "Unlimited active alerts"
+            : $"{limits.ActiveAlerts}/{limits.Capacity} active alerts used";
 
         var alerts = await _db.Alerts
             .AsNoTracking()
@@ -81,8 +81,8 @@ public class LogModel : PageModel
             AlertId = alerts[0].Id;
 
         SelectedAlertName = AlertId is null
-            ? "All campaigns"
-            : AlertOptions.FirstOrDefault(x => x.Id == AlertId.Value)?.Label ?? "Selected campaign";
+            ? "All alerts"
+            : AlertOptions.FirstOrDefault(x => x.Id == AlertId.Value)?.Label ?? "Selected alert";
 
         SelectedTimeframe = NormalizeTimeframe(Timeframe);
 
@@ -151,9 +151,9 @@ public class LogModel : PageModel
     {
         return marketType switch
         {
-            MarketType.Crypto => "Application URL",
-            MarketType.Traditional => "Company or idea",
-            _ => "Campaign source"
+            MarketType.Crypto => "Trusted store",
+            MarketType.Traditional => "Resale opportunity",
+            _ => "Product"
         };
     }
 
@@ -161,11 +161,10 @@ public class LogModel : PageModel
     {
         return timeframe switch
         {
+            "1h" => "Hourly",
+            "6h" => "6 hours",
+            "12h" => "12 hours",
             "1d" => "Daily",
-            "3d" => "Every 3 days",
-            "1wk" => "Weekly",
-            "2wk" => "Biweekly",
-            "1mo" => "Monthly",
             _ => timeframe
         };
     }

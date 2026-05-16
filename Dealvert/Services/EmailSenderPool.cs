@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public static class EmailSenderPool
 {
@@ -21,7 +21,7 @@ public static class EmailSenderPool
             [
                 new EmailSenderProfile(
                     "Primary",
-                    string.IsNullOrWhiteSpace(options.FromName) ? "Promovert" : options.FromName.Trim(),
+                    string.IsNullOrWhiteSpace(options.FromName) ? "Dealvert" : options.FromName.Trim(),
                     options.FromEmail!.Trim(),
                     string.IsNullOrWhiteSpace(options.Username) ? options.FromEmail!.Trim() : options.Username.Trim(),
                     options.Password!,
@@ -63,7 +63,7 @@ public static class EmailSenderPool
 
         return new EmailSenderProfile(
             Clean(profile.Name) ?? fromEmail,
-            Clean(profile.FromName) ?? Clean(fallback.FromName) ?? "Promovert",
+            Clean(profile.FromName) ?? Clean(fallback.FromName) ?? "Dealvert",
             fromEmail,
             Clean(profile.Username) ?? fromEmail,
             password,

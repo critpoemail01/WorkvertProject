@@ -1,6 +1,6 @@
-using Alivert.Models;
+using Dealvert.Models;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public interface IAlertDispatcher
 {

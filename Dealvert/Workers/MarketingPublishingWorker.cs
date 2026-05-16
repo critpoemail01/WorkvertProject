@@ -1,9 +1,9 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Workers;
+namespace Dealvert.Workers;
 
 public sealed class MarketingPublishingWorker : BackgroundService
 {

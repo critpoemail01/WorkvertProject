@@ -1,13 +1,13 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Pages.App.Planner;
+namespace Dealvert.Pages.App.Planner;
 
 [Authorize]
 public class DetailsModel : PageModel
@@ -530,7 +530,7 @@ public class DetailsModel : PageModel
         if (plan.Emails.Any())
             items.Add(_authorization.GetEmailAuthorization(settings));
 
-        items.Add(new PublicationAuthorization(true, "Landing pages", "Landing pages are published inside Promovert after campaign approval."));
+        items.Add(new PublicationAuthorization(true, "Watch pages", "Shared watch pages are published inside Dealvert after product-watch approval."));
         return items;
     }
 
@@ -741,12 +741,12 @@ public class DetailsModel : PageModel
         {
             var place = string.Join(", ", new[] { plan.AudienceCity, plan.AudienceCountry }.Where(x => !string.IsNullOrWhiteSpace(x)));
             if (string.IsNullOrWhiteSpace(place))
-                place = "Cidade selecionada";
+                place = "Selected city";
 
             return plan.AudienceRadiusKm is > 0 ? $"{place} + {plan.AudienceRadiusKm} km" : place;
         }
 
-        return "Mundo";
+        return "World";
     }
 
     private static CampaignBusinessReport EmptyBusinessReport()

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 public class AlertDeliveryLog
 {

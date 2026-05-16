@@ -1,5 +1,5 @@
-using Alivert.Data;
-using Alivert.Models;
+using Dealvert.Data;
+using Dealvert.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Net;
@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 using System.Net.Mail;
 using System.Text.Json;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class AlertDispatcher : IAlertDispatcher
 {
@@ -80,7 +80,8 @@ public sealed class AlertDispatcher : IAlertDispatcher
                 "TEAMS" => await DeliverTeamsAsync(log, settings?.TeamsWebhookUrl, message, ct),
                 "TELEGRAM" => await DeliverTelegramAsync(log, settings?.TelegramChatId, message, ct),
                 "EMAIL" => await DeliverEmailAsync(log, alert, snapshot, message, settings, ct),
-                "TIKTOK" or "INSTAGRAM" or "FACEBOOK" or "LINKEDIN" or "SMS" => DeliverCampaignQueue(log, alert, channel),
+                "TIKTOK" or "INSTAGRAM" or "FACEBOOK" or "LINKEDIN" or "SMS" =>
+                    Skip(log, $"Channel '{channel}' is not part of the Dealvert price-alert workflow."),
                 _ => Skip(log, $"Unsupported channel '{channel}'.")
             };
         }
@@ -90,7 +91,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Campaign delivery failed for campaign {CampaignId}.", alert.Id);
+            _logger.LogWarning(ex, "Price alert delivery failed for alert {AlertId}.", alert.Id);
             log.Status = "Failed";
             log.ErrorMessage = Truncate(ex.Message, 500);
             return log;
@@ -110,15 +111,20 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         var payload = new
         {
-            type = "promovert.campaign_activity",
-            campaignId = alert.Id,
-            source = alert.Symbol,
-            campaignAsset = alert.RuleType.DisplayName(),
-            goal = alert.Threshold,
-            audienceContacts = CountAudienceContacts(alert.AudienceList),
+            type = "dealvert.price_alert",
+            alertId = alert.Id,
+            productUrl = alert.Symbol,
+            rule = alert.RuleType.DisplayName(),
+            targetPrice = alert.Threshold,
+            marginPercent = alert.ZonePercent,
+            metadata = ProductWatchMetadata.Parse(alert.AudienceList),
             snapshot.Price,
             snapshot.PercentChange24h,
-            snapshot.Volume24h,
+            opportunityScore = snapshot.Volume24h,
+            snapshot.StoreName,
+            snapshot.ProductName,
+            snapshot.ResaleBenchmarkPrice,
+            snapshot.OpportunityMarginPercent,
             snapshot.AsOfUtc,
             message
         };
@@ -137,7 +143,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         var payload = new
         {
-            content = Truncate($"**Promovert campaign**\n{message}", 1900),
+            content = Truncate($"**Dealvert price alert**\n{message}", 1900),
             allowed_mentions = new { parse = Array.Empty<string>() }
         };
 
@@ -155,7 +161,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         var payload = new
         {
-            text = Truncate($"Promovert campaign\n{message}", 2900)
+            text = Truncate($"Dealvert price alert\n{message}", 2900)
         };
 
         return await PostJsonAsync(log, uri, payload, "Slack webhook", ct);
@@ -174,9 +180,9 @@ public sealed class AlertDispatcher : IAlertDispatcher
         {
             ["@type"] = "MessageCard",
             ["@context"] = "https://schema.org/extensions",
-            ["summary"] = "Promovert campaign",
+            ["summary"] = "Dealvert price alert",
             ["themeColor"] = "22c55e",
-            ["title"] = "Promovert campaign",
+            ["title"] = "Dealvert price alert",
             ["text"] = Truncate(message, 2900)
         };
 
@@ -200,7 +206,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         var payload = new
         {
             chat_id = chatId.Trim(),
-            text = Truncate($"Promovert campaign\n{message}", 3900),
+            text = Truncate($"Dealvert price alert\n{message}", 3900),
             disable_web_page_preview = true
         };
 
@@ -216,7 +222,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         CancellationToken ct)
     {
         if (settings?.EmailEnabled == false)
-            return Skip(log, "Email outreach is disabled.");
+            return Skip(log, "Email alerts are disabled.");
 
         var emailOptions = _options.CurrentValue.Email;
         var senderProfiles = EmailSenderPool.GetConfiguredSenders(emailOptions);
@@ -254,7 +260,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
             using var mail = new MailMessage
             {
                 From = new MailAddress(sender.FromEmail, sender.FromName),
-                Subject = Truncate($"Promovert campaign - {alert.Symbol}", 120),
+                Subject = Truncate($"Dealvert price alert - {snapshot.ProductName ?? alert.Symbol}", 120),
                 Body = BuildEmailBody(alert, snapshot, message, RecipientName(recipient)),
                 IsBodyHtml = false
             };
@@ -266,7 +272,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         log.Status = "Sent";
         log.Destination = recipients.Count == 1
             ? recipients[0].Address
-            : $"{recipients.Count} potential clients via {senderProfiles.Count} sender profile{(senderProfiles.Count == 1 ? "" : "s")}";
+            : $"{recipients.Count} recipients via {senderProfiles.Count} sender profile{(senderProfiles.Count == 1 ? "" : "s")}";
         return log;
     }
 
@@ -324,7 +330,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
         var dayToken = localNow.DayOfWeek.ToString()[..3];
         var allowedDays = ParseDays(settings.AlertWindowDays);
         if (allowedDays.Count > 0 && !allowedDays.Contains(dayToken, StringComparer.OrdinalIgnoreCase))
-            return "Outside campaign delivery day.";
+            return "Outside alert delivery day.";
 
         if (!TimeSpan.TryParse(settings.AlertWindowStart, out var start) ||
             !TimeSpan.TryParse(settings.AlertWindowEnd, out var end))
@@ -335,7 +341,7 @@ public sealed class AlertDispatcher : IAlertDispatcher
             ? now >= start && now <= end
             : now >= start || now <= end;
 
-        return insideWindow ? null : "Outside campaign delivery time window.";
+        return insideWindow ? null : "Outside alert delivery time window.";
     }
 
     private static HashSet<string> ParseDays(string? days)
@@ -362,44 +368,43 @@ public sealed class AlertDispatcher : IAlertDispatcher
         return true;
     }
 
-    private static AlertDeliveryLog DeliverCampaignQueue(AlertDeliveryLog log, Alert alert, string channel)
-    {
-        log.Status = "Sent";
-        var audienceContacts = CountAudienceContacts(alert.AudienceList);
-        log.Destination = channel.Equals("SMS", StringComparison.OrdinalIgnoreCase) && audienceContacts > 0
-            ? $"{channel} campaign queue ({audienceContacts} contacts)"
-            : $"{channel} campaign queue";
-        return log;
-    }
-
     private static IReadOnlyList<MailAddress> ParseAudienceEmailRecipients(string? audienceList)
     {
         var recipients = new List<MailAddress>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var metadata = ProductWatchMetadata.Parse(audienceList);
+
+        AddRecipient(metadata.ReportEmail);
 
         foreach (var contact in SplitAudienceList(audienceList))
         {
             if (!contact.Contains('@'))
                 continue;
 
+            var normalized = contact.StartsWith("ReportEmail=", StringComparison.OrdinalIgnoreCase)
+                ? contact["ReportEmail=".Length..]
+                : contact;
+            AddRecipient(normalized);
+        }
+
+        return recipients;
+
+        void AddRecipient(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || !value.Contains('@'))
+                return;
+
             try
             {
-                var recipient = new MailAddress(contact);
+                var recipient = new MailAddress(value.Trim());
                 if (seen.Add(recipient.Address))
                     recipients.Add(recipient);
             }
             catch (FormatException)
             {
-                // Ignore phone numbers or malformed entries when preparing email outreach.
+                // Ignore malformed entries when preparing price alert email.
             }
         }
-
-        return recipients;
-    }
-
-    private static int CountAudienceContacts(string? audienceList)
-    {
-        return SplitAudienceList(audienceList).Count();
     }
 
     private static IEnumerable<string> SplitAudienceList(string? audienceList)
@@ -430,15 +435,20 @@ public sealed class AlertDispatcher : IAlertDispatcher
 
         lines.AddRange(new[]
         {
-            "Promovert campaign",
+            "Dealvert price alert",
             "",
             message,
             "",
-            $"Source: {alert.Symbol}",
-            $"Campaign asset: {alert.RuleType.DisplayName()}",
-            $"Cadence: {alert.Timeframe}",
-            $"Goal: {alert.Threshold:0.##}",
-            $"Estimated reach signal: {snapshot.Price:0.########}",
+            $"Product URL: {alert.Symbol}",
+            $"Product: {snapshot.ProductName ?? snapshot.Symbol}",
+            $"Trusted store: {snapshot.StoreName ?? "Verified store"}",
+            $"Rule: {alert.RuleType.DisplayName()}",
+            $"Target price: EUR {alert.Threshold:0.##}",
+            $"Current price: EUR {snapshot.Price:0.##}",
+            $"Resale benchmark: {(snapshot.ResaleBenchmarkPrice is null ? "n/a" : $"EUR {snapshot.ResaleBenchmarkPrice.Value:0.##}")}",
+            $"Estimated margin: {(snapshot.OpportunityMarginPercent is null ? "n/a" : $"{snapshot.OpportunityMarginPercent.Value:0.##}%")}",
+            $"Category: {snapshot.Category ?? ProductWatchMetadata.Parse(alert.AudienceList).Category}",
+            $"Location: {ProductWatchMetadata.Parse(alert.AudienceList).LocationLabel()}",
             $"Checked at UTC: {snapshot.AsOfUtc:yyyy-MM-dd HH:mm:ss}"
         });
 

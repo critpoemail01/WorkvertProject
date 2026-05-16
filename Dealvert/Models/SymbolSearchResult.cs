@@ -1,4 +1,4 @@
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 public record SymbolSearchResult(
     string Symbol,

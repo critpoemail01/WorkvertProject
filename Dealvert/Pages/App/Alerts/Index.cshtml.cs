@@ -1,13 +1,13 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Pages.App.Alerts;
+namespace Dealvert.Pages.App.Alerts;
 
 [Authorize]
 public class AlertsIndexModel : PageModel
@@ -31,8 +31,8 @@ public class AlertsIndexModel : PageModel
     public string SelectedScheduleTimeZone { get; private set; } = TimeZoneCatalog.DefaultTimeZoneId;
     public bool IsUnlimitedPlan { get; private set; }
     public bool IsAnnualUnlimitedPlan { get; private set; }
-    public string PlanPromoTitle { get; private set; } = "Unlock unlimited campaigns";
-    public string PlanPromoText { get; private set; } = "Unlimited yearly is EUR 299 and covers every campaign, platform, channel and cadence without counting credits.";
+    public string PlanPromoTitle { get; private set; } = "Basic";
+    public string PlanPromoText { get; private set; } = "Start with 5 active products. The unlimited plan covers alerts, daily reports, and all channels.";
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -56,7 +56,7 @@ public class AlertsIndexModel : PageModel
             var limits = await _accounts.GetLimitsAsync(userId);
             if (!limits.IsUnlimited && limits.RemainingSlots <= 0)
             {
-                StatusMessage = "No credits available. Pause another campaign-platform or upgrade your plan before activating this campaign.";
+                StatusMessage = "No credits available. Pause another product or upgrade the plan before enabling this alert.";
                 return RedirectToPage();
             }
         }
@@ -67,7 +67,7 @@ public class AlertsIndexModel : PageModel
         alert.UpdatedAtUtc = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        StatusMessage = alert.IsEnabled ? "Campaign activated." : "Campaign paused.";
+        StatusMessage = alert.IsEnabled ? "Alert activated." : "Alert paused.";
         return RedirectToPage();
     }
 
@@ -78,7 +78,7 @@ public class AlertsIndexModel : PageModel
         if (alert is null) return NotFound();
 
         await DeleteAlertsAsync([alert]);
-        StatusMessage = "Campaign deleted.";
+        StatusMessage = "Alert deleted.";
         return RedirectToPage();
     }
 
@@ -95,7 +95,7 @@ public class AlertsIndexModel : PageModel
             var alertsToEnable = alerts.Count(a => !a.IsEnabled);
             if (!limits.IsUnlimited && alertsToEnable > limits.RemainingSlots)
             {
-                StatusMessage = $"No credits available. This source needs {alertsToEnable} platform credit(s), but only {limits.RemainingSlots} remain.";
+                StatusMessage = $"No credits available. This product needs {alertsToEnable} credit(s), but only {limits.RemainingSlots} are available.";
                 return RedirectToPage();
             }
         }
@@ -109,7 +109,7 @@ public class AlertsIndexModel : PageModel
         }
 
         await _db.SaveChangesAsync();
-        StatusMessage = shouldEnable ? "Campaign source activated." : "Campaign source paused.";
+        StatusMessage = shouldEnable ? "Product activated." : "Product paused.";
         return RedirectToPage();
     }
 
@@ -120,7 +120,7 @@ public class AlertsIndexModel : PageModel
         if (alerts.Count == 0) return NotFound();
 
         await DeleteAlertsAsync(alerts);
-        StatusMessage = "Campaign source deleted.";
+        StatusMessage = "Product deleted.";
         return RedirectToPage();
     }
 
@@ -130,7 +130,7 @@ public class AlertsIndexModel : PageModel
 
         if (!TimeSpan.TryParse(startTime, out _) || !TimeSpan.TryParse(endTime, out _))
         {
-            StatusMessage = "Use valid start and end times for the delivery window.";
+            StatusMessage = "Use valid times for the delivery window.";
             return RedirectToPage();
         }
 
@@ -148,7 +148,7 @@ public class AlertsIndexModel : PageModel
         settings.AlertWindowDays = NormalizeDays(days);
         await _db.SaveChangesAsync();
 
-        StatusMessage = "Delivery window saved. Campaign activity outside this window will be skipped.";
+        StatusMessage = "Delivery window saved. Alerts outside this window will be skipped.";
         return RedirectToPage();
     }
 
@@ -165,7 +165,7 @@ public class AlertsIndexModel : PageModel
             await _db.SaveChangesAsync();
         }
 
-        StatusMessage = "24/7 campaign delivery restored.";
+        StatusMessage = "24/7 delivery restored.";
         return RedirectToPage();
     }
 
@@ -294,17 +294,17 @@ public class AlertsIndexModel : PageModel
 
         if (IsAnnualUnlimitedPlan)
         {
-            PlanPromoTitle = "Annual unlimited active";
+            PlanPromoTitle = "Unlimited annual";
             PlanPromoText = account?.UnlimitedUntilUtc is null
-                ? "Every campaign type, platform, channel and cadence is already included in your annual account."
-                : $"Every campaign type, platform, channel and cadence is included until {account.UnlimitedUntilUtc.Value.ToLocalTime():MMM d, yyyy}.";
+                ? "All alerts, categories, channels, and daily reports are included."
+                : $"All alerts, categories, channels, and daily reports are included until {account.UnlimitedUntilUtc.Value.ToLocalTime():MMM d, yyyy}.";
             return;
         }
 
         if (IsUnlimitedPlan)
         {
-            PlanPromoTitle = "Switch to annual and save";
-            PlanPromoText = "You already have unlimited campaign-platforms. Annual billing is EUR 299/year and saves more than 50% versus paying monthly.";
+            PlanPromoTitle = "Unlimited";
+            PlanPromoText = "You already have unlimited products and categories. The annual plan is EUR 299/year.";
         }
     }
 }

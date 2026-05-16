@@ -1,7 +1,7 @@
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Models;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class CrmConsentPolicyTests
 {

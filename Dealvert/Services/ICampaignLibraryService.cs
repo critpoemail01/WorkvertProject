@@ -1,4 +1,4 @@
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public interface ICampaignLibraryService
 {

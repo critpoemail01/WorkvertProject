@@ -1,7 +1,7 @@
 @page
-@model Alivert.Pages.HowItWorksModel
+@model Dealvert.Pages.HowItWorksModel
 @{
-    ViewData["Title"] = "Como funciona";
+    ViewData["Title"] = "How it works";
 }
 
 <section class="hero-section">
@@ -11,20 +11,20 @@
                 <div>
                     <div class="hero-kicker mb-3">
                         <i class="bi bi-diagram-3-fill"></i>
-                        <span>Da empresa a uma campanha pronta</span>
+                        <span>From URL to actionable alert</span>
                     </div>
-                    <h1 class="hero-title display-5 fw-bold mb-3">Transforma o website da empresa numa campanha completa.</h1>
+                    <h1 class="hero-title display-5 fw-bold mb-3">Turn a product link into a regional price radar.</h1>
                     <p class="lead muted mb-4">
-                        A Promovert analisa o URL, cria o Business DNA, sugere campanhas por setor, gera posts, emails, landing page, formulario, tracking e relatorio.
+                        Dealvert reads the product URL, stores your region and category, compares trusted stores with resale benchmarks, and sends an email when the target price or margin is reached.
                     </p>
                     <div class="hero-actions">
-                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar gratis</button>
-                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">Ver precos</a>
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View pricing</a>
                     </div>
                     <div class="micro-proof-row">
-                        <span><i class="bi bi-check2"></i> 5 creditos gratis</span>
-                        <span><i class="bi bi-check2"></i> Posts, emails e landing page</span>
-                        <span><i class="bi bi-check2"></i> Leads, conversoes e relatorio</span>
+                        <span><i class="bi bi-check2"></i> 5 free credits</span>
+                        <span><i class="bi bi-check2"></i> URL, region, and margin rules</span>
+                        <span><i class="bi bi-check2"></i> Daily opportunity reports</span>
                     </div>
                 </div>
 
@@ -32,29 +32,29 @@
                     <div class="proof-row">
                         <i class="bi bi-link-45deg"></i>
                         <div>
-                            <strong>Comeca pelo URL</strong>
-                            <span>Insere o website, nome da empresa ou ideia de negocio.</span>
+                            <strong>Start with the URL</strong>
+                            <span>Paste an Amazon.es, Fnac, Worten, or other product page.</span>
                         </div>
                     </div>
                     <div class="proof-row">
-                        <i class="bi bi-stars"></i>
+                        <i class="bi bi-geo-alt"></i>
                         <div>
-                            <strong>A IA cria o plano</strong>
-                            <span>Objetivo, publico, oferta, canais, calendario e mensagens.</span>
+                            <strong>Set the region</strong>
+                            <span>Choose country, city, category, trusted stores, and resale marketplaces.</span>
                         </div>
                     </div>
                     <div class="proof-row">
-                        <i class="bi bi-check2-square"></i>
+                        <i class="bi bi-bullseye"></i>
                         <div>
-                            <strong>Aprovas antes de publicar</strong>
-                            <span>Nada sai sem aprovacao do utilizador ou da equipa.</span>
+                            <strong>Define the rule</strong>
+                            <span>Use a target price, a margin below target, or a daily opportunity score.</span>
                         </div>
                     </div>
                     <div class="proof-row">
-                        <i class="bi bi-graph-up-arrow"></i>
+                        <i class="bi bi-envelope-check"></i>
                         <div>
-                            <strong>Mede o resultado</strong>
-                            <span>Alcance, interacoes, leads, subscricoes e vendas.</span>
+                            <strong>Get the alert</strong>
+                            <span>Receive the store, price, benchmark, margin, and check time by email or webhook.</span>
                         </div>
                     </div>
                 </div>
@@ -63,64 +63,64 @@
 
         <section class="mt-5">
             <div class="section-header">
-                <span class="section-eyebrow"><i class="bi bi-lightning-charge-fill"></i> Fluxo principal</span>
-                <h2 class="section-title">A campanha e a unidade principal, nao o post isolado.</h2>
-                <p class="section-copy">Cada campanha nasce de uma empresa, tem uma estrategia, conteudos por canal, uma pagina de conversao e medicao de negocio.</p>
+                <span class="section-eyebrow"><i class="bi bi-lightning-charge-fill"></i> Main workflow</span>
+                <h2 class="section-title">Every watch is built around one buying decision.</h2>
+                <p class="section-copy">The product URL is the anchor. Region, trusted stores, resale sites, and margin rules decide when Dealvert should interrupt you.</p>
             </div>
 
             <div class="step-grid workflow-step-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
-                    <h2>URL da empresa</h2>
-                    <p class="mb-0">A Promovert usa o website para perceber produto, proposta de valor, publico e contexto visual.</p>
+                    <h2>Product URL</h2>
+                    <p class="mb-0">Paste the product page you want to monitor.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
-                    <h2>Business DNA</h2>
-                    <p class="mb-0">Cria um perfil comercial com problema, promessa, segmentos, tom e canais provaveis.</p>
+                    <h2>Region</h2>
+                    <p class="mb-0">Add country and city so the watch reflects local stock and pricing.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <h2>Campanhas sugeridas</h2>
-                    <p class="mb-0">Sugere campanhas por setor, objetivo e maturidade: leads, marcacoes, vendas, lancamento ou prova social.</p>
+                    <h2>Category</h2>
+                    <p class="mb-0">Use category reporting to discover similar opportunities each day.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">4</div>
-                    <h2>Conteudo por canal</h2>
-                    <p class="mb-0">Gera posts para LinkedIn, Instagram, Facebook, TikTok e emails adaptados ao periodo escolhido.</p>
+                    <h2>Trusted stores</h2>
+                    <p class="mb-0">Limit alerts to stores you are willing to buy from.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">5</div>
-                    <h2>Landing page</h2>
-                    <p class="mb-0">Cria uma pagina de conversao com CTA, formulario, UTM e tracking para captar leads.</p>
+                    <h2>Resale benchmark</h2>
+                    <p class="mb-0">Compare against OLX, Vinted, Wallapop, or your chosen resale sites.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">6</div>
-                    <h2>Aprovacao</h2>
-                    <p class="mb-0">O utilizador aprova, rejeita ou edita os posts antes de agendar qualquer publicacao.</p>
+                    <h2>Target and margin</h2>
+                    <p class="mb-0">Trigger only when the price clears the buying rule you set.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">7</div>
-                    <h2>Publicacao autorizada</h2>
-                    <p class="mb-0">A publicacao oficial acontece apenas em contas, paginas ou fornecedores autorizados.</p>
+                    <h2>Delivery window</h2>
+                    <p class="mb-0">Keep alerts inside the days and hours when you can act.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">8</div>
-                    <h2>Relatorio e proxima campanha</h2>
-                    <p class="mb-0">O dashboard mostra alcance, interacoes e conversoes, depois recomenda o proximo passo.</p>
+                    <h2>History</h2>
+                    <p class="mb-0">Review sent, skipped, and failed deliveries from one place.</p>
                 </div>
             </div>
         </section>
 
         <section class="conversion-band mt-4">
             <div>
-                <span class="tag mb-2">MVP recomendado</span>
-                <h2 class="h3 fw-bold mb-2">Comeca com uma campanha de 14 dias.</h2>
-                <p class="mb-0 muted">URL da empresa, Business DNA, 3 campanhas sugeridas, 5 posts LinkedIn, 5 posts Instagram, 3 emails, 1 landing page, UTM, captacao de leads e dashboard simples.</p>
+                <span class="tag mb-2">Recommended start</span>
+                <h2 class="h3 fw-bold mb-2">Create one watch from an Amazon.es URL.</h2>
+                <p class="mb-0 muted">Start with a product you already understand, then add daily reports for the categories you want to scout.</p>
             </div>
             <div class="conversion-actions">
-                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar gratis</button>
-                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">Ver precos</a>
+                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View pricing</a>
             </div>
         </section>
     </div>

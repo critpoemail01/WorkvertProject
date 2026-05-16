@@ -1,16 +1,16 @@
 @page "/campaign/{slug}"
-@model Alivert.Pages.CampaignModel
+@model Dealvert.Pages.CampaignModel
 @{
     ViewData["Title"] = Model.LandingPage.Headline;
 }
 
 <section class="campaign-public-hero">
     <div class="campaign-public-copy">
-        <span class="tag mb-3">Campaign landing page</span>
+        <span class="tag mb-3">Shared deal watch</span>
         <h1>@Model.LandingPage.Headline</h1>
         <p>@Model.LandingPage.Subheadline</p>
         <div class="campaign-public-dna">
-            <strong>Business DNA</strong>
+            <strong>Watch context</strong>
             <span>@Model.Plan.BusinessDna</span>
         </div>
     </div>
@@ -25,8 +25,8 @@
         }
         else
         {
-            <h2>@Model.LandingPage.FormTitle</h2>
-            <p>@Model.LandingPage.FormIntro</p>
+            <h2>Get notified about this watch</h2>
+            <p>Leave your details to receive follow-up about this product, price target, or opportunity.</p>
             <form method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <label class="form-label" asp-for="Input.Name"></label>
@@ -47,7 +47,7 @@
                 <input class="form-control" asp-for="Input.Phone" placeholder="Optional" />
 
                 <label class="form-label mt-3" asp-for="Input.Message"></label>
-                <textarea class="form-control" asp-for="Input.Message" rows="4" placeholder="What are you trying to improve?"></textarea>
+                <textarea class="form-control" asp-for="Input.Message" rows="4" placeholder="Which product, price, or region should we watch?"></textarea>
 
                 <label class="campaign-consent-check mt-3">
                     <input asp-for="Input.MarketingConsentAccepted" />
@@ -55,7 +55,7 @@
                 </label>
                 <span class="text-danger" asp-validation-for="Input.MarketingConsentAccepted"></span>
 
-                <button class="btn btn-primary w-100 mt-4" type="submit">@Model.LandingPage.PrimaryCallToAction</button>
+                <button class="btn btn-primary w-100 mt-4" type="submit">Notify me</button>
             </form>
         }
     </aside>

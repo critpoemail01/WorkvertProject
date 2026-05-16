@@ -1,17 +1,17 @@
 @page
-@model Alivert.Pages.App.SettingsModel
+@model Dealvert.Pages.App.SettingsModel
 @{
-    ViewData["Title"] = "Canais de marketing";
+    ViewData["Title"] = "Email and channels";
 }
 
 <div class="account-page">
     <div class="account-heading">
         <div>
-            <span class="tag mb-2">Conta e definicoes</span>
-            <h1 class="fw-bold mb-0">Canais de marketing</h1>
-            <p class="muted mb-0">Escolhe onde a Promovert prepara, agenda e envia atividade de campanha.</p>
+            <span class="tag mb-2">Account and settings</span>
+            <h1 class="fw-bold mb-0">Email and channels</h1>
+            <p class="muted mb-0">Choose where Dealvert sends price alerts, daily opportunity reports, and webhook payloads.</p>
         </div>
-        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Voltar a campanhas</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Back to alerts</a>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
@@ -22,240 +22,40 @@
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
 
-        <section class="account-section mt-4">
-            <div class="account-section-title">Integracoes oficiais de publicacao</div>
-            <div class="official-integration-intro">
-                <div>
-                    <span class="tag">Publicacao autorizada</span>
-                    <h2>Publicar apenas atraves de ligacoes OAuth oficiais</h2>
-                    <p>A Promovert so marca conteudo social como publicado quando a conta, pagina ou fornecedor esta autorizado. LinkedIn, Instagram e Facebook exigem permissoes oficiais; redes sem integracao ficam como brief criativo ate existir fornecedor ligado.</p>
-                </div>
-                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index"><i class="bi bi-calendar-check me-1"></i>Rever campanhas</a>
-            </div>
-
-            <div class="official-integration-grid">
-                <article class="official-integration-card priority">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-linkedin"></i></span>
-                        <div>
-                            <h3>LinkedIn Company Page</h3>
-                            <p>Organic and sponsored B2B posts require an authorized organization and page role.</p>
-                        </div>
-                        <strong class="notification-channel-status @(Model.Input.LinkedInAuthorized ? "ready" : "setup")">@(Model.Input.LinkedInAuthorized ? "Authorized" : "OAuth required")</strong>
-                    </div>
-                    <label class="notification-channel-switch">
-                        <span>
-                            <strong>Official OAuth completed</strong>
-                            <small>Use only organization pages the user can administer or publish to.</small>
-                        </span>
-                        <span class="form-check form-switch m-0">
-                            <input class="form-check-input" asp-for="Input.LinkedInAuthorized" />
-                        </span>
-                    </label>
-                    <div class="official-integration-fields">
-                        <label><span>Organization ID</span><input asp-for="Input.LinkedInOrganizationId" class="form-control" placeholder="urn/li organization id" /></label>
-                        <label><span>Organization name</span><input asp-for="Input.LinkedInOrganizationName" class="form-control" placeholder="Company Page name" /></label>
-                        <label class="wide"><span>Scopes</span><input asp-for="Input.LinkedInScopes" class="form-control" /></label>
-                    </div>
-                    <span asp-validation-for="Input.LinkedInOrganizationId" class="text-danger"></span>
-                </article>
-
-                <article class="official-integration-card priority">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-instagram"></i></span>
-                        <div>
-                            <h3>Instagram Business</h3>
-                            <p>Publishing must use a connected Instagram Business or Creator account through Meta authorization.</p>
-                        </div>
-                        <strong class="notification-channel-status @(Model.Input.InstagramAuthorized ? "ready" : "setup")">@(Model.Input.InstagramAuthorized ? "Authorized" : "OAuth required")</strong>
-                    </div>
-                    <label class="notification-channel-switch">
-                        <span>
-                            <strong>Official Meta OAuth completed</strong>
-                            <small>Respect provider publishing limits and only publish to authorized accounts.</small>
-                        </span>
-                        <span class="form-check form-switch m-0">
-                            <input class="form-check-input" asp-for="Input.InstagramAuthorized" />
-                        </span>
-                    </label>
-                    <div class="official-integration-fields">
-                        <label><span>Business account ID</span><input asp-for="Input.InstagramBusinessAccountId" class="form-control" placeholder="Instagram Business account ID" /></label>
-                        <label><span>Account name</span><input asp-for="Input.InstagramBusinessAccountName" class="form-control" placeholder="@("@brand")" /></label>
-                        <label class="wide"><span>Scopes</span><input asp-for="Input.InstagramScopes" class="form-control" /></label>
-                    </div>
-                    <span asp-validation-for="Input.InstagramBusinessAccountId" class="text-danger"></span>
-                </article>
-
-                <article class="official-integration-card priority">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-facebook"></i></span>
-                        <div>
-                            <h3>Facebook Page</h3>
-                            <p>Posts are allowed only for Facebook Pages authorized through Meta page permissions.</p>
-                        </div>
-                        <strong class="notification-channel-status @(Model.Input.FacebookAuthorized ? "ready" : "setup")">@(Model.Input.FacebookAuthorized ? "Authorized" : "OAuth required")</strong>
-                    </div>
-                    <label class="notification-channel-switch">
-                        <span>
-                            <strong>Official Meta OAuth completed</strong>
-                            <small>Use only pages explicitly selected during authorization.</small>
-                        </span>
-                        <span class="form-check form-switch m-0">
-                            <input class="form-check-input" asp-for="Input.FacebookAuthorized" />
-                        </span>
-                    </label>
-                    <div class="official-integration-fields">
-                        <label><span>Page ID</span><input asp-for="Input.FacebookPageId" class="form-control" placeholder="Facebook Page ID" /></label>
-                        <label><span>Page name</span><input asp-for="Input.FacebookPageName" class="form-control" placeholder="Page name" /></label>
-                        <label class="wide"><span>Scopes</span><input asp-for="Input.FacebookScopes" class="form-control" /></label>
-                    </div>
-                    <span asp-validation-for="Input.FacebookPageId" class="text-danger"></span>
-                </article>
-
-                <article class="official-integration-card">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-envelope-check"></i></span>
-                        <div>
-                            <h3>Email provider</h3>
-                            <p>Use Brevo, Mailchimp, SendGrid, Amazon SES or verified SMTP sender profiles.</p>
-                        </div>
-                        <strong class="notification-channel-status @(Model.EmailTransportConfigured ? "ready" : "setup")">@(Model.EmailTransportConfigured ? "Ready" : "Setup")</strong>
-                    </div>
-                    <label class="notification-channel-field">
-                        <span>Provider name</span>
-                        <input asp-for="Input.EmailProvider" class="form-control" list="emailProviderOptions" placeholder="Brevo, Mailchimp, SendGrid, Amazon SES..." />
-                    </label>
-                    <datalist id="emailProviderOptions">
-                        <option value="Brevo"></option>
-                        <option value="Mailchimp"></option>
-                        <option value="SendGrid"></option>
-                        <option value="Amazon SES"></option>
-                        <option value="Verified SMTP"></option>
-                    </datalist>
-                </article>
-
-                <article class="official-integration-card">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-google"></i></span>
-                        <div>
-                            <h3>Google Business Profile</h3>
-                            <p>Optional local campaign channel for authorized business profiles.</p>
-                        </div>
-                        <strong class="notification-channel-status @(Model.Input.GoogleBusinessAuthorized ? "ready" : "setup")">@(Model.Input.GoogleBusinessAuthorized ? "Authorized" : "Planned")</strong>
-                    </div>
-                    <label class="notification-channel-switch">
-                        <span><strong>Authorized profile available</strong><small>Useful for local campaign updates.</small></span>
-                        <span class="form-check form-switch m-0"><input class="form-check-input" asp-for="Input.GoogleBusinessAuthorized" /></span>
-                    </label>
-                    <label class="notification-channel-field">
-                        <span>Profile name</span>
-                        <input asp-for="Input.GoogleBusinessProfileName" class="form-control" placeholder="Business profile name" />
-                    </label>
-                    <span asp-validation-for="Input.GoogleBusinessProfileName" class="text-danger"></span>
-                </article>
-
-                <article class="official-integration-card">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-whatsapp"></i></span>
-                        <div>
-                            <h3>WhatsApp provider</h3>
-                            <p>Use only a business messaging provider authorized for the account.</p>
-                        </div>
-                        <strong class="notification-channel-status @(Model.Input.WhatsAppAuthorized ? "ready" : "setup")">@(Model.Input.WhatsAppAuthorized ? "Authorized" : "Planned")</strong>
-                    </div>
-                    <label class="notification-channel-switch">
-                        <span><strong>Authorized provider available</strong><small>Message templates must still be approved by the provider.</small></span>
-                        <span class="form-check form-switch m-0"><input class="form-check-input" asp-for="Input.WhatsAppAuthorized" /></span>
-                    </label>
-                    <label class="notification-channel-field">
-                        <span>Provider name</span>
-                        <input asp-for="Input.WhatsAppProviderName" class="form-control" placeholder="WhatsApp Business provider" />
-                    </label>
-                    <span asp-validation-for="Input.WhatsAppProviderName" class="text-danger"></span>
-                </article>
-
-                <article class="official-integration-card priority">
-                    <div class="official-integration-head">
-                        <span><i class="bi bi-graph-up-arrow"></i></span>
-                        <div>
-                            <h3>Google Analytics / Pixel / UTM</h3>
-                            <p>Landing pages include UTM links by default and can load GA4 or Meta Pixel for campaign tracking.</p>
-                        </div>
-                        <strong class="notification-channel-status @(!string.IsNullOrWhiteSpace(Model.Input.GoogleAnalyticsMeasurementId) || !string.IsNullOrWhiteSpace(Model.Input.MetaPixelId) ? "ready" : "setup")">@(!string.IsNullOrWhiteSpace(Model.Input.GoogleAnalyticsMeasurementId) || !string.IsNullOrWhiteSpace(Model.Input.MetaPixelId) ? "Ready" : "Optional")</strong>
-                    </div>
-                    <div class="official-integration-fields">
-                        <label>
-                            <span>GA4 measurement ID</span>
-                            <input asp-for="Input.GoogleAnalyticsMeasurementId" class="form-control" placeholder="G-ABC123XYZ" />
-                        </label>
-                        <label>
-                            <span>Meta Pixel ID</span>
-                            <input asp-for="Input.MetaPixelId" class="form-control" placeholder="1234567890" />
-                        </label>
-                    </div>
-                    <small class="notification-channel-note">UTM links are generated per campaign in the plan detail page. GA4 and Pixel are injected only when IDs are configured.</small>
-                    <span asp-validation-for="Input.GoogleAnalyticsMeasurementId" class="text-danger"></span>
-                    <span asp-validation-for="Input.MetaPixelId" class="text-danger"></span>
-                </article>
-            </div>
-        </section>
+        <input type="hidden" asp-for="Input.LinkedInAuthorized" />
+        <input type="hidden" asp-for="Input.LinkedInOrganizationId" />
+        <input type="hidden" asp-for="Input.LinkedInOrganizationName" />
+        <input type="hidden" asp-for="Input.LinkedInScopes" />
+        <input type="hidden" asp-for="Input.InstagramAuthorized" />
+        <input type="hidden" asp-for="Input.InstagramBusinessAccountId" />
+        <input type="hidden" asp-for="Input.InstagramBusinessAccountName" />
+        <input type="hidden" asp-for="Input.InstagramScopes" />
+        <input type="hidden" asp-for="Input.FacebookAuthorized" />
+        <input type="hidden" asp-for="Input.FacebookPageId" />
+        <input type="hidden" asp-for="Input.FacebookPageName" />
+        <input type="hidden" asp-for="Input.FacebookScopes" />
+        <input type="hidden" asp-for="Input.GoogleBusinessAuthorized" />
+        <input type="hidden" asp-for="Input.GoogleBusinessProfileName" />
+        <input type="hidden" asp-for="Input.EmailProvider" />
+        <input type="hidden" asp-for="Input.WhatsAppAuthorized" />
+        <input type="hidden" asp-for="Input.WhatsAppProviderName" />
+        <input type="hidden" asp-for="Input.GoogleAnalyticsMeasurementId" />
+        <input type="hidden" asp-for="Input.MetaPixelId" />
+        <input type="hidden" asp-for="Input.AgencyName" />
+        <input type="hidden" asp-for="Input.AgencyWorkspaceName" />
+        <input type="hidden" asp-for="Input.AgencyBrandColor" />
+        <input type="hidden" asp-for="Input.AgencyReportFooter" />
+        <input type="hidden" asp-for="Input.AgencyPermissionMode" />
 
         <section class="account-section mt-4">
-            <div class="account-section-title">Agency white-label</div>
-            <div class="agency-white-label-panel">
-                <div>
-                    <span class="tag">Multi-client ready</span>
-                    <h2>Brand reports and landing pages for the agency/client workspace</h2>
-                    <p>Use this when Promovert is operated by an agency or internal growth team with multiple clients. The values below are shown in campaign reports and public landing pages.</p>
-                </div>
-                <div class="agency-white-label-preview">
-                    <span style="@(string.IsNullOrWhiteSpace(Model.Input.AgencyBrandColor) ? null : $"background:{Model.Input.AgencyBrandColor}")"></span>
-                    <strong>@(string.IsNullOrWhiteSpace(Model.Input.AgencyName) ? "Agency brand" : Model.Input.AgencyName)</strong>
-                    <small>@(string.IsNullOrWhiteSpace(Model.Input.AgencyWorkspaceName) ? "Client workspace" : Model.Input.AgencyWorkspaceName)</small>
-                </div>
-            </div>
-            <div class="official-integration-fields mt-3">
-                <label>
-                    <span>Agency name</span>
-                    <input asp-for="Input.AgencyName" class="form-control" placeholder="Growth agency or internal team" />
-                </label>
-                <label>
-                    <span>Workspace label</span>
-                    <input asp-for="Input.AgencyWorkspaceName" class="form-control" placeholder="Client portfolio, PME Portugal..." />
-                </label>
-                <label>
-                    <span>Permission mode</span>
-                    <select asp-for="Input.AgencyPermissionMode" class="form-select">
-                        <option value="OwnerOnly">Owner only</option>
-                        <option value="TeamReview">Team review before publish</option>
-                        <option value="ClientApproval">Client approval before publish</option>
-                    </select>
-                </label>
-                <label>
-                    <span>Brand color</span>
-                    <input asp-for="Input.AgencyBrandColor" class="form-control" placeholder="#14b8a6" />
-                    <span asp-validation-for="Input.AgencyBrandColor" class="text-danger"></span>
-                </label>
-                <label>
-                    <span>Report footer</span>
-                    <input asp-for="Input.AgencyReportFooter" class="form-control" placeholder="Prepared by the growth team. Contact: agency@example.com" />
-                </label>
-            </div>
-            <div class="notification-channel-actions">
-                <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i> Save white-label settings</button>
-                <span>These settings support agency branding, client workspaces and branded reports.</span>
-            </div>
-        </section>
-
-        <section class="account-section mt-4">
-            <div class="account-section-title">Campaign delivery preferences</div>
+            <div class="account-section-title">Delivery preferences</div>
             <div class="notification-channel-intro">
                 <div>
-                    <span class="tag">Most used channels</span>
-                    <h2>Prepare outreach where customers already react</h2>
-                    <p>Email and SMS cover direct outreach, social channels cover distribution, and webhooks connect campaigns to CRMs or automation workflows.</p>
+                    <span class="tag">Primary channels</span>
+                    <h2>Receive alerts where you can act quickly</h2>
+                    <p>Email covers price alerts and daily reports. Webhooks connect the radar to automations, teams, or your own dashboards.</p>
                 </div>
-                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> Nova campanha</a>
+                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
             </div>
 
             <div class="notification-channel-grid">
@@ -264,7 +64,7 @@
                         <span class="notification-channel-icon"><i class="bi bi-envelope"></i></span>
                         <div>
                             <h3>Email</h3>
-                            <p>Best for personalized messages to potential-client lists.</p>
+                            <p>Main channel for price alerts and daily opportunity reports.</p>
                         </div>
                         <span class="notification-channel-status @(Model.Input.EmailEnabled && Model.EmailTransportConfigured ? "ready" : Model.Input.EmailEnabled ? "setup" : "muted")">
                             @(Model.Input.EmailEnabled && Model.EmailTransportConfigured ? "Ready" : Model.Input.EmailEnabled ? "Setup" : "Muted")
@@ -272,81 +72,16 @@
                     </div>
                     <label class="notification-channel-switch">
                         <span>
-                            <strong>Email outreach</strong>
-                            <small>Uses verified SMTP sender profiles configured on the server, selected per recipient for healthier delivery.</small>
+                            <strong>Email alerts</strong>
+                            <small>Uses verified SMTP senders configured on the server.</small>
                         </span>
                         <span class="form-check form-switch m-0">
                             <input class="form-check-input" asp-for="Input.EmailEnabled" />
                         </span>
                     </label>
-                    <small class="notification-channel-note">@(Model.EmailTransportConfigured ? $"{Model.EmailSenderProfileCount} verified sender profile{(Model.EmailSenderProfileCount == 1 ? "" : "s")} configured." : "Set Notifications:Email or Notifications:Email:SenderProfiles before email campaigns can send.")</small>
-                </article>
-
-                <article class="notification-channel-card">
-                    <div class="notification-channel-head">
-                        <span class="notification-channel-icon"><i class="bi bi-play-btn"></i></span>
-                        <div>
-                            <h3>TikTok / mobile updates</h3>
-                            <p>Use this for creator briefs, short-video tasks and mobile campaign updates.</p>
-                        </div>
-                        <span class="notification-channel-status @(Model.TelegramBotConfigured && !string.IsNullOrWhiteSpace(Model.Input.TelegramChatId) ? "ready" : "setup")">
-                            @(Model.TelegramBotConfigured && !string.IsNullOrWhiteSpace(Model.Input.TelegramChatId) ? "Ready" : "Setup")
-                        </span>
-                    </div>
-                    <label class="notification-channel-field">
-                        <span>Mobile channel ID</span>
-                        <input asp-for="Input.TelegramChatId" class="form-control" placeholder="123456789" />
-                    </label>
-                    <small class="notification-channel-note">@(Model.TelegramBotConfigured ? "Mobile update provider is configured." : "Configure the mobile update provider before campaign updates can send.")</small>
-                    <span asp-validation-for="Input.TelegramChatId" class="text-danger"></span>
-                </article>
-
-                <article class="notification-channel-card">
-                    <div class="notification-channel-head">
-                        <span class="notification-channel-icon"><i class="bi bi-instagram"></i></span>
-                        <div>
-                            <h3>Instagram / community webhook</h3>
-                            <p>Useful for creative review, community tasks and social publishing workflows.</p>
-                        </div>
-                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "Setup" : "Ready")</span>
-                    </div>
-                    <label class="notification-channel-field">
-                        <span>Community webhook URL</span>
-                        <input asp-for="Input.DiscordWebhookUrl" class="form-control" placeholder="https://community.example.com/webhook" />
-                    </label>
-                    <span asp-validation-for="Input.DiscordWebhookUrl" class="text-danger"></span>
-                </article>
-
-                <article class="notification-channel-card">
-                    <div class="notification-channel-head">
-                        <span class="notification-channel-icon"><i class="bi bi-kanban"></i></span>
-                        <div>
-                            <h3>Team workspace</h3>
-                            <p>Best for teams coordinating posts, emails and follow-up work.</p>
-                        </div>
-                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "Setup" : "Ready")</span>
-                    </div>
-                    <label class="notification-channel-field">
-                        <span>Workspace webhook URL</span>
-                        <input asp-for="Input.SlackWebhookUrl" class="form-control" placeholder="https://workspace.example.com/webhook" />
-                    </label>
-                    <span asp-validation-for="Input.SlackWebhookUrl" class="text-danger"></span>
-                </article>
-
-                <article class="notification-channel-card">
-                    <div class="notification-channel-head">
-                        <span class="notification-channel-icon"><i class="bi bi-linkedin"></i></span>
-                        <div>
-                            <h3>LinkedIn / B2B workflow</h3>
-                            <p>Good for professional outreach and B2B campaign operations.</p>
-                        </div>
-                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "Setup" : "Ready")</span>
-                    </div>
-                    <label class="notification-channel-field">
-                        <span>B2B workflow URL</span>
-                        <input asp-for="Input.TeamsWebhookUrl" class="form-control" placeholder="https://b2b.example.com/webhook" />
-                    </label>
-                    <span asp-validation-for="Input.TeamsWebhookUrl" class="text-danger"></span>
+                    <small class="notification-channel-note">
+                        @(Model.EmailTransportConfigured ? $"{Model.EmailSenderProfileCount} sender profile{(Model.EmailSenderProfileCount == 1 ? "" : "s")} configured." : "Configure Notifications:Email or Notifications:Email:SenderProfiles before sending emails.")
+                    </small>
                 </article>
 
                 <article class="notification-channel-card">
@@ -354,49 +89,104 @@
                         <span class="notification-channel-icon"><i class="bi bi-braces"></i></span>
                         <div>
                             <h3>Webhook</h3>
-                            <p>For CRMs, automation tools, lead-routing bots and custom campaign workflows.</p>
+                            <p>Send structured deal alerts to automation tools, bots, spreadsheets, or custom dashboards.</p>
                         </div>
                         <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "Setup" : "Ready")</span>
                     </div>
                     <label class="notification-channel-field">
                         <span>Webhook URL</span>
-                        <input asp-for="Input.WebhookUrl" class="form-control" placeholder="https://example.com/promovert-webhook" />
+                        <input asp-for="Input.WebhookUrl" class="form-control" placeholder="https://example.com/dealvert-webhook" />
                     </label>
                     <span asp-validation-for="Input.WebhookUrl" class="text-danger"></span>
                 </article>
 
-                <article class="notification-channel-card notification-channel-card-disabled">
+                <article class="notification-channel-card">
                     <div class="notification-channel-head">
-                        <span class="notification-channel-icon"><i class="bi bi-phone-vibrate"></i></span>
+                        <span class="notification-channel-icon"><i class="bi bi-slack"></i></span>
                         <div>
-                            <h3>SMS promotions</h3>
-                            <p>High-value next step for direct mobile offers after SMS provider setup.</p>
+                            <h3>Slack</h3>
+                            <p>Post high-margin product signals into a team channel.</p>
                         </div>
-                        <span class="notification-channel-status muted">Planned</span>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "Setup" : "Ready")</span>
                     </div>
-                    <p class="notification-channel-note mb-0">Not selectable yet because it needs a paid SMS provider before deliveries can be guaranteed.</p>
+                    <label class="notification-channel-field">
+                        <span>Slack webhook URL</span>
+                        <input asp-for="Input.SlackWebhookUrl" class="form-control" placeholder="https://hooks.slack.com/services/..." />
+                    </label>
+                    <span asp-validation-for="Input.SlackWebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-discord"></i></span>
+                        <div>
+                            <h3>Discord</h3>
+                            <p>Route opportunities to private resale, buying, or research communities.</p>
+                        </div>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "Setup" : "Ready")</span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Discord webhook URL</span>
+                        <input asp-for="Input.DiscordWebhookUrl" class="form-control" placeholder="https://discord.com/api/webhooks/..." />
+                    </label>
+                    <span asp-validation-for="Input.DiscordWebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-microsoft-teams"></i></span>
+                        <div>
+                            <h3>Microsoft Teams</h3>
+                            <p>Send price signals to procurement or operations workspaces.</p>
+                        </div>
+                        <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "Setup" : "Ready")</span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Teams webhook URL</span>
+                        <input asp-for="Input.TeamsWebhookUrl" class="form-control" placeholder="https://outlook.office.com/webhook/..." />
+                    </label>
+                    <span asp-validation-for="Input.TeamsWebhookUrl" class="text-danger"></span>
+                </article>
+
+                <article class="notification-channel-card">
+                    <div class="notification-channel-head">
+                        <span class="notification-channel-icon"><i class="bi bi-telegram"></i></span>
+                        <div>
+                            <h3>Telegram</h3>
+                            <p>Receive compact mobile alerts through a configured Telegram bot.</p>
+                        </div>
+                        <span class="notification-channel-status @(Model.TelegramBotConfigured && !string.IsNullOrWhiteSpace(Model.Input.TelegramChatId) ? "ready" : "setup")">
+                            @(Model.TelegramBotConfigured && !string.IsNullOrWhiteSpace(Model.Input.TelegramChatId) ? "Ready" : "Setup")
+                        </span>
+                    </div>
+                    <label class="notification-channel-field">
+                        <span>Telegram chat ID</span>
+                        <input asp-for="Input.TelegramChatId" class="form-control" placeholder="123456789" />
+                    </label>
+                    <small class="notification-channel-note">@(Model.TelegramBotConfigured ? "Telegram bot is configured." : "Configure the Telegram bot token before Telegram alerts can send.")</small>
+                    <span asp-validation-for="Input.TelegramChatId" class="text-danger"></span>
                 </article>
             </div>
 
             <div class="notification-channel-actions">
-                <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i> Save delivery channels</button>
-                <span>These destinations become selectable per campaign when you create or edit a campaign.</span>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Save channels</button>
+                <span>These destinations become available when you create or edit alerts.</span>
             </div>
         </section>
 
         <section class="account-section mt-4">
-            <div class="account-section-title">Campaign time zone settings</div>
+            <div class="account-section-title">Time zone settings</div>
             <div class="settings-timezone-panel" data-settings-timezone>
                 <div class="settings-timezone-copy">
                     <span class="settings-timezone-icon"><i class="bi bi-globe2"></i></span>
                     <div>
-                        <h2>Local timestamps in every campaign event</h2>
-                        <p>Campaign activity stays stored in UTC. This setting controls the local timestamp shown in email, social workflow and webhook updates.</p>
+                        <h2>Local timestamps in every alert</h2>
+                        <p>Activity stays stored in UTC. This setting controls the local timestamp shown in emails, webhooks, and the alert history.</p>
                     </div>
                 </div>
 
                 <div class="settings-timezone-control">
-                    <label class="modal-field-label" for="notificationTimeZone">Campaign time zone</label>
+                    <label class="modal-field-label" for="notificationTimeZone">Notification time zone</label>
                     <select asp-for="Input.AlertTimeZone" class="form-select settings-timezone" id="notificationTimeZone" data-combo data-settings-timezone-select>
                         @foreach (var zone in Model.NotificationTimeZones)
                         {
@@ -413,29 +203,21 @@
                     </div>
                     <button class="btn btn-outline-secondary btn-sm" type="button" data-settings-use-browser-timezone disabled>Use detected</button>
                     <div>
-                        <span>Selected campaign time</span>
+                        <span>Selected local time</span>
                         <strong data-settings-selected-timezone-clock>Checking selected time...</strong>
                     </div>
                 </div>
 
                 <div class="settings-timezone-actions">
-                    <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i> Save channel settings</button>
-                    <span>Use UTC for neutral timestamps, or choose your local city for clearer campaign delivery times.</span>
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Save settings</button>
+                    <span>Use UTC for neutral timestamps, or choose your local city for clearer alert delivery times.</span>
                 </div>
             </div>
-        </section>
-
-        <section class="account-section mt-4">
-            <div class="account-section-title">Set up campaign distribution</div>
-            <p class="muted mb-3">Social workflows, email and webhooks can coordinate campaign output once their destinations are connected.</p>
-            <button class="btn btn-outline-secondary" type="button" disabled>
-                <i class="bi bi-megaphone me-1"></i> Campaign channel setup wizard
-            </button>
         </section>
     </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/alivert-combos.js" asp-append-version="true"></script>
+    <script src="~/js/dealvert-combos.js" asp-append-version="true"></script>
 }

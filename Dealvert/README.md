@@ -12,7 +12,7 @@ Core workflows:
 Run locally from the repository root:
 
 ```powershell
-dotnet run --project Alivert\Promovert.csproj
+dotnet run --project Dealvert\Promovert.csproj
 ```
 
 Email sender profiles can be configured under `Notifications:Email:SenderProfiles`. Use only verified sender addresses on authenticated domains, with SPF/DKIM/DMARC configured by the mail provider. When multiple profiles are configured, Promovert distributes campaign recipients across those profiles instead of sending every email from the same mailbox.

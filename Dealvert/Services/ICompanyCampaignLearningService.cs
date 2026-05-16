@@ -1,4 +1,4 @@
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public interface ICompanyCampaignLearningService
 {
@@ -41,6 +41,6 @@ public sealed record CompanyLearningProfile(
             "No winning CTA yet",
             "No email pattern yet",
             "No landing page pattern yet",
-            "Run the first campaign, capture leads and Promovert will adapt the next one.");
+            "Run the first product watch, capture signals and Dealvert will adapt the next one.");
     }
 }

@@ -1,4 +1,4 @@
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 public static class AlertRuleTypeExtensions
 {
@@ -14,7 +14,7 @@ public static class AlertRuleTypeExtensions
 
     public static bool UsesPriceZone(this AlertRuleType ruleType)
     {
-        return ruleType == AlertRuleType.PriceZone;
+        return ruleType is AlertRuleType.PriceZone or AlertRuleType.PriceBelowMargin;
     }
 
     public static bool UsesRsi(this AlertRuleType ruleType)
@@ -42,18 +42,20 @@ public static class AlertRuleTypeExtensions
     {
         return ruleType switch
         {
-            AlertRuleType.PriceAbove => "TikTok short video",
-            AlertRuleType.PriceBelow => "Instagram post/reel",
-            AlertRuleType.PercentDrop24h => "Facebook campaign",
-            AlertRuleType.PercentRise24h => "LinkedIn post",
-            AlertRuleType.VolumeAbove24h => "Personalized email",
-            AlertRuleType.PriceZone => "SMS promotion",
-            AlertRuleType.RsiBelow => "Retargeting audience",
-            AlertRuleType.RsiAbove => "Launch announcement",
-            AlertRuleType.RsiOversoldEmaCrossUp => "Influencer brief",
-            AlertRuleType.RsiOverboughtEmaCrossDown => "Lead nurture sequence",
-            AlertRuleType.EmaCrossUp => "Multi-channel push",
-            AlertRuleType.EmaCrossDown => "Win-back campaign",
+            AlertRuleType.PriceAbove => "Resale above target",
+            AlertRuleType.PriceBelow => "Price at or below target",
+            AlertRuleType.PercentDrop24h => "Strong price drop",
+            AlertRuleType.PercentRise24h => "Resale margin",
+            AlertRuleType.VolumeAbove24h => "Opportunity score",
+            AlertRuleType.PriceZone => "Inside price zone",
+            AlertRuleType.PriceBelowMargin => "Margin below target price",
+            AlertRuleType.DailyOpportunityReport => "Daily opportunity report",
+            AlertRuleType.RsiBelow => "Category cooled down",
+            AlertRuleType.RsiAbove => "Category heating up",
+            AlertRuleType.RsiOversoldEmaCrossUp => "Demand recovery",
+            AlertRuleType.RsiOverboughtEmaCrossDown => "Demand dropping",
+            AlertRuleType.EmaCrossUp => "Trend rising",
+            AlertRuleType.EmaCrossDown => "Trend falling",
             _ => ruleType.ToString()
         };
     }

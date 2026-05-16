@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 public class Alert
 {
@@ -18,7 +18,7 @@ public class Alert
     [Required]
     public AlertRuleType RuleType { get; set; }
 
-    // Reused by Promovert as the campaign goal metric: reach, clicks, leads or conversions.
+    // Reused by Dealvert as the product source URL.
     [Required]
     public decimal Threshold { get; set; }
 

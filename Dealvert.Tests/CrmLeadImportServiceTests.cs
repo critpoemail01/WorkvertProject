@@ -1,6 +1,6 @@
-using Alivert.Services;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class CrmLeadImportServiceTests
 {
@@ -24,20 +24,20 @@ public class CrmLeadImportServiceTests
     }
 
     [Fact]
-    public void Parse_SupportsPortugueseSemicolonHeaders()
+    public void Parse_SupportsSemicolonHeaders()
     {
         var service = new CrmLeadImportService();
 
         var rows = service.Parse("""
-            nome;email;empresa;cargo;indústria;país;cidade;fase
-            João;joao@example.com;Empresa Lda;Diretor;Industria;Portugal;Lisboa;Novo
+            name;email;company;role;industry;country;city;stage
+            John;joao@example.com;Empresa Lda;Director;Industry;Portugal;Lisbon;New
             """, "Pipedrive");
 
         var row = Assert.Single(rows);
-        Assert.Equal("João", row.ContactName);
+        Assert.Equal("John", row.ContactName);
         Assert.Equal("Empresa Lda", row.CompanyName);
         Assert.Equal("Portugal", row.Country);
-        Assert.Equal("Novo", row.Stage);
+        Assert.Equal("New", row.Stage);
     }
 
     [Fact]

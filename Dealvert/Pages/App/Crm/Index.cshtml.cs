@@ -1,6 +1,6 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace Alivert.Pages.App.Crm;
+namespace Dealvert.Pages.App.Crm;
 
 [Authorize]
 public class IndexModel : PageModel
@@ -284,7 +284,7 @@ public class IndexModel : PageModel
         {
             _db.CrmLeads.Remove(lead);
             await _db.SaveChangesAsync();
-            StatusMessage = "CRM lead removed.";
+            StatusMessage = "Source entry removed.";
         }
 
         return RedirectToPage();

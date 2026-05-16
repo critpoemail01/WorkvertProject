@@ -1,4 +1,4 @@
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class NotificationOptions
 {
@@ -9,7 +9,7 @@ public sealed class NotificationOptions
 
 public sealed class EmailNotificationOptions
 {
-    public string FromName { get; set; } = "Promovert";
+    public string FromName { get; set; } = "Dealvert";
     public string? FromEmail { get; set; }
     public string? Username { get; set; }
     public string? Password { get; set; }
@@ -22,7 +22,7 @@ public sealed class EmailNotificationOptions
 public sealed class EmailSenderProfileOptions
 {
     public string Name { get; set; } = "Primary";
-    public string FromName { get; set; } = "Promovert";
+    public string FromName { get; set; } = "Dealvert";
     public string? FromEmail { get; set; }
     public string? Username { get; set; }
     public string? Password { get; set; }

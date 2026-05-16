@@ -1,95 +1,100 @@
 @page
-@model Alivert.Pages.IndexModel
+@model Dealvert.Pages.IndexModel
 @{
-    ViewData["Title"] = "Motor de campanhas online";
+    ViewData["Title"] = "URL price alerts";
 }
 
-<section class="hero-section">
+<section class="hero-section product-landing">
     <div class="container">
         <div class="promo-strip mb-4">
             <div>
-                <span class="promo-label">Lancamento</span>
-                <span class="promo-copy">Comeca com 5 creditos gratis. O plano ilimitado custa EUR 49.99/mes ou EUR 299/ano quando o marketing passa a ser continuo.</span>
+                <span class="promo-label">Deal radar</span>
+                <span class="promo-copy">Track products by URL, compare trusted stores, and receive resale opportunities by email.</span>
             </div>
-            <a class="promo-link" asp-page="/Pricing">Ver precos <i class="bi bi-arrow-right-short"></i></a>
+            <a class="promo-link" asp-page="/Pricing">View plans <i class="bi bi-arrow-right-short"></i></a>
         </div>
 
-        <div class="surface hero-card p-4 p-md-5">
+        <div class="surface hero-card product-landing-hero p-4 p-md-5">
             <div class="row align-items-center g-4">
                 <div class="col-lg-7">
                     <div class="hero-kicker mb-3">
-                        <i class="bi bi-megaphone-fill"></i>
-                        <span>Campanhas completas geradas a partir de um URL</span>
+                        <i class="bi bi-radar"></i>
+                        <span>Price alerts and product arbitrage</span>
                     </div>
 
-                    <h1 class="display-5 fw-bold hero-title mb-3">Promovert transforma o website da empresa numa campanha completa.</h1>
+                    <h1 class="display-5 fw-bold hero-title mb-3">Dealvert tells you when a product is cheap enough to buy.</h1>
                     <p class="lead mb-4 muted">
-                        Insere o URL, valida o Business DNA, escolhe uma campanha sugerida e aprova os posts, emails e landing page antes de publicar.
+                        Paste an Amazon.es URL or another store link, choose a country, city, target price, and margin. Dealvert watches trusted stores and emails you when it finds an opportunity.
                     </p>
 
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">
-                            Comecar gratis
-                        </button>
-                        <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">Como funciona</a>
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard">Abrir dashboard</a>
+                            <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create">Create alert</a>
+                            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard">Open dashboard</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" data-auth-open="login">Log in</button>
                         }
                     </div>
 
                     <div class="micro-proof-row">
-                        <span><i class="bi bi-check2"></i> Business DNA a partir do URL</span>
-                        <span><i class="bi bi-check2"></i> Posts, emails e landing page</span>
-                        <span><i class="bi bi-check2"></i> Alcance, interacoes e conversoes</span>
+                        <span><i class="bi bi-check2"></i> Product URL</span>
+                        <span><i class="bi bi-check2"></i> Country, city, and category</span>
+                        <span><i class="bi bi-check2"></i> Email at the right price</span>
                     </div>
 
                     <div class="hero-proof mt-4">
                         <div>
-                            <strong>3</strong>
-                            <span>metricas principais</span>
+                            <strong>5</strong>
+                            <span>free alerts</span>
                         </div>
                         <div>
-                            <strong>6</strong>
-                            <span>canais de marketing</span>
+                            <strong>24/7</strong>
+                            <span>monitoring</span>
                         </div>
                         <div>
-                            <strong>EUR 299</strong>
-                            <span>ilimitado/ano</span>
+                            <strong>resale</strong>
+                            <span>daily benchmark</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-5">
-                    <div class="market-panel">
-                        <div class="market-panel-header">
-                            <span class="badge badge-soft">Campanha completa</span>
+                    <div class="deal-radar-panel">
+                        <div class="deal-radar-head">
+                            <span class="badge badge-soft">Active radar</span>
                             <span class="market-dot"></span>
                         </div>
-                        <div class="market-card active">
+                        <div class="deal-radar-product">
+                            <span><i class="bi bi-link-45deg"></i></span>
                             <div>
-                                <div class="fw-semibold">https://empresa.pt</div>
-                                <div class="small muted">Business DNA + campanha de 14 dias</div>
+                                <strong>amazon.es/dp/B0...</strong>
+                                <small>Consoles · Lisbon, Portugal</small>
                             </div>
-                            <span class="signal signal-buy">A gerar</span>
                         </div>
-                        <div class="market-card">
+                        <div class="deal-radar-row best">
                             <div>
-                                <div class="fw-semibold">Posts por canal</div>
-                                <div class="small muted">LinkedIn, Instagram, Facebook, TikTok</div>
+                                <strong>Amazon.es</strong>
+                                <small>trusted store</small>
                             </div>
-                            <span class="signal">Rascunho</span>
+                            <span>EUR 389.90</span>
                         </div>
-                        <div class="market-card">
+                        <div class="deal-radar-row">
                             <div>
-                                <div class="fw-semibold">Emails + landing page</div>
-                                <div class="small muted">Follow-up, formulario e UTM</div>
+                                <strong>OLX / Vinted</strong>
+                                <small>resale benchmark</small>
                             </div>
-                            <span class="signal">Aprovar</span>
+                            <span>EUR 455.00</span>
                         </div>
-                        <div class="market-panel-footer">
-                            <i class="bi bi-graph-up-arrow"></i>
-                            <span>Alcancados, interagiram, converteram. Um dashboard.</span>
+                        <div class="deal-radar-alert">
+                            <i class="bi bi-bell-fill"></i>
+                            <div>
+                                <strong>Margin found</strong>
+                                <span>17% below benchmark. Email ready.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -98,31 +103,31 @@
 
         <section class="mt-5">
             <div class="section-header">
-                <span class="section-eyebrow"><i class="bi bi-stars"></i> Campanha como unidade principal</span>
-                <h2 class="section-title">Estrategia, conteudo, captacao e relatorio no mesmo fluxo.</h2>
-                <p class="section-copy">A Promovert foca-se em tres resultados: utilizadores alcancados, utilizadores que interagiram e utilizadores que subscreveram ou compraram.</p>
+                <span class="section-eyebrow"><i class="bi bi-stars"></i> How it works</span>
+                <h2 class="section-title">From product page to the alert that matters.</h2>
+                <p class="section-copy">Built for disciplined buying: target price, minimum margin, trusted stores, and a daily category report.</p>
             </div>
 
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="surface feature-card h-100">
-                        <div class="icon-pill mb-3"><i class="bi bi-fingerprint"></i></div>
-                        <h5>Business DNA</h5>
-                        <p class="mb-0 muted">Analisa o URL e cria o perfil comercial: produto, publico, oferta, tom, setor e oportunidades de campanha.</p>
+                        <div class="icon-pill mb-3"><i class="bi bi-link-45deg"></i></div>
+                        <h5>Paste the URL</h5>
+                        <p class="mb-0 muted">Start from a real product on Amazon.es, Fnac, Worten, PcComponentes, or another store.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="surface feature-card h-100">
-                        <div class="icon-pill mb-3"><i class="bi bi-calendar2-week"></i></div>
-                        <h5>Calendario de posts</h5>
-                        <p class="mb-0 muted">Gera hooks, captions, scripts curtos e variacoes por canal para o periodo escolhido.</p>
+                        <div class="icon-pill mb-3"><i class="bi bi-geo-alt"></i></div>
+                        <h5>Set the region</h5>
+                        <p class="mb-0 muted">Country, city, category, trusted stores, and resale marketplaces to compare.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="surface feature-card h-100">
-                        <div class="icon-pill mb-3"><i class="bi bi-window-stack"></i></div>
-                        <h5>Landing page e leads</h5>
-                        <p class="mb-0 muted">Cria uma pagina de conversao com formulario, UTM, tracking e origem da campanha.</p>
+                        <div class="icon-pill mb-3"><i class="bi bi-envelope-check"></i></div>
+                        <h5>Get the signal</h5>
+                        <p class="mb-0 muted">Email when the price hits the target, clears your margin, or the category shows opportunities.</p>
                     </div>
                 </div>
             </div>
@@ -130,13 +135,20 @@
 
         <div class="conversion-band mt-4">
             <div>
-                <span class="tag mb-2">Melhor proximo passo</span>
-                <h2 class="fw-bold mb-2">Adiciona um URL e gera a primeira campanha.</h2>
-                <p class="mb-0 muted">Cada credito cobre uma campanha ativa numa plataforma durante 30 dias. O plano ilimitado cobre todos os canais sem contar creditos.</p>
+                <span class="tag mb-2">Best next step</span>
+                <h2 class="fw-bold mb-2">Create your first alert with an Amazon.es URL.</h2>
+                <p class="mb-0 muted">Start with a product you already want to buy or resell. Then add daily category reports.</p>
             </div>
             <div class="conversion-actions">
-                <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Comecar gratis</button>
-                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">Ver precos</a>
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+                    <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create">New alert</a>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                }
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View plans</a>
             </div>
         </div>
     </div>

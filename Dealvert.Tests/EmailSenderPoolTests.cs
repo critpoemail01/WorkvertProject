@@ -1,6 +1,6 @@
-using Alivert.Services;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class EmailSenderPoolTests
 {
@@ -9,7 +9,7 @@ public class EmailSenderPoolTests
     {
         var senders = EmailSenderPool.GetConfiguredSenders(new EmailNotificationOptions
         {
-            FromName = "Promovert",
+            FromName = "Dealvert",
             FromEmail = "growth@example.com",
             Username = "",
             Password = "secret",
@@ -74,6 +74,6 @@ public class EmailSenderPoolTests
 
     private static EmailSenderProfile Sender(string email)
     {
-        return new EmailSenderProfile(email, "Promovert", email, email, "secret", "smtp.example.com", 587, true);
+        return new EmailSenderProfile(email, "Dealvert", email, email, "secret", "smtp.example.com", 587, true);
     }
 }

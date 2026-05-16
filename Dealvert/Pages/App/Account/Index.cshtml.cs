@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using Alivert.Data;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Pages.App.Account;
+namespace Dealvert.Pages.App.Account;
 
 [Authorize]
 public class IndexModel : PageModel

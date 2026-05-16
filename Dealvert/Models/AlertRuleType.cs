@@ -1,4 +1,4 @@
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 public enum AlertRuleType
 {
@@ -13,5 +13,7 @@ public enum AlertRuleType
     RsiOversoldEmaCrossUp = 9,
     RsiOverboughtEmaCrossDown = 10,
     EmaCrossUp = 11,
-    EmaCrossDown = 12
+    EmaCrossDown = 12,
+    PriceBelowMargin = 13,
+    DailyOpportunityReport = 14
 }

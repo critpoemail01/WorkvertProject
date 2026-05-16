@@ -1,19 +1,19 @@
 @page
-@model Alivert.Pages.App.LogModel
+@model Dealvert.Pages.App.LogModel
 @{
-    ViewData["Title"] = "Activity log";
+    ViewData["Title"] = "History";
 }
 
 <div class="log-view">
     <section class="app-page-hero">
         <div>
-            <span class="tag mb-3">Campaign history</span>
-            <h1 class="hero-title fw-bold mb-2">Activity log</h1>
-            <p class="lead muted mb-0">Review campaign deliveries, skipped windows and failed channel attempts.</p>
+            <span class="tag mb-3">Alert history</span>
+            <h1 class="hero-title fw-bold mb-2">History</h1>
+            <p class="lead muted mb-0">Review sent emails, skipped windows, and channel failures.</p>
         </div>
         <form method="get" class="log-alert-picker app-page-hero-actions">
             <select class="form-select" name="alertId" onchange="this.form.submit()">
-                <option value="">All campaigns</option>
+                <option value="">All alerts</option>
                 @foreach (var option in Model.AlertOptions)
                 {
                     <option value="@option.Id" selected="@(Model.AlertId == option.Id)">@option.Label</option>
@@ -46,7 +46,7 @@
                         <div class="log-empty-copy">
                             <span class="tag">Waiting for activity</span>
                             <h2>No log entries yet</h2>
-                            <p>Delivery attempts, failed channel updates and schedule skips will appear here after your campaigns produce activity.</p>
+                            <p>Email attempts, webhooks, and skipped windows appear here after there is activity.</p>
                         </div>
                         <div class="log-empty-highlights" aria-label="Log entry types">
                             <span><i class="bi bi-check2-circle"></i> Sent</span>
@@ -54,8 +54,8 @@
                             <span><i class="bi bi-exclamation-triangle"></i> Failed</span>
                         </div>
                         <div class="log-empty-actions">
-                            <a class="btn btn-primary" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> Nova campanha</a>
-                            <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i> Channel settings</a>
+                            <a class="btn btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+                            <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i>Channels</a>
                             @if (Model.AlertId is not null || Model.SelectedTimeframe != "all")
                             {
                                 <a class="btn btn-outline-secondary" asp-page="/App/Log"><i class="bi bi-arrow-counterclockwise me-1"></i> Clear filters</a>
@@ -68,8 +68,8 @@
                     <table class="table log-table align-middle">
                         <thead>
                             <tr>
-                                <th>Campaign asset</th>
-                                <th>Source</th>
+                                <th>Rule</th>
+                                <th>Product</th>
                                 <th>Channel</th>
                                 <th>Status</th>
                                 <th class="text-end">Date</th>
@@ -83,7 +83,7 @@
                                     <div class="log-rule">
                                         <i class="bi @(row.Status == "Sent" ? "bi-arrow-up-short text-success" : row.Status == "Failed" ? "bi-exclamation-triangle text-danger" : "bi-dash-circle text-muted")"></i>
                                         <div>
-                                            <strong>@Alivert.Pages.App.LogModel.FormatRule(row.RuleType)</strong>
+                                            <strong>@Dealvert.Pages.App.LogModel.FormatRule(row.RuleType)</strong>
                                             @if (!string.IsNullOrWhiteSpace(row.Detail))
                                             {
                                                 <small>@row.Detail</small>
@@ -92,8 +92,8 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span>@Alivert.Pages.App.LogModel.SourceTypeLabel(row.MarketType)</span>
-                                    <small>@Alivert.Pages.App.LogModel.FormatSymbol(row.Symbol) &middot; @Alivert.Pages.App.LogModel.CadenceLabel(row.Timeframe)</small>
+                                    <span>@Dealvert.Pages.App.LogModel.SourceTypeLabel(row.MarketType)</span>
+                                    <small>@Dealvert.Pages.App.LogModel.FormatSymbol(row.Symbol) &middot; @Dealvert.Pages.App.LogModel.CadenceLabel(row.Timeframe)</small>
                                 </td>
                                 <td>@row.Channel</td>
                                 <td>
@@ -113,7 +113,7 @@
                 <div class="timeframe-filter-head">
                     <div>
                         <span>Timeframe</span>
-                        <small>Filter by campaign cadence</small>
+                        <small>Filter by frequency</small>
                     </div>
                     @if (Model.SelectedTimeframe != "all")
                     {
@@ -123,7 +123,7 @@
                 <div class="timeframe-tabs" aria-label="Timeframe filter">
                     <a class="@(Model.SelectedTimeframe == "all" ? "active" : "")" href="@Model.AllTimeframesUrl()" aria-current="@(Model.SelectedTimeframe == "all" ? "page" : null)">
                         <span class="timeframe-label">All</span>
-                        <small>Every cadence</small>
+                        <small>Every</small>
                     </a>
                     @foreach (var timeframe in Model.Timeframes)
                     {
@@ -140,7 +140,7 @@
                 {
                     <div class="rule-filter-row disabled">
                         <span class="rule-dot"></span>
-                        <span>No campaigns yet</span>
+                        <span>No alerts</span>
                         <i class="bi bi-lock"></i>
                     </div>
                 }
@@ -162,7 +162,7 @@
                 <div class="log-upgrade-card plan-included">
                     <span><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
                     <a asp-page="/App/Billing">Manage plan</a>
-                    <p>@Model.PlanCapacityLabel. All campaign assets, cadences and log history are included on this account.</p>
+                    <p>@Model.PlanCapacityLabel. Alerts, reports, and history are included in this account.</p>
                 </div>
             }
             else
@@ -170,7 +170,7 @@
                 <div class="log-upgrade-card">
                     <span>Premium only</span>
                     <a asp-page="/App/Billing">Upgrade</a>
-                    <p>@Model.PlanCapacityLabel. Unlimited keeps every campaign active without managing credit capacity.</p>
+                    <p>@Model.PlanCapacityLabel. Unlimited keeps every product and category active.</p>
                 </div>
             }
         </aside>
@@ -180,6 +180,6 @@
 @functions {
     private static string TimeframeLabel(string timeframe)
     {
-        return Alivert.Pages.App.LogModel.CadenceLabel(timeframe);
+        return Dealvert.Pages.App.LogModel.CadenceLabel(timeframe);
     }
 }

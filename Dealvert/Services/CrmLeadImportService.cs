@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net.Mail;
 using System.Text;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class CrmLeadImportService
 {
@@ -79,7 +79,6 @@ public sealed class CrmLeadImportService
         ["external_id"] = "externalid",
         ["externalref"] = "externalid",
         ["recordid"] = "externalid",
-        ["nome"] = "name",
         ["name"] = "name",
         ["fullname"] = "name",
         ["full_name"] = "name",
@@ -96,14 +95,9 @@ public sealed class CrmLeadImportService
         ["businessemail"] = "email",
         ["phone"] = "phone",
         ["mobile"] = "phone",
-        ["telefone"] = "phone",
-        ["telemovel"] = "phone",
-        ["telemÃ³vel"] = "phone",
-        ["telemã³vel"] = "phone",
         ["company"] = "company",
         ["companyname"] = "company",
         ["company_name"] = "company",
-        ["empresa"] = "company",
         ["organization"] = "company",
         ["organisation"] = "company",
         ["account"] = "company",
@@ -111,36 +105,19 @@ public sealed class CrmLeadImportService
         ["title"] = "role",
         ["jobtitle"] = "role",
         ["job_title"] = "role",
-        ["cargo"] = "role",
         ["industry"] = "industry",
-        ["industria"] = "industry",
-        ["indastria"] = "industry",
-        ["indÃºstria"] = "industry",
-        ["indãºstria"] = "industry",
         ["sector"] = "industry",
         ["country"] = "country",
-        ["pais"] = "country",
-        ["paas"] = "country",
-        ["paÃ­s"] = "country",
-        ["paã­s"] = "country",
-        ["paãs"] = "country",
         ["city"] = "city",
-        ["cidade"] = "city",
         ["stage"] = "stage",
-        ["fase"] = "stage",
         ["status"] = "stage",
-        ["estado"] = "stage",
         ["tags"] = "tags",
         ["tag"] = "tags",
         ["segment"] = "tags",
         ["segments"] = "tags",
         ["source"] = "source",
-        ["fonte"] = "source",
         ["notes"] = "notes",
-        ["notas"] = "notes",
-        ["observacoes"] = "notes",
-        ["observaÃ§Ãµes"] = "notes",
-        ["observaã§ãµes"] = "notes"
+        ["remarks"] = "notes"
     };
 
     private static CsvDocument ReadDocument(string? raw)

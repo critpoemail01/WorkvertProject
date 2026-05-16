@@ -1,8 +1,8 @@
-using Alivert.Models;
+using Dealvert.Models;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public interface IMarketDataService
 {
-    Task<MarketSnapshot> GetSnapshotAsync(string symbol, MarketType marketType, CancellationToken ct);
+    Task<MarketSnapshot> GetSnapshotAsync(string symbol, MarketType marketType, CancellationToken ct, Alert? alert = null);
 }

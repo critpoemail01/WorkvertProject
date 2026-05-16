@@ -1,11 +1,11 @@
 using System;
-using Alivert.Data;
+using Dealvert.Data;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Alivert.Migrations
+namespace Dealvert.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260513003000_HelpDeskAndAlertSchedule")]

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Alivert.Pages;
+namespace Dealvert.Pages;
 
 public sealed class NewsModel : PageModel
 {
@@ -9,19 +9,19 @@ public sealed class NewsModel : PageModel
     public List<Post> Posts { get; } = new()
     {
         new Post(
-            "Pacotes de creditos para lancamentos de campanha",
-            "Produto",
-            "Compra pacotes de creditos e continua a correr campanhas sem subscricao mensal.",
+            "Credit packs for occasional product watches",
+            "Product",
+            "Buy credit packs and keep running alerts without a monthly subscription.",
             DateTime.UtcNow.AddDays(-7)),
         new Post(
-            "Controlo de campanha: cadencia e janelas de entrega",
-            "Produto",
-            "Melhoramos o agendamento para manter outreach dentro da janela de entrega escolhida.",
+            "Alert control: cadence and delivery windows",
+            "Product",
+            "We improved scheduling so price alerts stay inside the delivery window you choose.",
             DateTime.UtcNow.AddDays(-14)),
         new Post(
-            "Roadmap: publicacao social e envio SMS",
+            "Roadmap: more channels and marketplaces",
             "Roadmap",
-            "Novos canais estao a caminho. O mesmo workflow de campanha, com mais sitios para distribuir.",
+            "New sources and delivery channels are on the way. The same alert workflow, with more places to compare and notify.",
             DateTime.UtcNow.AddDays(-30)),
     };
 

@@ -1,6 +1,6 @@
-using Alivert.Services;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class CampaignLibraryServiceTests
 {
@@ -11,10 +11,10 @@ public class CampaignLibraryServiceTests
 
         var recommendations = service.Recommend(new CampaignLibraryRequest(
             "SBI Flow",
-            "Software industrial para operacoes e producao",
-            "diretores de operacoes em fabricas",
-            "trocar Excel por dashboards e automacao",
-            "gerar leads",
+            "Industrial software for operations and production",
+            "operations directors in factories",
+            "replace Excel with dashboards and automation",
+            "generate leads",
             "B2B SaaS / automation"));
 
         Assert.Contains(recommendations, x => x.Key == "industrial-efficiency");
@@ -28,15 +28,15 @@ public class CampaignLibraryServiceTests
         var service = new CampaignLibraryService();
 
         var recommendations = service.Recommend(new CampaignLibraryRequest(
-            "Clinica Boa Vida",
-            "Clinica dentaria com marcacao online",
-            "pacientes locais",
-            "consulta rapida",
-            "marcacoes",
+            "Good Life Clinic",
+            "Dental clinic with online booking",
+            "local patients",
+            "fast consultation",
+            "bookings",
             "Clinics and healthcare"));
 
         Assert.Contains(recommendations, x => x.Key == "clinics-first-visit");
-        Assert.Contains(recommendations, x => x.Title.Contains("consulta", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(recommendations, x => x.Title.Contains("appointment", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -47,8 +47,8 @@ public class CampaignLibraryServiceTests
         var template = service.Find("construction-quote");
 
         Assert.NotNull(template);
-        Assert.Equal("Construcao e obras", template!.Sector);
-        Assert.Contains("orcamento", template.Goal, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Construction and renovation", template!.Sector);
+        Assert.Contains("quote", template.Goal, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -57,14 +57,14 @@ public class CampaignLibraryServiceTests
         var service = new CampaignLibraryService();
 
         var recommendations = service.Recommend(new CampaignLibraryRequest(
-            "Nova Marca",
-            "ideia de negocio ainda sem setor definido",
-            "clientes potenciais",
-            "proposta clara",
-            "gerar leads",
+            "New Brand",
+            "business idea without a defined sector yet",
+            "potential customers",
+            "clear proposition",
+            "generate leads",
             null));
 
-        Assert.All(recommendations, x => Assert.Equal("Geral / crescimento", x.Sector));
+        Assert.All(recommendations, x => Assert.Equal("General growth", x.Sector));
         Assert.Contains(recommendations, x => x.Key == "general-lead-capture");
     }
 }

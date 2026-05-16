@@ -1,8 +1,8 @@
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.Extensions.Options;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class IntegrationAuthorizationServiceTests
 {
@@ -15,7 +15,7 @@ public class IntegrationAuthorizationServiceTests
         var ready = service.GetPostAuthorization(new UserNotificationSettings
         {
             LinkedInAuthorized = true,
-            LinkedInOrganizationName = "Promovert Company Page"
+            LinkedInOrganizationName = "Dealvert Company Page"
         }, "LinkedIn");
 
         Assert.False(blocked.IsAuthorized);
@@ -45,7 +45,7 @@ public class IntegrationAuthorizationServiceTests
                 [
                     new EmailSenderProfileOptions
                     {
-                        FromName = "Promovert",
+                        FromName = "Dealvert",
                         FromEmail = "growth@example.com",
                         Username = "growth@example.com",
                         Password = "secret",

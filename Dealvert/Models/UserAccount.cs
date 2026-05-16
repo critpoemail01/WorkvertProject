@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 /// <summary>
 /// Simple user billing/limits profile.

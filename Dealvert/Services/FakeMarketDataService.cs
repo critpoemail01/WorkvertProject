@@ -1,7 +1,7 @@
-using Alivert.Models;
+using Dealvert.Models;
 using System.Collections.Concurrent;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 /// <summary>
 /// MVP provider: generates a stable-ish random walk per symbol.
@@ -11,7 +11,7 @@ public sealed class FakeMarketDataService : IMarketDataService
 {
     private readonly ConcurrentDictionary<string, decimal> _lastPrice = new(StringComparer.OrdinalIgnoreCase);
 
-    public Task<MarketSnapshot> GetSnapshotAsync(string symbol, MarketType marketType, CancellationToken ct)
+    public Task<MarketSnapshot> GetSnapshotAsync(string symbol, MarketType marketType, CancellationToken ct, Alert? alert = null)
     {
         var price = _lastPrice.GetOrAdd(symbol, _ => (decimal)(50 + Random.Shared.NextDouble() * 200));
 

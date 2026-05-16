@@ -1,6 +1,6 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 
-namespace Alivert.Pages.App;
+namespace Dealvert.Pages.App;
 
 [Authorize]
 public class BillingModel : PageModel
@@ -233,7 +233,7 @@ public class BillingModel : PageModel
 
         StatusMessage = purchase.Credits > 0
             ? $"{purchase.Credits} credits added for {CreditPackAccessDays} days."
-            : $"Unlimited campaigns activated for {GetPurchaseUnlimitedPlan(purchase).DurationLabel}.";
+            : $"Unlimited alerts activated for {GetPurchaseUnlimitedPlan(purchase).DurationLabel}.";
         return RedirectToPage();
     }
 

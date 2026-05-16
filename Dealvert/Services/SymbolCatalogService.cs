@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using Alivert.Models;
+using Dealvert.Models;
 using Microsoft.Extensions.Options;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class SymbolCatalogService : ISymbolCatalogService
 {

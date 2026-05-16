@@ -1,7 +1,7 @@
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Models;
+using Dealvert.Services;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class AlertRuleEngineTests
 {
@@ -68,7 +68,7 @@ public class AlertRuleEngineTests
 
         Assert.True(result.Triggered);
         Assert.True(alert.PriceZoneWasInside);
-        Assert.Contains("entered target band", result.Message);
+        Assert.Contains("entered target zone", result.Message);
     }
 
     [Fact]
@@ -115,6 +115,30 @@ public class AlertRuleEngineTests
             new MarketSnapshot("AAPL", 102m, 0, DateTime.UtcNow));
 
         Assert.False(result.Triggered);
+    }
+
+    [Fact]
+    public void PriceBelowMargin_Triggers_WhenPriceIsBelowTargetByConfiguredMargin()
+    {
+        var alert = Alert(AlertRuleType.PriceBelowMargin, 100);
+        alert.ZonePercent = 10;
+
+        var result = _engine.Evaluate(
+            alert,
+            new MarketSnapshot("Console @ Amazon", 89.99m, 0, DateTime.UtcNow, StoreName: "Amazon"));
+
+        Assert.True(result.Triggered);
+    }
+
+    [Fact]
+    public void DailyOpportunityReport_Triggers_WhenOpportunityScoreMeetsMinimum()
+    {
+        var result = _engine.Evaluate(
+            Alert(AlertRuleType.DailyOpportunityReport, 20),
+            new MarketSnapshot("Camera @ Fnac", 199, 0, DateTime.UtcNow, 45, "Fnac", "Camera", "https://example.com", 260, 23, "Portugal", "Lisboa", "Fotografia"));
+
+        Assert.True(result.Triggered);
+        Assert.Contains("score 45", result.Message);
     }
 
     [Fact]

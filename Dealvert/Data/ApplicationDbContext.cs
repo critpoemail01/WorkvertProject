@@ -1,9 +1,9 @@
-using Alivert.Models;
+using Dealvert.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Data;
+namespace Dealvert.Data;
 
 public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {

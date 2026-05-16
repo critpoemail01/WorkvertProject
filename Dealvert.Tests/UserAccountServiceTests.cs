@@ -1,9 +1,9 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class UserAccountServiceTests
 {
@@ -21,7 +21,7 @@ public class UserAccountServiceTests
     }
 
     [Fact]
-    public async Task GetLimitsAsync_CountsActiveCampaignPlatformCredits()
+    public async Task GetLimitsAsync_CountsOnlyActiveProductAlerts()
     {
         await using var db = CreateDbContext();
         db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 5 });
@@ -41,8 +41,8 @@ public class UserAccountServiceTests
 
         Assert.False(limits.IsUnlimited);
         Assert.Equal(5, limits.Capacity);
-        Assert.Equal(5, limits.ActiveAlerts);
-        Assert.Equal(0, limits.RemainingSlots);
+        Assert.Equal(2, limits.ActiveAlerts);
+        Assert.Equal(3, limits.RemainingSlots);
     }
 
     [Fact]
@@ -156,27 +156,30 @@ public class UserAccountServiceTests
     }
 
     [Fact]
-    public async Task GetLimitsAsync_DisablesAlertsWhenScheduledPlanConsumesCapacity()
+    public async Task GetLimitsAsync_IgnoresLegacyScheduledPlans()
     {
         await using var db = CreateDbContext();
         db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 5 });
-        db.MarketingPlans.Add(MarketingPlan("user-1", "Scheduled", "TikTok,Instagram,Facebook,LinkedIn"));
+        var plan = MarketingPlan("user-1", "Scheduled", "TikTok,Instagram,Facebook,LinkedIn");
+        db.MarketingPlans.Add(plan);
         db.Alerts.AddRange(Enumerable.Range(0, 3).Select(_ => Alert("user-1", isEnabled: true)));
         await db.SaveChangesAsync();
 
         var service = new UserAccountService(db);
         var limits = await service.GetLimitsAsync("user-1");
         var enabledAlerts = await db.Alerts.CountAsync(a => a.UserId == "user-1" && a.IsEnabled);
+        var savedPlan = await db.MarketingPlans.SingleAsync(x => x.UserId == "user-1");
 
         Assert.False(limits.IsUnlimited);
         Assert.Equal(5, limits.Capacity);
-        Assert.Equal(5, limits.ActiveAlerts);
-        Assert.Equal(0, limits.RemainingSlots);
-        Assert.Equal(1, enabledAlerts);
+        Assert.Equal(3, limits.ActiveAlerts);
+        Assert.Equal(2, limits.RemainingSlots);
+        Assert.Equal(3, enabledAlerts);
+        Assert.Equal("Scheduled", savedPlan.Status);
     }
 
     [Fact]
-    public async Task GetLimitsAsync_PausesScheduledPlanWhenPlatformCreditsExceedCapacity()
+    public async Task GetLimitsAsync_DoesNotPauseLegacyScheduledPlans()
     {
         await using var db = CreateDbContext();
         db.UserAccounts.Add(new UserAccount { UserId = "user-1", Credits = 5 });
@@ -218,9 +221,9 @@ public class UserAccountServiceTests
         Assert.Equal(5, limits.Capacity);
         Assert.Equal(0, limits.ActiveAlerts);
         Assert.Equal(5, limits.RemainingSlots);
-        Assert.Equal("Paused", savedPlan.Status);
-        Assert.Equal("Approved", savedPlan.Posts.Single().Status);
-        Assert.Equal("Approved", savedPlan.Emails.Single().Status);
+        Assert.Equal("Scheduled", savedPlan.Status);
+        Assert.Equal("Scheduled", savedPlan.Posts.Single().Status);
+        Assert.Equal("Scheduled", savedPlan.Emails.Single().Status);
     }
 
     [Fact]

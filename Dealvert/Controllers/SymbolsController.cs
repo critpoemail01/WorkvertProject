@@ -1,8 +1,8 @@
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Alivert.Controllers;
+namespace Dealvert.Controllers;
 
 [Route("symbols")]
 public sealed class SymbolsController : Controller

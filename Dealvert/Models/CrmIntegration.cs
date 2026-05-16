@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Alivert.Models;
+namespace Dealvert.Models;
 
 public class CrmIntegration
 {
@@ -13,7 +13,7 @@ public class CrmIntegration
     public string Provider { get; set; } = "CSV / manual import";
 
     [Required, StringLength(120)]
-    public string DisplayName { get; set; } = "Prospecting CRM";
+    public string DisplayName { get; set; } = "Trusted source list";
 
     [StringLength(500)]
     public string? ApiBaseUrl { get; set; }

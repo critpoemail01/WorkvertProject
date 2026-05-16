@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using Alivert.Services;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace Alivert.Controllers;
+namespace Dealvert.Controllers;
 
 [Route("auth")]
 public sealed class AuthController : Controller

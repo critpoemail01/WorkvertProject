@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Pages.App;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Pages.App;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class BillingModelTests
 {
@@ -160,7 +160,7 @@ public class BillingModelTests
 
     private sealed class TestWebHostEnvironment : IWebHostEnvironment
     {
-        public string ApplicationName { get; set; } = "Alivert.Tests";
+        public string ApplicationName { get; set; } = "Dealvert.Tests";
         public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
         public string WebRootPath { get; set; } = string.Empty;
         public string EnvironmentName { get; set; } = "Development";

@@ -1,4 +1,4 @@
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public interface IUserAccountService
 {
@@ -9,7 +9,7 @@ public interface IUserAccountService
 
     /// <summary>
     /// Returns (isUnlimited, allowedCreditCapacity, activeCreditUnits, remainingSlots).
-    /// One active manual campaign channel uses 1 credit. One scheduled AI plan uses 1 credit per active platform.
+    /// One active product alert uses 1 credit.
     /// Paid credit capacity is calculated from credit transactions that are still inside the 30-day validity window.
     /// </summary>
     Task<(bool IsUnlimited, int Capacity, int ActiveAlerts, int RemainingSlots)> GetLimitsAsync(string userId, CancellationToken ct = default);

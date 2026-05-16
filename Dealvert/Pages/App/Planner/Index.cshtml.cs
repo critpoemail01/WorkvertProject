@@ -1,6 +1,6 @@
-using Alivert.Data;
-using Alivert.Models;
-using Alivert.Services;
+using Dealvert.Data;
+using Dealvert.Models;
+using Dealvert.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace Alivert.Pages.App.Planner;
+namespace Dealvert.Pages.App.Planner;
 
 [Authorize]
 public class IndexModel : PageModel
@@ -51,7 +51,7 @@ public class IndexModel : PageModel
     public IReadOnlyList<string> PlatformOptions => SupportedPlatforms;
     public IReadOnlyList<string> FrequencyOptions => SupportedFrequencies;
     public IReadOnlyList<string> LocationScopeOptions => SupportedLocationScopes;
-    public IReadOnlyList<string> GoalOptions { get; } = ["leads qualificados", "marcacoes", "vendas", "lancamento", "promocao"];
+    public IReadOnlyList<string> GoalOptions { get; } = ["qualified leads", "bookings", "sales", "launch", "promotion"];
     public List<PlanRow> RecentPlans { get; private set; } = new();
     public string? SuggestionMessage { get; private set; }
     public string? LeadDiscoveryMessage { get; private set; }
@@ -73,46 +73,46 @@ public class IndexModel : PageModel
 
     public class PlannerInput
     {
-        [Display(Name = "Nome do produto ou app")]
+        [Display(Name = "Product or app name")]
         [Required, StringLength(160)]
         public string ProductName { get; set; } = string.Empty;
 
-        [Display(Name = "URL do produto")]
+        [Display(Name = "Product URL")]
         [StringLength(300)]
         public string? ProductUrl { get; set; }
 
-        [Display(Name = "Empresa ou ideia de negocio")]
+        [Display(Name = "Company or business idea")]
         [Required, StringLength(400)]
         public string CompanyOrIdea { get; set; } = string.Empty;
 
-        [Display(Name = "Publico-alvo")]
+        [Display(Name = "Target audience")]
         [Required, StringLength(700)]
         public string TargetAudience { get; set; } = string.Empty;
 
-        [Display(Name = "Proposta de valor")]
+        [Display(Name = "Value proposition")]
         [Required, StringLength(700)]
         public string ValueProposition { get; set; } = string.Empty;
 
-        [Display(Name = "Objetivo da campanha")]
+        [Display(Name = "Campaign goal")]
         [Required, StringLength(200)]
-        public string CampaignGoal { get; set; } = "subscricoes";
+        public string CampaignGoal { get; set; } = "subscriptions";
 
-        [Display(Name = "Tom")]
+        [Display(Name = "Tone")]
         [Required, StringLength(80)]
-        public string Tone { get; set; } = "claro, direto e pratico";
+        public string Tone { get; set; } = "clear, direct, and practical";
 
-        [Display(Name = "Plataformas")]
+        [Display(Name = "Platforms")]
         public List<string> Platforms { get; set; } = ["TikTok", "Instagram", "Facebook", "LinkedIn"];
 
-        [Display(Name = "Regiao do publico")]
+        [Display(Name = "Audience region")]
         [Required, StringLength(16)]
         public string AudienceLocationScope { get; set; } = "World";
 
-        [Display(Name = "Pais")]
+        [Display(Name = "Country")]
         [StringLength(120)]
         public string? AudienceCountry { get; set; }
 
-        [Display(Name = "Cidade")]
+        [Display(Name = "City")]
         [StringLength(160)]
         public string? AudienceCity { get; set; }
 
@@ -124,36 +124,36 @@ public class IndexModel : PageModel
         [StringLength(32)]
         public string? AudienceLongitude { get; set; }
 
-        [Display(Name = "Raio")]
+        [Display(Name = "Radius")]
         [Range(1, 1000)]
         public int AudienceRadiusKm { get; set; } = 25;
 
-        [Display(Name = "Data de inicio")]
+        [Display(Name = "Start date")]
         public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-        [Display(Name = "Duracao")]
+        [Display(Name = "Duration")]
         [Range(7, 90)]
         public int DurationDays { get; set; } = 30;
 
-        [Display(Name = "Frequencia de publicacao")]
+        [Display(Name = "Publishing frequency")]
         [Required]
         public string Frequency { get; set; } = "Daily";
 
-        [Display(Name = "Emails de potenciais clientes")]
+        [Display(Name = "Prospect emails")]
         [StringLength(4000)]
         public string? EmailAudience { get; set; }
 
-        [Display(Name = "Usar leads CRM importadas")]
+        [Display(Name = "Use imported source entries")]
         public bool UseCrmLeads { get; set; }
 
-        [Display(Name = "Leads CRM selecionadas")]
+        [Display(Name = "Selected source entries")]
         public List<int> SelectedCrmLeadIds { get; set; } = new();
 
-        [Display(Name = "Filtro de leads CRM")]
+        [Display(Name = "Source entry filter")]
         [StringLength(240)]
         public string? CrmLeadFilter { get; set; }
 
-        [Display(Name = "Limite de leads CRM")]
+        [Display(Name = "Source entry limit")]
         [Range(1, 500)]
         public int CrmLeadLimit { get; set; } = 100;
 
@@ -178,7 +178,7 @@ public class IndexModel : PageModel
                 ApplyTemplate(template);
                 ActiveCampaignTemplateKey = template.Key;
                 Input.SelectedTemplateKey = template.Key;
-                SuggestionMessage = $"{template.Sector}: '{template.Title}' preparada como proxima campanha.";
+                SuggestionMessage = $"{template.Sector}: '{template.Title}' prepared as the next campaign.";
             }
         }
 
@@ -192,7 +192,7 @@ public class IndexModel : PageModel
         if (string.IsNullOrWhiteSpace(Input.ProductUrl))
         {
             ModelState.Clear();
-            ModelState.AddModelError("Input.ProductUrl", "Adiciona primeiro o URL da aplicacao.");
+            ModelState.AddModelError("Input.ProductUrl", "Add the application URL first.");
             await LoadPlansAsync();
             return Page();
         }
@@ -219,14 +219,14 @@ public class IndexModel : PageModel
             Input.AudienceLongitude = null;
             Input.AudienceRadiusKm = 25;
 
-            SuggestionMessage = $"Detetado: {suggestion.DetectedApplicationType}. Reve o briefing sugerido antes de gerar a campanha.";
+            SuggestionMessage = $"Detected: {suggestion.DetectedApplicationType}. Review the suggested brief before generating the campaign.";
             ModelState.Clear();
         }
         catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or TaskCanceledException)
         {
             ModelState.Clear();
             ModelState.AddModelError("Input.ProductUrl", ex is TaskCanceledException
-                ? "O URL demorou demasiado a responder."
+                ? "The URL took too long to respond."
                 : ex.Message);
         }
 
@@ -242,7 +242,7 @@ public class IndexModel : PageModel
         var template = _campaignLibrary.Find(templateKey);
         if (template is null)
         {
-            ModelState.AddModelError(string.Empty, "Template de campanha nao encontrado.");
+            ModelState.AddModelError(string.Empty, "Campaign template not found.");
             await LoadPlansAsync();
             return Page();
         }
@@ -250,7 +250,7 @@ public class IndexModel : PageModel
         ApplyTemplate(template);
         ActiveCampaignTemplateKey = template.Key;
         Input.SelectedTemplateKey = template.Key;
-        SuggestionMessage = $"{template.Sector}: '{template.Title}' aplicada. Reve a campanha estruturada antes de gerar.";
+        SuggestionMessage = $"{template.Sector}: '{template.Title}' applied. Review the structured campaign before generating.";
         await LoadPlansAsync();
         return Page();
     }
@@ -260,10 +260,10 @@ public class IndexModel : PageModel
         NormalizeInput();
         ModelState.Clear();
 
-        Input.DetectedApplicationType = "Customizado";
+        Input.DetectedApplicationType = "Custom";
         Input.SelectedTemplateKey = "custom";
         ActiveCampaignTemplateKey = "custom";
-        SuggestionMessage = "Campanha customizada selecionada. Define objetivo, publico, oferta, canais e cadencia antes de gerar.";
+        SuggestionMessage = "Custom campaign selected. Define the goal, audience, offer, channels, and cadence before generating.";
         await LoadPlansAsync();
         return Page();
     }
@@ -277,13 +277,13 @@ public class IndexModel : PageModel
         Input.Frequency = MvpFrequency;
         Input.Platforms = ["LinkedIn", "Instagram"];
         Input.CampaignGoal = string.IsNullOrWhiteSpace(Input.CampaignGoal) || Input.CampaignGoal is "subscriptions" or "subscricoes"
-            ? "leads qualificados"
+            ? "qualified leads"
             : Input.CampaignGoal;
         Input.Tone = string.IsNullOrWhiteSpace(Input.Tone)
-            ? "claro, direto e focado em conversao"
+            ? "clear, direct, and conversion-focused"
             : Input.Tone;
 
-        SuggestionMessage = "Funil MVP aplicado: 14 dias, 5 posts LinkedIn, 5 posts Instagram, 3 emails, landing page, links UTM, aprovacao e dashboard.";
+        SuggestionMessage = "MVP funnel applied: 14 days, 5 LinkedIn posts, 5 Instagram posts, 3 emails, landing page, UTM links, approval, and dashboard.";
         await LoadPlansAsync();
         return Page();
     }
@@ -305,7 +305,7 @@ public class IndexModel : PageModel
 
         if (string.IsNullOrWhiteSpace(Input.TargetAudience) && string.IsNullOrWhiteSpace(Input.CompanyOrIdea))
         {
-            ModelState.AddModelError("Input.EmailAudience", "Adiciona o publico-alvo ou ideia da empresa antes de sugerir emails.");
+            ModelState.AddModelError("Input.EmailAudience", "Add the target audience or company idea before suggesting emails.");
             await LoadPlansAsync();
             return Page();
         }
@@ -327,14 +327,14 @@ public class IndexModel : PageModel
         {
             Input.EmailAudience = MergeEmailAudience(Input.EmailAudience, result.Emails.Select(x => x.Email));
             LeadDiscoveryMessage = searchOnline
-                ? $"{result.Emails.Count} email{(result.Emails.Count == 1 ? "" : "s")} publico{(result.Emails.Count == 1 ? "" : "s")} sugerido{(result.Emails.Count == 1 ? "" : "s")} a partir de paginas de empresas e adicionado{(result.Emails.Count == 1 ? "" : "s")} para revisao."
-                : $"{result.Emails.Count} email{(result.Emails.Count == 1 ? "" : "s")} publico{(result.Emails.Count == 1 ? "" : "s")} encontrado{(result.Emails.Count == 1 ? "" : "s")} e adicionado{(result.Emails.Count == 1 ? "" : "s")} a lista para revisao.";
+                ? $"{result.Emails.Count} public email{(result.Emails.Count == 1 ? "" : "s")} suggested from company pages and added for review."
+                : $"{result.Emails.Count} public email{(result.Emails.Count == 1 ? "" : "s")} found and added to the list for review.";
         }
         else
         {
             LeadDiscoveryMessage = searchOnline
-                ? "Nao foram encontrados emails publicos automaticamente. Reve as pesquisas de prospecao ou escreve emails manualmente."
-                : "Pesquisas de prospecao preparadas. Usa os resultados para validar empresas e contactos antes de enviar.";
+                ? "No public emails were found automatically. Review the prospecting searches or enter emails manually."
+                : "Prospecting searches prepared. Use the results to validate companies and contacts before sending.";
         }
 
         ModelState.Clear();
@@ -361,7 +361,7 @@ public class IndexModel : PageModel
 
         if (platforms.Count == 0)
         {
-            ModelState.AddModelError("Input.Platforms", "Escolhe pelo menos uma plataforma.");
+            ModelState.AddModelError("Input.Platforms", "Choose at least one platform.");
             await LoadPlansAsync();
             return Page();
         }
@@ -380,13 +380,13 @@ public class IndexModel : PageModel
         {
             if (Input.SelectedCrmLeadIds.Count == 0)
             {
-                ModelState.AddModelError("Input.SelectedCrmLeadIds", "Seleciona pelo menos uma lead CRM importada para esta campanha.");
+                ModelState.AddModelError("Input.SelectedCrmLeadIds", "Select at least one imported source entry for this product watch.");
             }
             else
             {
                 crmLeadEmails = await LoadSelectedCrmLeadEmailsAsync(userId, Input.SelectedCrmLeadIds);
                 if (crmLeadEmails.Count == 0)
-                    ModelState.AddModelError("Input.SelectedCrmLeadIds", "As leads CRM selecionadas ja nao estao disponiveis para campanhas.");
+                    ModelState.AddModelError("Input.SelectedCrmLeadIds", "The selected source entries are no longer available for product watches.");
             }
         }
 
@@ -427,7 +427,7 @@ public class IndexModel : PageModel
             StartDate = Input.StartDate,
             EndDate = endDate,
             EmailAudience = Clean(emailAudience),
-            CrmLeadFilter = Input.UseCrmLeads ? "selected CRM leads" : null,
+            CrmLeadFilter = Input.UseCrmLeads ? "selected source entries" : null,
             CrmLeadSourceCount = crmLeadEmails.Count,
             Status = "Draft"
         };
@@ -459,10 +459,10 @@ public class IndexModel : PageModel
         plan.Leads.AddRange(draft.Leads);
         plan.LandingPage = draft.LandingPage;
         plan.BusinessDna = companyLearning.HasData
-            ? Clip($"{draft.BusinessDna} Adaptacao aprendida: {companyLearning.RecommendedCampaignBrief}", 1000)
+            ? Clip($"{draft.BusinessDna} Learned adaptation: {companyLearning.RecommendedCampaignBrief}", 1000)
             : draft.BusinessDna;
         plan.BusinessDna = plan.CrmLeadSourceCount > 0
-            ? Clip($"{plan.BusinessDna} Foco CRM: {plan.CrmLeadSourceCount} email{(plan.CrmLeadSourceCount == 1 ? "" : "s")} de leads importadas com filtro '{plan.CrmLeadFilter ?? "todas as leads CRM"}'.", 1000)
+            ? Clip($"{plan.BusinessDna} Source focus: {plan.CrmLeadSourceCount} imported contact{(plan.CrmLeadSourceCount == 1 ? "" : "s")} with filter '{plan.CrmLeadFilter ?? "all source entries"}'.", 1000)
             : plan.BusinessDna;
 
         _db.MarketingPlans.Add(plan);
@@ -478,7 +478,7 @@ public class IndexModel : PageModel
 
         if (plan is null)
         {
-            StatusMessage = "Campanha nao encontrada ou ja eliminada.";
+            StatusMessage = "Campaign not found or already deleted.";
             return RedirectToPage();
         }
 
@@ -486,7 +486,7 @@ public class IndexModel : PageModel
         _db.MarketingPlans.Remove(plan);
         await _db.SaveChangesAsync();
 
-        StatusMessage = $"Campanha '{productName}' eliminada.";
+        StatusMessage = $"Campaign '{productName}' deleted.";
         return RedirectToPage();
     }
 
@@ -641,7 +641,7 @@ public class IndexModel : PageModel
         Input.UseCrmLeads = source.CrmLeadSourceCount > 0;
         Input.CrmLeadFilter = source.CrmLeadFilter;
         Input.CrmLeadLimit = Math.Max(100, source.CrmLeadSourceCount);
-        SuggestionMessage = "Proxima campanha preparada com base no relatorio anterior e leads captadas.";
+        SuggestionMessage = "Next campaign prepared from the previous report and captured leads.";
     }
 
     private async Task<List<string>> LoadSelectedCrmLeadEmailsAsync(string userId, IReadOnlyCollection<int> selectedIds)
@@ -670,12 +670,12 @@ public class IndexModel : PageModel
         Input.CampaignGoal = Clip(template.Goal, 200);
         Input.ValueProposition = Clip(string.IsNullOrWhiteSpace(Input.ValueProposition)
             ? template.Offer
-            : $"{Input.ValueProposition}. Oferta da campanha: {template.Offer}", 700);
+            : $"{Input.ValueProposition}. Campaign offer: {template.Offer}", 700);
         Input.TargetAudience = Clip(string.IsNullOrWhiteSpace(Input.TargetAudience)
             ? template.Audience
             : Input.TargetAudience, 700);
         Input.CompanyOrIdea = Clip(string.IsNullOrWhiteSpace(Input.CompanyOrIdea)
-            ? $"Campanha {template.Sector}: {template.Strategy}"
+            ? $"{template.Sector} campaign: {template.Strategy}"
             : Input.CompanyOrIdea, 400);
         Input.DurationDays = Math.Clamp(template.DurationDays, 7, 90);
         Input.Frequency = SupportedFrequencies.Contains(template.Frequency, StringComparer.OrdinalIgnoreCase)
@@ -689,7 +689,7 @@ public class IndexModel : PageModel
         if (Input.Platforms.Count == 0)
             Input.Platforms = ["Instagram", "Facebook", "LinkedIn"];
 
-        Input.Tone = Clip($"{template.Sector.ToLowerInvariant()}, pratico e focado em conversao", 80);
+        Input.Tone = Clip($"{template.Sector.ToLowerInvariant()}, practical and conversion-focused", 80);
         Input.DetectedApplicationType = template.Sector;
         Input.SelectedTemplateKey = template.Key;
     }
@@ -708,16 +708,16 @@ public class IndexModel : PageModel
     private void ValidateLocation()
     {
         if (Input.AudienceLocationScope == "Country" && string.IsNullOrWhiteSpace(Input.AudienceCountry))
-            ModelState.AddModelError("Input.AudienceCountry", "Adiciona o pais do publico desta campanha.");
+            ModelState.AddModelError("Input.AudienceCountry", "Add the audience country for this campaign.");
 
         if (Input.AudienceLocationScope != "City")
             return;
 
         if (string.IsNullOrWhiteSpace(Input.AudienceCity))
-            ModelState.AddModelError("Input.AudienceCity", "Adiciona a cidade ou clica no mapa para definir o centro da campanha.");
+            ModelState.AddModelError("Input.AudienceCity", "Add the city or click the map to set the campaign center.");
 
         if (Input.AudienceRadiusKm < 1 || Input.AudienceRadiusKm > 1000)
-            ModelState.AddModelError("Input.AudienceRadiusKm", "Usa um raio entre 1 e 1000 km.");
+            ModelState.AddModelError("Input.AudienceRadiusKm", "Use a radius between 1 and 1000 km.");
     }
 
     private static string BuildLocationLabel(string scope, string? country, string? city, int? radiusKm)
@@ -729,12 +729,12 @@ public class IndexModel : PageModel
         {
             var place = string.Join(", ", new[] { city, country }.Where(x => !string.IsNullOrWhiteSpace(x)));
             if (string.IsNullOrWhiteSpace(place))
-                place = "Cidade selecionada";
+                place = "Selected city";
 
             return radiusKm is > 0 ? $"{place} + {radiusKm} km" : place;
         }
 
-        return "Mundo";
+        return "World";
     }
 
     private string BuildInputLocationSummary()

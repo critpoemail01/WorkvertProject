@@ -1,7 +1,7 @@
-using Alivert.Services;
+using Dealvert.Services;
 using System.Net;
 
-namespace Alivert.Tests;
+namespace Dealvert.Tests;
 
 public class LeadDiscoveryServiceTests
 {

@@ -1,7 +1,7 @@
-using Alivert.Models;
+using Dealvert.Models;
 using Microsoft.Extensions.Options;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class IntegrationAuthorizationService : IIntegrationAuthorizationService
 {

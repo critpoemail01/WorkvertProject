@@ -1,8 +1,8 @@
-using Alivert.Data;
-using Alivert.Models;
+using Dealvert.Data;
+using Dealvert.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class UserAccountService : IUserAccountService
 {
@@ -143,10 +143,8 @@ public sealed class UserAccountService : IUserAccountService
         if (string.IsNullOrWhiteSpace(userId) || isUnlimited)
             return 0;
 
-        var activeMarketingPlanUnits = await PauseExcessMarketingPlansAsync(userId, capacity, ct);
-        var alertCapacity = Math.Max(0, capacity - activeMarketingPlanUnits);
         var activeAlertCount = await _db.Alerts.CountAsync(a => a.UserId == userId && a.IsEnabled, ct);
-        if (activeAlertCount <= alertCapacity)
+        if (activeAlertCount <= capacity)
             return 0;
 
         var nowUtc = DateTime.UtcNow;
@@ -154,7 +152,7 @@ public sealed class UserAccountService : IUserAccountService
             .Where(a => a.UserId == userId && a.IsEnabled)
             .OrderByDescending(a => a.UpdatedAtUtc)
             .ThenByDescending(a => a.Id)
-            .Skip(alertCapacity)
+            .Skip(capacity)
             .ToListAsync(ct);
 
         foreach (var alert in alertsToDisable)
@@ -169,62 +167,10 @@ public sealed class UserAccountService : IUserAccountService
 
     private async Task<int> CountActiveCreditUnitsAsync(string userId, CancellationToken ct)
     {
-        var activeManualCampaigns = await _db.Alerts
+        var activeProductAlerts = await _db.Alerts
             .AsNoTracking()
             .CountAsync(a => a.UserId == userId && a.IsEnabled, ct);
 
-        return activeManualCampaigns + await CountActiveMarketingPlanCreditUnitsAsync(userId, ct);
-    }
-
-    private async Task<int> CountActiveMarketingPlanCreditUnitsAsync(string userId, CancellationToken ct)
-    {
-        var activePlanPlatforms = await _db.MarketingPlans
-            .AsNoTracking()
-            .Where(x => x.UserId == userId && x.Status == "Scheduled")
-            .Select(x => x.Platforms)
-            .ToListAsync(ct);
-
-        return activePlanPlatforms.Sum(CampaignCreditUsage.CountPlatformUnits);
-    }
-
-    private async Task<int> PauseExcessMarketingPlansAsync(string userId, int capacity, CancellationToken ct)
-    {
-        var activePlans = await _db.MarketingPlans
-            .Include(x => x.Posts)
-            .Include(x => x.Emails)
-            .Where(x => x.UserId == userId && x.Status == "Scheduled")
-            .OrderByDescending(x => x.UpdatedAtUtc)
-            .ThenByDescending(x => x.Id)
-            .ToListAsync(ct);
-
-        var usedCredits = 0;
-        var pausedAny = false;
-        var nowUtc = DateTime.UtcNow;
-
-        foreach (var plan in activePlans)
-        {
-            var planCredits = CampaignCreditUsage.CountPlatformUnits(plan.Platforms);
-            if (planCredits <= 0)
-                continue;
-
-            if (usedCredits + planCredits <= capacity)
-            {
-                usedCredits += planCredits;
-                continue;
-            }
-
-            plan.Status = "Paused";
-            plan.UpdatedAtUtc = nowUtc;
-            foreach (var post in plan.Posts.Where(x => x.Status == "Scheduled"))
-                post.Status = "Approved";
-            foreach (var email in plan.Emails.Where(x => x.Status == "Scheduled"))
-                email.Status = "Approved";
-            pausedAny = true;
-        }
-
-        if (pausedAny)
-            await _db.SaveChangesAsync(ct);
-
-        return usedCredits;
+        return activeProductAlerts;
     }
 }

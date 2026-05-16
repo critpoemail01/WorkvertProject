@@ -1,18 +1,18 @@
 @page
-@model Alivert.Pages.App.DashboardModel
+@model Dealvert.Pages.App.DashboardModel
 @{
     ViewData["Title"] = "Dashboard";
 }
 
-<section class="app-page-hero">
+<section class="app-page-hero product-hero">
     <div>
-        <span class="tag mb-3">Dashboard de crescimento</span>
+        <span class="tag mb-3">Price radar</span>
         <h1 class="hero-title fw-bold mb-2">Dashboard</h1>
-        <p class="lead muted mb-0">Mede alcance, interacoes e subscricoes ou compras geradas pelas campanhas Promovert.</p>
+        <p class="lead muted mb-0">Summary of watched products, triggered alerts, sent emails, and plan capacity.</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i> Nova campanha</a>
-        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-megaphone me-1"></i>Ver campanhas</a>
+        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-bell me-1"></i>View alerts</a>
     </div>
 </section>
 
@@ -20,14 +20,14 @@
     <div class="dashboard-plan-main">
         <span class="app-stat-icon dashboard-plan-icon"><i class="bi @(Model.IsUnlimitedPlan ? "bi-stars" : "bi-wallet2")"></i></span>
         <div>
-            <div class="app-stat-label">Plano atual</div>
+            <div class="app-stat-label">Current plan</div>
             <h2>@Model.PlanName</h2>
             <p>@Model.PlanDescription</p>
         </div>
     </div>
     <div class="dashboard-plan-usage">
         <div class="dashboard-plan-meter-head">
-            <span>@Model.ActiveAlerts creditos-plataforma ativos</span>
+            <span>@Model.ActiveAlerts active alerts</span>
             <strong>@Model.PlanCapacityLabel</strong>
         </div>
         <div class="dashboard-plan-meter" aria-label="Plan usage">
@@ -37,262 +37,94 @@
             <span>@Model.PlanRemainingLabel</span>
             @if (Model.PlanExpiresOnUtc is not null && Model.IsUnlimitedPlan)
             {
-                <span>Expires @Model.PlanExpiresOnUtc.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
+                <span>Ends on @Model.PlanExpiresOnUtc.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
             }
         </div>
     </div>
     <div class="dashboard-plan-actions">
-        <a class="btn btn-primary" asp-page="/App/Billing">Gerir plano</a>
-        <a class="btn btn-outline-secondary" asp-page="/Pricing">Comparar precos</a>
+        <a class="btn btn-primary" asp-page="/App/Billing">Manage plan</a>
+        <a class="btn btn-outline-secondary" asp-page="/Pricing">Compare plans</a>
     </div>
 </section>
 
 <div class="dashboard-stat-grid mt-4">
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-broadcast"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-box-seam"></i></span>
         <div>
-            <div class="app-stat-label">Utilizadores alcancados</div>
-            <div class="app-stat-value">@Model.UsersReached</div>
+            <div class="app-stat-label">Watched products</div>
+            <div class="app-stat-value">@Model.UniqueSymbols</div>
         </div>
     </div>
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-chat-square-heart"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-bell-fill"></i></span>
         <div>
-            <div class="app-stat-label">Utilizadores que interagiram</div>
-            <div class="app-stat-value">@Model.UsersInteracted</div>
+            <div class="app-stat-label">Active alerts</div>
+            <div class="app-stat-value">@Model.ActiveAlerts</div>
         </div>
     </div>
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-bag-check-fill"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-lightning-charge"></i></span>
         <div>
-            <div class="app-stat-label">Subscreveram ou compraram</div>
-            <div class="app-stat-value">@Model.UsersConverted</div>
+            <div class="app-stat-label">Signals 7 days</div>
+            <div class="app-stat-value">@Model.TriggersLast7Days</div>
         </div>
     </div>
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-percent"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-envelope-check"></i></span>
         <div>
-            <div class="app-stat-label">Taxa de conversao</div>
-            <div class="app-stat-value">@Model.ConversionRateLabel</div>
+            <div class="app-stat-label">Failures 7 days</div>
+            <div class="app-stat-value">@Model.FailedDeliveriesLast7Days</div>
         </div>
     </div>
 </div>
 
-<section class="surface app-panel mt-4">
+<section class="surface app-panel product-opportunity-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Resultados de negocio</h2>
-            <p>Cliques, leads, taxa de conversao, custo por lead e proxima acao recomendada.</p>
+            <h2>Opportunity flow</h2>
+            <p>Dealvert combines the source URL, trusted stores, region, and resale benchmark to decide when to notify you.</p>
         </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i>Nova campanha</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
     </div>
 
-    <div class="business-metric-grid">
+    <div class="product-flow-grid">
         <article>
-            <span><i class="bi bi-cursor"></i></span>
-            <div>
-                <strong>@Model.BusinessReport.Clicks</strong>
-                <small>cliques</small>
-            </div>
+            <span><i class="bi bi-link-45deg"></i></span>
+            <strong>Product URL</strong>
+            <p>Amazon.es or another store used as the starting reference.</p>
         </article>
         <article>
-            <span><i class="bi bi-person-lines-fill"></i></span>
-            <div>
-                <strong>@Model.BusinessReport.Leads</strong>
-                <small>leads</small>
-            </div>
+            <span><i class="bi bi-shield-check"></i></span>
+            <strong>Trusted stores</strong>
+            <p>Worten, Fnac, PcComponentes, MediaMarkt, and custom lists.</p>
         </article>
         <article>
-            <span><i class="bi bi-graph-up-arrow"></i></span>
-            <div>
-                <strong>@Model.BusinessReport.ConversionRateLabel</strong>
-                <small>conversao de leads</small>
-            </div>
+            <span><i class="bi bi-arrow-repeat"></i></span>
+            <strong>Resale market</strong>
+            <p>OLX, Vinted, Wallapop, and other resale benchmarks.</p>
         </article>
         <article>
-            <span><i class="bi bi-calculator"></i></span>
-            <div>
-                <strong>@Model.BusinessReport.CostPerLeadLabel</strong>
-                <small>custo por lead</small>
-            </div>
+            <span><i class="bi bi-envelope-paper"></i></span>
+            <strong>Actionable email</strong>
+            <p>Price, store, margin, category, and check time.</p>
         </article>
     </div>
-
-    <div class="business-insight-grid mt-3">
-        <article>
-            <span class="tag">Melhor canal</span>
-            <h3>@Model.BusinessReport.TopLeadChannel</h3>
-            <p>@Model.BusinessReport.TopLeadChannelLeads leads geradas ou projetadas.</p>
-        </article>
-        <article>
-            <span class="tag">Melhor post</span>
-            <h3>@Model.BusinessReport.TopLeadPost</h3>
-            <p>@Model.BusinessReport.TopLeadPostDetail</p>
-        </article>
-        <article>
-            <span class="tag">Melhor email</span>
-            <h3>@Model.BusinessReport.BestEmail</h3>
-            <p>@Model.BusinessReport.BestEmailDetail</p>
-        </article>
-        <article>
-            <span class="tag">Mais rentavel</span>
-            <h3>@Model.BusinessReport.MostProfitableCampaign</h3>
-            <p>@Model.BusinessReport.MostProfitableCampaignDetail</p>
-        </article>
-    </div>
-
-    <div class="business-next-action mt-3">
-        <span><i class="bi bi-lightning-charge-fill"></i></span>
-        <div>
-            <strong>Proxima acao recomendada</strong>
-            <p>@Model.BusinessReport.RecommendedNextAction</p>
-        </div>
-    </div>
-
-    @if (Model.BusinessReport.Channels.Any())
-    {
-        <div class="table-responsive mt-3">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>Canal</th>
-                        <th>Cliques</th>
-                        <th>Leads</th>
-                        <th>Conversao</th>
-                        <th>Sinal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var channel in Model.BusinessReport.Channels)
-                {
-                    <tr>
-                        <td><strong>@channel.Channel</strong></td>
-                        <td>@channel.Clicks</td>
-                        <td>@channel.Leads</td>
-                        <td>@channel.ConversionRateLabel</td>
-                        <td class="text-muted">@channel.Signal</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-
-    @if (Model.BusinessReport.Campaigns.Any())
-    {
-        <div class="table-responsive mt-3">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>Campanha</th>
-                        <th>Cliques</th>
-                        <th>Leads</th>
-                        <th>Conversao</th>
-                        <th>Custo por lead</th>
-                        <th>Melhor canal</th>
-                        <th class="text-end">Acao</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var campaign in Model.BusinessReport.Campaigns)
-                {
-                    <tr>
-                        <td><strong>@campaign.Campaign</strong><div class="text-muted">@campaign.NextAction</div></td>
-                        <td>@campaign.Clicks</td>
-                        <td>@campaign.Leads</td>
-                        <td>@campaign.ConversionRateLabel</td>
-                        <td>@campaign.CostPerLeadLabel</td>
-                        <td>@campaign.BestChannel</td>
-                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@campaign.Id">Abrir</a></td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="empty-state compact mt-3">
-            <i class="bi bi-graph-up-arrow"></i>
-            <span>Ainda nao ha resultados de negocio. Gera e publica uma campanha com landing page para comecar a medir leads.</span>
-        </div>
-    }
 </section>
 
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Motor de campanhas</h2>
-            <p>Rascunhos, agenda e conteudo publicado que alimentam o relatorio de alcance.</p>
+            <h2>Recent alerts</h2>
+            <p>Signals generated when the price or opportunity score matched the rule.</p>
         </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Index" asp-fragment="campaign-config">Nova campanha</a>
-    </div>
-
-    <div class="planner-metric-strip dashboard-ai-strip">
-        <div><strong>@Model.AiPlans</strong><span>campanhas</span></div>
-        <div><strong>@Model.ScheduledAiItems</strong><span>itens agendados</span></div>
-        <div><strong>@Model.PublishedAiItems</strong><span>publicados/enviados</span></div>
-    </div>
-
-    @if (!Model.LatestAiPlans.Any())
-    {
-        <div class="empty-state compact mt-3">
-            <i class="bi bi-stars"></i>
-            <span>Ainda nao ha campanhas geradas. Cria uma campanha a partir do produto, publico-alvo e periodo de publicacao.</span>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive mt-3">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>Produto</th>
-                        <th>Estado</th>
-                        <th>Conteudo gerado</th>
-                        <th>Criada em</th>
-                        <th class="text-end">Acao</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var plan in Model.LatestAiPlans)
-                {
-                    <tr>
-                        <td>@plan.ProductName</td>
-                        <td><span class="badge text-bg-secondary">@plan.Status</span></td>
-                        <td>@plan.Posts posts / @plan.Emails emails / landing page</td>
-                        <td class="text-muted">@plan.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-page="/App/Planner/Details" asp-route-id="@plan.Id">Abrir</a></td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-</section>
-
-@if (Model.FailedDeliveriesLast7Days > 0)
-{
-    <div class="alert alert-warning mt-4 mb-0">
-        @Model.FailedDeliveriesLast7Days tentativa(s) de entrega falharam nos ultimos 7 dias.
-        <a asp-page="/App/Settings">Ver canais de marketing</a>.
-    </div>
-}
-
-<section class="surface app-panel mt-4">
-    <div class="app-panel-header">
-        <div>
-            <h2>Atividade recente</h2>
-            <p>Eventos mais recentes gerados pelos fluxos ativos.</p>
-        </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Abrir log</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Open history</a>
     </div>
 
     @if (!Model.LatestTriggers.Any())
     {
         <div class="empty-state compact">
-            <i class="bi bi-megaphone"></i>
-            <span>Ainda nao ha atividade. Cria uma campanha e acompanha alcance, interacao e conversao.</span>
+            <i class="bi bi-bell"></i>
+            <span>No signals yet. Create an alert and set a target price to start.</span>
         </div>
     }
     else
@@ -301,9 +133,9 @@
             <table class="table table-sm align-middle">
                 <thead>
                     <tr>
-                        <th>Quando</th>
-                        <th>Origem</th>
-                        <th>Atividade</th>
+                        <th>When</th>
+                        <th>Product</th>
+                        <th>Signal</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -324,17 +156,17 @@
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Entregas recentes</h2>
-            <p>Tentativas de entrega por email, SMS, social e webhook.</p>
+            <h2>Recent deliveries</h2>
+            <p>Emails, webhooks, and team channels used to deliver alerts.</p>
         </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Settings">Configurar canais</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Settings">Configure channels</a>
     </div>
 
     @if (!Model.LatestDeliveries.Any())
     {
         <div class="empty-state compact">
             <i class="bi bi-send"></i>
-            <span>Ainda nao ha tentativas de entrega.</span>
+            <span>No delivery attempts yet.</span>
         </div>
     }
     else
@@ -343,11 +175,11 @@
             <table class="table table-sm align-middle">
                 <thead>
                     <tr>
-                        <th>Quando</th>
-                        <th>Origem</th>
-                        <th>Canal</th>
-                        <th>Estado</th>
-                        <th>Detalhe</th>
+                        <th>When</th>
+                        <th>Product</th>
+                        <th>Channel</th>
+                        <th>Status</th>
+                        <th>Detail</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -360,15 +192,15 @@
                         <td>
                             @if (row.Status == "Sent")
                             {
-                                <span class="badge text-bg-success">Enviado</span>
+                                <span class="badge text-bg-success">Sent</span>
                             }
                             else if (row.Status == "Failed")
                             {
-                                <span class="badge text-bg-danger">Falhou</span>
+                                <span class="badge text-bg-danger">Failed</span>
                             }
                             else
                             {
-                                <span class="badge text-bg-secondary">Ignorado</span>
+                                <span class="badge text-bg-secondary">Skipped</span>
                             }
                         </td>
                         <td class="text-muted">@row.ErrorMessage</td>

@@ -2,13 +2,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class UrlCampaignBriefSuggester : IUrlCampaignBriefSuggester
 {
     private static readonly AppTypeRule[] Rules =
     [
-        new("Industrial / manufacturing", ["industrial", "industry", "factory", "fabrica", "manufacturing", "production", "producao", "operations", "operacoes", "maintenance", "manutencao", "metalomecanica", "energia", "planeamento"],
+        new("Industrial / manufacturing", ["industrial", "industry", "factory", "manufacturing", "production", "operations", "maintenance", "energy", "planning"],
             "industrial SMEs, factories, production managers, maintenance teams and operations directors",
             "turn operational problems into measurable improvements in production, maintenance, planning or costs",
             "qualified industrial leads and diagnostic requests",
@@ -43,28 +43,28 @@ public sealed class UrlCampaignBriefSuggester : IUrlCampaignBriefSuggester
             "helpful, local and action-oriented",
             ["Instagram", "Facebook", "TikTok", "LinkedIn"]),
 
-        new("Clinics and healthcare", ["clinic", "clinica", "clínica", "doctor", "dentist", "medical", "health", "saude", "saúde", "consulta", "check-up", "appointment"],
+        new("Clinics and healthcare", ["clinic", "doctor", "dentist", "medical", "health", "healthcare", "check-up", "appointment"],
             "local patients and families who need a trusted, easy way to book care",
             "make the first contact, check-up or appointment simple and trustworthy",
             "appointments and qualified patient enquiries",
             "trustworthy, clear and local",
             ["Instagram", "Facebook", "TikTok", "Email"]),
 
-        new("Construction and renovation", ["construction", "construcao", "construção", "obra", "renovation", "remodel", "remodelacao", "remodelação", "builder", "orcamento", "orçamento"],
+        new("Construction and renovation", ["construction", "renovation", "remodel", "builder", "quote", "estimate"],
             "property owners, companies and managers planning works or renovations",
             "turn project interest into qualified quote requests with proof of completed work",
             "quote requests and site visits",
             "visual, trustworthy and practical",
             ["Instagram", "Facebook", "LinkedIn", "Email"]),
 
-        new("Restaurants and hospitality", ["restaurant", "restaurante", "menu", "food", "comida", "reservation", "reserva", "bar", "cafe", "café", "hospitality"],
+        new("Restaurants and hospitality", ["restaurant", "menu", "food", "reservation", "bar", "cafe", "hospitality"],
             "local customers, visitors and groups looking for a place to eat or book",
             "make menus, reservations and private events easy to discover and book",
             "reservations and event enquiries",
             "visual, local and appetite-led",
             ["Instagram", "Facebook", "TikTok", "Email"]),
 
-        new("Real estate", ["real estate", "imobiliaria", "imobiliária", "property", "imovel", "imóvel", "house", "apartamento", "avaliacao", "avaliação"],
+        new("Real estate", ["real estate", "property", "house", "apartment", "valuation"],
             "property owners, buyers and investors looking for trusted market guidance",
             "capture valuation requests, property listings and qualified buyer interest",
             "valuation requests and qualified property leads",

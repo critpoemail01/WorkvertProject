@@ -1,414 +1,48 @@
-﻿@page
-@model Alivert.Pages.App.Crm.IndexModel
+@page
+@model Dealvert.Pages.App.Crm.IndexModel
 @{
-    ViewData["Title"] = "Importar leads CSV";
+    ViewData["Title"] = "Source lists";
 }
 
-<section class="app-page-hero">
+<section class="app-page-hero product-hero">
     <div>
-        <span class="tag mb-3">Importacao CSV</span>
-        <h1 class="hero-title fw-bold mb-2">Usa as leads da tua equipa de prospecao nas campanhas.</h1>
-        <p class="lead muted mb-0">Por agora, importa leads selecionando um ficheiro CSV. Depois escolhes esses contactos no campaign builder.</p>
+        <span class="tag mb-3">Source lists</span>
+        <h1 class="hero-title fw-bold mb-2">Build watches from trusted stores and resale marketplaces.</h1>
+        <p class="lead muted mb-0">Dealvert uses store lists, resale sites, country, city, and category context to decide which product opportunities deserve an alert.</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-primary btn-lg" asp-page="/App/Planner/Index" asp-fragment="campaign-config"><i class="bi bi-plus-lg me-1"></i>Nova campanha</a>
+        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-bell me-1"></i>View alerts</a>
     </div>
-</section>
-
-@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-{
-    <div class="alert alert-info mt-4 mb-0">@Model.StatusMessage</div>
-}
-
-<div class="dashboard-stat-grid mt-4">
-    <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-people"></i></span>
-        <div>
-            <div class="app-stat-label">Leads CRM</div>
-            <div class="app-stat-value">@Model.TotalLeads</div>
-        </div>
-    </div>
-    <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-envelope-check"></i></span>
-        <div>
-            <div class="app-stat-label">Com email</div>
-            <div class="app-stat-value">@Model.LeadsWithEmail</div>
-        </div>
-    </div>
-    <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-bullseye"></i></span>
-        <div>
-            <div class="app-stat-label">Prontas para campanha</div>
-            <div class="app-stat-value">@Model.ReadyForCampaign</div>
-        </div>
-    </div>
-    <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-shield-check"></i></span>
-        <div>
-            <div class="app-stat-label">Com consentimento</div>
-            <div class="app-stat-value">@Model.AuthorizedContacts</div>
-        </div>
-    </div>
-    <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-shield-x"></i></span>
-        <div>
-            <div class="app-stat-label">Excluidas</div>
-            <div class="app-stat-value">@Model.SuppressedContacts</div>
-        </div>
-    </div>
-</div>
-
-<section class="surface app-panel mt-4 crm-csv-import-panel">
-    <div class="app-panel-header">
-        <div>
-            <h2>Importar leads por CSV</h2>
-            <p>Seleciona um CSV do CRM ou lista de prospecao. A Promovert le as colunas, sugere o match e pede confirmacao antes de importar.</p>
-        </div>
-    </div>
-
-    <form method="post" asp-page-handler="PreviewCsv" enctype="multipart/form-data" class="crm-form" data-csv-upload-form>
-        <div class="row g-3">
-            <div class="col-12">
-                <label asp-for="Import.CsvFile" class="form-label"></label>
-                <input asp-for="Import.CsvFile" class="form-control" type="file" accept=".csv,text/csv" data-csv-file-input />
-                <div class="form-text">A origem das leads fica automaticamente com o nome do ficheiro. O consentimento e exclusoes podem ser geridos depois.</div>
-                <span asp-validation-for="Import.CsvFile" class="text-danger"></span>
-            </div>
-        </div>
-
-        <button class="btn btn-outline-secondary mt-3" type="submit"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Ler colunas do CSV</button>
-    </form>
-
-    @if (Model.CsvPreview is not null && Model.CsvPreview.Columns.Any())
-    {
-        <form method="post" asp-page-handler="ImportLeads" class="crm-form crm-column-map-form mt-4">
-            <input asp-for="Import.Source" type="hidden" />
-            <input asp-for="Import.RawCsv" type="hidden" />
-
-            <div class="crm-csv-preview-summary">
-                <div>
-                    <strong>@Model.CsvPreview.Columns.Count colunas detetadas</strong>
-                    <span>Origem: @Model.Import.Source</span>
-                    <span>@Model.CsvPreview.SampleRows.Count linha@(Model.CsvPreview.SampleRows.Count == 1 ? "" : "s") de preview - delimitador '@Model.CsvPreview.Delimiter'</span>
-                </div>
-                <span>@(Model.CsvPreview.HasHeader ? "Cabecalho detetado" : "Sem cabecalho detetado")</span>
-            </div>
-
-            <div class="crm-column-map-grid mt-3">
-                <label>
-                    <span class="form-label">Email <small>obrigatorio</small></span>
-                    <select asp-for="Import.EmailColumn" class="form-select">
-                        <option value="">Selecionar coluna CSV</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                    <span asp-validation-for="Import.EmailColumn" class="text-danger"></span>
-                </label>
-                <label>
-                    <span class="form-label">Nome do contacto</span>
-                    <select asp-for="Import.ContactNameColumn" class="form-select">
-                        <option value="">Usar email como nome</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Empresa</span>
-                    <select asp-for="Import.CompanyNameColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Cargo</span>
-                    <select asp-for="Import.RoleColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Setor</span>
-                    <select asp-for="Import.IndustryColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Pais</span>
-                    <select asp-for="Import.CountryColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Cidade</span>
-                    <select asp-for="Import.CityColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Estado</span>
-                    <select asp-for="Import.StageColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Tags</span>
-                    <select asp-for="Import.TagsColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Telefone</span>
-                    <select asp-for="Import.PhoneColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">ID externo</span>
-                    <select asp-for="Import.ExternalIdColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span class="form-label">Notas</span>
-                    <select asp-for="Import.NotesColumn" class="form-select">
-                        <option value="">Nao importar</option>
-                        @foreach (var column in Model.CsvPreview.Columns)
-                        {
-                            <option value="@column.Index">@column.Label</option>
-                        }
-                    </select>
-                </label>
-            </div>
-
-            <div class="crm-csv-preview-table mt-3">
-                <table class="table table-sm align-middle">
-                    <thead>
-                        <tr>
-                            @foreach (var column in Model.CsvPreview.Columns)
-                            {
-                                <th>@column.Label</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var row in Model.CsvPreview.SampleRows)
-                    {
-                        <tr>
-                            @for (var i = 0; i < Model.CsvPreview.Columns.Count; i++)
-                            {
-                                <td>@(i < row.Count ? row[i] : "")</td>
-                            }
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="alert-form-actions mt-4">
-                <button class="btn btn-primary" type="submit"><i class="bi bi-cloud-arrow-up me-1"></i>Importar leads mapeadas</button>
-                <span class="muted">A importacao CSV e o unico modo por agora. Contactos com unsubscribe ou excluidos nao entram em campanhas de email.</span>
-            </div>
-        </form>
-    }
 </section>
 
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Consentimento e Email Hub</h2>
-            <p>Gere contactos autorizados, unsubscribe e listas de exclusao antes de usar emails CRM em campanhas.</p>
+            <h2>What belongs here now</h2>
+            <p>Use each alert to store the trusted shops and resale marketplaces that matter for that product or category.</p>
         </div>
     </div>
-    <div class="consent-hub-grid">
+    <div class="product-flow-grid">
+        <article>
+            <span><i class="bi bi-shop"></i></span>
+            <strong>Trusted stores</strong>
+            <p>Amazon.es, Fnac, Worten, PcComponentes, MediaMarkt, or any source you trust.</p>
+        </article>
+        <article>
+            <span><i class="bi bi-arrow-repeat"></i></span>
+            <strong>Resale benchmarks</strong>
+            <p>OLX, Vinted, Wallapop, eBay, or specialist second-hand marketplaces.</p>
+        </article>
+        <article>
+            <span><i class="bi bi-geo-alt"></i></span>
+            <strong>Local context</strong>
+            <p>Country and city filters keep stock, shipping, and resale value realistic.</p>
+        </article>
         <article>
             <span><i class="bi bi-envelope-check"></i></span>
-            <strong>Permitidos para outreach</strong>
-            <p>Contactos desconhecidos ou consentidos podem ser selecionados para revisao. Contactos consentidos devem ter origem explicita.</p>
-        </article>
-        <article>
-            <span><i class="bi bi-person-x"></i></span>
-            <strong>Lista de exclusao</strong>
-            <p>Contactos com unsubscribe ou suprimidos ficam bloqueados para campanhas e visiveis para auditoria.</p>
-        </article>
-        <article>
-            <span><i class="bi bi-window-stack"></i></span>
-            <strong>Captacao pela landing page</strong>
-            <p>Formularios publicos captam consentimento e devolvem leads ao CRM com origem de campanha e canal.</p>
+            <strong>Alerts and reports</strong>
+            <p>Get immediate price alerts or daily category reports when the margin is worth action.</p>
         </article>
     </div>
 </section>
-
-<section class="surface app-panel mt-4">
-    <div class="app-panel-header">
-        <div>
-            <h2>Leads CRM importadas</h2>
-            <p>Estes contactos passam a estar disponiveis como publico selecionavel no campaign builder.</p>
-        </div>
-    </div>
-
-    @if (!Model.Leads.Any())
-    {
-        <div class="empty-state compact">
-            <i class="bi bi-person-lines-fill"></i>
-            <span>Ainda nao existem leads CRM importadas.</span>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>Contacto</th>
-                        <th>Empresa</th>
-                        <th>Segmento</th>
-                        <th>Localizacao</th>
-                        <th>Stage</th>
-                        <th>Consentimento</th>
-                        <th>Origem</th>
-                        <th class="text-end">Acao</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var lead in Model.Leads)
-                {
-                    <tr>
-                        <td>
-                            <strong>@lead.ContactName</strong>
-                            <div class="text-muted">@lead.Email</div>
-                        </td>
-                        <td>
-                            <strong>@lead.CompanyName</strong>
-                            <div class="text-muted">@lead.Role</div>
-                        </td>
-                        <td>
-                            <span>@lead.Industry</span>
-                            <div class="text-muted">@lead.Tags</div>
-                        </td>
-                        <td>@string.Join(", ", new[] { lead.City, lead.Country }.Where(x => !string.IsNullOrWhiteSpace(x)))</td>
-                        <td><span class="badge text-bg-secondary">@lead.Stage</span></td>
-                        <td>
-                            <form method="post" asp-page-handler="UpdateConsent" asp-route-leadId="@lead.Id" class="crm-consent-form">
-                                <select class="form-select form-select-sm" name="consentStatus">
-                                    @foreach (var status in Model.ConsentStatusOptions)
-                                    {
-                                        <option value="@status" selected="@(lead.ConsentStatus == status)">@status</option>
-                                    }
-                                </select>
-                                <button class="btn btn-sm btn-outline-secondary" type="submit">Guardar</button>
-                            </form>
-                            <div class="text-muted small">@lead.ConsentSource</div>
-                        </td>
-                        <td>
-                            <span>@lead.Source</span>
-                            <div class="text-muted">@lead.Tags</div>
-                        </td>
-                        <td class="text-end">
-                            <form method="post" asp-page-handler="DeleteLead" asp-route-leadId="@lead.Id">
-                                <button class="btn btn-sm btn-outline-secondary" type="submit">Remover</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-</section>
-
-<section class="surface app-panel mt-4">
-    <div class="app-panel-header">
-        <div>
-            <h2>Leads captadas por campanha</h2>
-            <p>Leads das landing pages ficam guardadas com campanha, consentimento do formulario e origem UTM/canal.</p>
-        </div>
-    </div>
-
-    @if (!Model.CapturedLandingLeads.Any())
-    {
-        <div class="empty-state compact">
-            <i class="bi bi-person-plus"></i>
-            <span>Ainda nao existem leads captadas por landing page.</span>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>Lead</th>
-                        <th>Campanha</th>
-                        <th>Origin</th>
-                        <th>Consentimento</th>
-                        <th>Captada em</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var lead in Model.CapturedLandingLeads)
-                {
-                    <tr>
-                        <td><strong>@lead.ContactName</strong><div class="text-muted">@lead.Email</div></td>
-                        <td><strong>@lead.Campaign</strong><div class="text-muted">/@lead.LandingSlug</div></td>
-                        <td><strong>@lead.Source</strong><div class="text-muted">@lead.CompanyName @lead.Role</div></td>
-                        <td><span class="badge @(lead.ConsentAccepted ? "text-bg-success" : "text-bg-warning")">@(lead.ConsentAccepted ? "Aceite" : "Em falta")</span></td>
-                        <td class="text-muted">@lead.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-</section>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.querySelectorAll('[data-csv-file-input]').forEach((input) => {
-            input.addEventListener('change', () => {
-                if (input.files && input.files.length > 0) {
-                    input.form?.requestSubmit();
-                }
-            });
-        });
-    </script>
-}
-

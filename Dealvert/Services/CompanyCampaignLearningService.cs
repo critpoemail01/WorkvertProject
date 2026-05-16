@@ -1,9 +1,9 @@
-using Alivert.Data;
-using Alivert.Models;
+using Dealvert.Data;
+using Dealvert.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-namespace Alivert.Services;
+namespace Dealvert.Services;
 
 public sealed class CompanyCampaignLearningService : ICompanyCampaignLearningService
 {

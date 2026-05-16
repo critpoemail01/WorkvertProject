@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Alivert.Pages;
+namespace Dealvert.Pages;
 
 public sealed class AboutModel : PageModel
 {
