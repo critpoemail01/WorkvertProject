@@ -1,0 +1,96 @@
+@page
+@model Workvert.Pages.App.HelpDeskModel
+@{
+    ViewData["Title"] = "Help desk";
+}
+
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">Help desk</h1>
+            <p class="muted mb-0">Open a support ticket when something is broken or you need help with product alerts, billing, or notification channels.</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Open new support ticket</div>
+        <form method="post" class="helpdesk-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-warning support-validation-summary"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.Name" class="form-label"></label>
+                    <input asp-for="Input.Name" class="form-control" placeholder="Your name" autocomplete="name" required />
+                    <span asp-validation-for="Input.Name" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.Email" class="form-label"></label>
+                    <input asp-for="Input.Email" class="form-control" placeholder="you@example.com" autocomplete="email" required />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                <div class="col-md-7">
+                    <label asp-for="Input.Subject" class="form-label"></label>
+                    <input asp-for="Input.Subject" class="form-control" placeholder="Short issue summary" maxlength="160" required />
+                    <div class="form-text">Example: Payment confirmation not updating.</div>
+                    <span asp-validation-for="Input.Subject" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Input.Message" class="form-label"></label>
+                    <textarea asp-for="Input.Message" class="form-control helpdesk-message" placeholder="Describe what happened, where it happened, and what you expected instead." maxlength="4000" required></textarea>
+                    <div class="form-text">Include the page, product URL, payment provider, or notification channel when relevant.</div>
+                    <span asp-validation-for="Input.Message" class="text-danger"></span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-4" type="submit"><i class="bi bi-send me-1"></i> Submit new ticket</button>
+        </form>
+        <p class="small muted mt-4 mb-0">
+            Note: please do not open duplicate tickets for the same issue. Add follow-up details by replying to the confirmation email or opening a new ticket only when the issue is different.
+        </p>
+    </section>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Recent tickets</div>
+        @if (!Model.Tickets.Any())
+        {
+            <div class="empty-state compact">
+                <i class="bi bi-chat-left-text"></i>
+                <span>No support tickets yet.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <tr>
+                            <td class="text-muted">@ticket.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@ticket.Subject</td>
+                            <td><span class="badge text-bg-secondary">@ticket.Status</span></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

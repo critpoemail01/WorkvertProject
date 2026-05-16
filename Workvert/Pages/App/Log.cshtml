@@ -1,0 +1,185 @@
+@page
+@model Workvert.Pages.App.LogModel
+@{
+    ViewData["Title"] = "History";
+}
+
+<div class="log-view">
+    <section class="app-page-hero">
+        <div>
+            <span class="tag mb-3">Alert history</span>
+            <h1 class="hero-title fw-bold mb-2">History</h1>
+            <p class="lead muted mb-0">Review sent emails, skipped windows, and channel failures.</p>
+        </div>
+        <form method="get" class="log-alert-picker app-page-hero-actions">
+            <select class="form-select" name="alertId" onchange="this.form.submit()">
+                <option value="">All alerts</option>
+                @foreach (var option in Model.AlertOptions)
+                {
+                    <option value="@option.Id" selected="@(Model.AlertId == option.Id)">@option.Label</option>
+                }
+            </select>
+            @if (Model.SelectedTimeframe != "all")
+            {
+                <input type="hidden" name="timeframe" value="@Model.SelectedTimeframe" />
+            }
+        </form>
+    </section>
+
+    <div class="log-layout">
+        <section class="log-main-panel">
+            <div class="log-context-bar">
+                <span>@Model.SelectedAlertName</span>
+                @if (Model.SelectedTimeframe != "all")
+                {
+                    <strong>@Model.SelectedTimeframe</strong>
+                }
+            </div>
+
+            <div class="log-table-wrap">
+                @if (!Model.Rows.Any())
+                {
+                    <div class="log-empty-state">
+                        <div class="log-empty-icon">
+                            <i class="bi bi-journal-check"></i>
+                        </div>
+                        <div class="log-empty-copy">
+                            <span class="tag">Waiting for activity</span>
+                            <h2>No log entries yet</h2>
+                            <p>Email attempts, webhooks, and skipped windows appear here after there is activity.</p>
+                        </div>
+                        <div class="log-empty-highlights" aria-label="Log entry types">
+                            <span><i class="bi bi-check2-circle"></i> Sent</span>
+                            <span><i class="bi bi-slash-circle"></i> Skipped</span>
+                            <span><i class="bi bi-exclamation-triangle"></i> Failed</span>
+                        </div>
+                        <div class="log-empty-actions">
+                            <a class="btn btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+                            <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i>Channels</a>
+                            @if (Model.AlertId is not null || Model.SelectedTimeframe != "all")
+                            {
+                                <a class="btn btn-outline-secondary" asp-page="/App/Log"><i class="bi bi-arrow-counterclockwise me-1"></i> Clear filters</a>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <table class="table log-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Rule</th>
+                                <th>Product</th>
+                                <th>Channel</th>
+                                <th>Status</th>
+                                <th class="text-end">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="log-rule">
+                                        <i class="bi @(row.Status == "Sent" ? "bi-arrow-up-short text-success" : row.Status == "Failed" ? "bi-exclamation-triangle text-danger" : "bi-dash-circle text-muted")"></i>
+                                        <div>
+                                            <strong>@Workvert.Pages.App.LogModel.FormatRule(row.RuleType)</strong>
+                                            @if (!string.IsNullOrWhiteSpace(row.Detail))
+                                            {
+                                                <small>@row.Detail</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>@Workvert.Pages.App.LogModel.SourceTypeLabel(row.MarketType)</span>
+                                    <small>@Workvert.Pages.App.LogModel.FormatSymbol(row.Symbol) &middot; @Workvert.Pages.App.LogModel.CadenceLabel(row.Timeframe)</small>
+                                </td>
+                                <td>@row.Channel</td>
+                                <td>
+                                    <span class="status-pill status-@row.Status.ToLowerInvariant()">@row.Status</span>
+                                </td>
+                                <td class="text-end muted">@row.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </section>
+
+        <aside class="log-side-panel">
+            <div class="timeframe-filter-card">
+                <div class="timeframe-filter-head">
+                    <div>
+                        <span>Timeframe</span>
+                        <small>Filter by frequency</small>
+                    </div>
+                    @if (Model.SelectedTimeframe != "all")
+                    {
+                        <a href="@Model.AllTimeframesUrl()">Reset</a>
+                    }
+                </div>
+                <div class="timeframe-tabs" aria-label="Timeframe filter">
+                    <a class="@(Model.SelectedTimeframe == "all" ? "active" : "")" href="@Model.AllTimeframesUrl()" aria-current="@(Model.SelectedTimeframe == "all" ? "page" : null)">
+                        <span class="timeframe-label">All</span>
+                        <small>Every</small>
+                    </a>
+                    @foreach (var timeframe in Model.Timeframes)
+                    {
+                        <a class="@(Model.SelectedTimeframe == timeframe ? "active" : "")" href="@Model.TimeframeUrl(timeframe)" aria-current="@(Model.SelectedTimeframe == timeframe ? "page" : null)">
+                            <span class="timeframe-label">@TimeframeLabel(timeframe)</span>
+                            <small>@timeframe</small>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div class="rule-filter-list">
+                @if (!Model.RuleFilters.Any())
+                {
+                    <div class="rule-filter-row disabled">
+                        <span class="rule-dot"></span>
+                        <span>No alerts</span>
+                        <i class="bi bi-lock"></i>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var rule in Model.RuleFilters)
+                    {
+                        <div class="rule-filter-row @(rule.Enabled ? "enabled" : "disabled")">
+                            <span class="rule-dot @rule.Tone"></span>
+                            <span>@rule.Name</span>
+                            <small>@rule.Count</small>
+                        </div>
+                    }
+                }
+            </div>
+
+            @if (Model.IsUnlimitedPlan)
+            {
+                <div class="log-upgrade-card plan-included">
+                    <span><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
+                    <a asp-page="/App/Billing">Manage plan</a>
+                    <p>@Model.PlanCapacityLabel. Alerts, reports, and history are included in this account.</p>
+                </div>
+            }
+            else
+            {
+                <div class="log-upgrade-card">
+                    <span>Premium only</span>
+                    <a asp-page="/App/Billing">Upgrade</a>
+                    <p>@Model.PlanCapacityLabel. Unlimited keeps every product and category active.</p>
+                </div>
+            }
+        </aside>
+    </div>
+</div>
+
+@functions {
+    private static string TimeframeLabel(string timeframe)
+    {
+        return Workvert.Pages.App.LogModel.CadenceLabel(timeframe);
+    }
+}

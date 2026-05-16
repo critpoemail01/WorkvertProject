@@ -1,0 +1,197 @@
+@page
+@model Workvert.Pages.PricingModel
+@{
+    ViewData["Title"] = "Pricing";
+}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="promo-strip mb-4">
+            <div>
+                <span class="promo-label">Launch offer</span>
+                <span class="promo-copy">Unlimited price alerts for EUR 49.99/month or EUR 299/year. Annual is the best option for continuous deal monitoring.</span>
+            </div>
+            @if (User?.Identity?.IsAuthenticated == true)
+            {
+                <a class="promo-link" asp-page="/App/Billing">Open billing <i class="bi bi-arrow-right-short"></i></a>
+            }
+            else
+            {
+                <button type="button" class="promo-link promo-button" data-auth-open="register">Create account <i class="bi bi-arrow-right-short"></i></button>
+            }
+        </div>
+
+        <div class="page-hero pricing-hero">
+            <div class="page-hero-grid">
+                <div>
+                    <div class="hero-kicker mb-3">
+                        <i class="bi bi-credit-card-2-front-fill"></i>
+                        <span>Simple pricing for recurring deal monitoring</span>
+                    </div>
+                    <h1 class="hero-title display-5 fw-bold mb-3">Start free and scale when price monitoring becomes continuous.</h1>
+                    <p class="lead muted mb-4">1 paid credit = 1 active product alert for 30 days. Buy packs from EUR 24.99 or choose monthly/annual unlimited.</p>
+                    <div class="hero-actions">
+                        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start with 5 free credits</button>
+                        <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
+                    </div>
+                </div>
+
+                <div class="proof-panel">
+                    <div class="proof-row">
+                        <i class="bi bi-gift"></i>
+                        <div>
+                            <strong>Free account first</strong>
+                            <span>Use 5 credits to validate the alert workflow before buying capacity.</span>
+                        </div>
+                    </div>
+                    <div class="proof-row">
+                        <i class="bi bi-wallet2"></i>
+                        <div>
+                            <strong>Credits for occasional monitoring</strong>
+                            <span>Packs of 25, 50, and 100 credits cover active product alerts for 30 days.</span>
+                        </div>
+                    </div>
+                    <div class="proof-row">
+                        <i class="bi bi-stars"></i>
+                        <div>
+                            <strong>Annual is best value</strong>
+                            <span>EUR 299/year saves more than 50% compared with monthly billing.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4 pricing-grid">
+            <div class="col-lg-3">
+                <div class="surface plan">
+                    <div class="plan-title">Free</div>
+                    <div class="plan-price mt-2">EUR 0</div>
+                    <div class="muted mt-2">Validate the workflow before paying.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>5 credits for 5 active product alerts</li>
+                        <li>Price targets, margin rules, and daily reports</li>
+                        <li>Dashboard and alert history</li>
+                    </ul>
+
+                    <div class="plan-footer">
+                        <button type="button" class="btn btn-outline-secondary w-100" data-auth-open="register">Create free account</button>
+                        <div class="plan-footer-note" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="surface plan">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="plan-title">Credit packs</div>
+                        <span class="plan-badge"><i class="bi bi-wallet2"></i> Flexible</span>
+                    </div>
+
+                    <div class="plan-price mt-2">from EUR 24.99</div>
+                    <div class="muted mt-2">Add 30-day capacity only when you need it.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>25 credits for EUR 24.99</li>
+                        <li>50 credits for EUR 34.99</li>
+                        <li>100 credits for EUR 49.99</li>
+                        <li>Credits expire 30 days after payment</li>
+                        <li>Card payment</li>
+                    </ul>
+
+                    <div class="plan-footer">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Buy credits</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Buy credits</button>
+                        }
+                        <div class="plan-footer-note small muted text-center">Pack capacity stays active for 30 days.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="surface plan plan-highlight">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="plan-title">Monthly unlimited</div>
+                        <span class="plan-badge"><i class="bi bi-arrow-repeat"></i> Flexible</span>
+                    </div>
+
+                    <div class="plan-price mt-2">EUR 49.99<span class="fs-6 muted">/month</span></div>
+                    <div class="muted mt-2">For teams that want to cover all products, categories, and channels month to month.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>Unlimited active product alerts</li>
+                        <li>Email, webhooks, and daily reports</li>
+                        <li>Card payment</li>
+                    </ul>
+
+                    <div class="plan-footer">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscribe monthly</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscribe monthly</button>
+                        }
+                        <div class="plan-footer-note small muted text-center">Monthly access activates after payment confirmation.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="surface plan plan-highlight">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="plan-title">Annual unlimited</div>
+                        <span class="plan-badge plan-badge-warm"><i class="bi bi-stars"></i> Best value</span>
+                    </div>
+
+                    <div class="plan-price mt-2">EUR 299<span class="fs-6 muted">/year</span></div>
+                    <div class="muted mt-2">Pay once per year and save more than 50% versus monthly billing.</div>
+
+                    <ul class="mt-3 muted">
+                        <li>Unlimited active product alerts for 1 year</li>
+                        <li>All price alert and opportunity report types</li>
+                        <li>Best option for continuous deal monitoring</li>
+                    </ul>
+
+                    <div class="plan-footer">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Billing">Subscribe annually</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register">Subscribe annually</button>
+                        }
+                        <div class="plan-footer-note small muted text-center">Annual access activates after payment confirmation.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="conversion-band mt-4">
+            <div>
+                <span class="tag mb-2">Still deciding?</span>
+                <h2 class="h3 fw-bold mb-2">Start free. Upgrade when monitoring becomes routine.</h2>
+                <p class="mb-0 muted">Most users start with 5 free credits, then choose 30-day packs or annual unlimited.</p>
+            </div>
+            <div class="conversion-actions">
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">How it works</a>
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+                    <a class="btn btn-primary btn-lg" asp-page="/App/Billing">Go to billing</a>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+                }
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,423 @@
+@page
+@using Workvert.Models
+@model Workvert.Pages.App.Alerts.AlertsIndexModel
+@{
+    ViewData["Title"] = "Price alerts";
+    var activeAlerts = Model.Alerts.Count(a => a.IsEnabled);
+    var dailyReports = Model.Alerts.Count(a => a.RuleType == AlertRuleType.DailyOpportunityReport);
+    var uniqueProducts = Model.AlertGroups.Count;
+}
+
+<div class="alerts-board product-watch-board">
+    <section class="app-page-hero product-hero">
+        <div>
+            <span class="tag mb-3">Deal intelligence</span>
+            <h1 class="hero-title fw-bold mb-2">Price alerts and opportunities</h1>
+            <p class="lead muted mb-0">Monitor products by URL, filter by region, and receive email when a trusted store drops below your target.</p>
+        </div>
+        <div class="app-page-hero-actions">
+            <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create">
+                <i class="bi bi-plus-lg me-1"></i>New alert
+            </a>
+            <button class="btn btn-outline-secondary btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                <i class="bi bi-clock me-1"></i>Email window
+            </button>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    <div class="product-watch-stats mt-4">
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-bag-check"></i></span>
+            <div>
+                <div class="app-stat-label">Watched products</div>
+                <div class="app-stat-value">@uniqueProducts</div>
+            </div>
+        </article>
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-bell-fill"></i></span>
+            <div>
+                <div class="app-stat-label">Active alerts</div>
+                <div class="app-stat-value">@activeAlerts</div>
+            </div>
+        </article>
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-newspaper"></i></span>
+            <div>
+                <div class="app-stat-label">Daily reports</div>
+                <div class="app-stat-value">@dailyReports</div>
+            </div>
+        </article>
+        <article class="surface app-stat-card">
+            <span class="app-stat-icon"><i class="bi bi-shield-check"></i></span>
+            <div>
+                <div class="app-stat-label">Plan</div>
+                <div class="app-stat-value">@Model.PlanPromoTitle</div>
+            </div>
+        </article>
+    </div>
+
+    @if (!Model.AlertGroups.Any())
+    {
+        <section class="surface product-empty-state mt-4">
+            <div class="product-empty-copy">
+                <span class="tag">Start with a URL</span>
+                <h2>Add a product from Amazon.es, Worten, Fnac, or another store.</h2>
+                <p>Set target price, margin, country/city, and category. Workvert creates email alerts and a daily resale opportunity report.</p>
+                <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>Create first alert</a>
+            </div>
+            <div class="product-empty-panel" aria-hidden="true">
+                <div><strong>PlayStation 5 Slim</strong><span>Amazon.es</span><em>-12%</em></div>
+                <div><strong>iPhone 14 128GB</strong><span>Worten</span><em>EUR 72 margin</em></div>
+                <div><strong>AirPods Pro</strong><span>Fnac / OLX</span><em>high resale</em></div>
+            </div>
+        </section>
+    }
+    else
+    {
+        <div class="product-watch-list mt-4">
+            @foreach (var group in Model.AlertGroups)
+            {
+                var firstAlert = group.Alerts.OrderByDescending(a => a.IsEnabled).First();
+                var metadata = ProductWatchMetadata.Parse(firstAlert.AudienceList);
+                var historyId = GroupHistoryId(group.MarketType, group.Symbol);
+                var enabled = group.Alerts.Any(a => a.IsEnabled);
+
+                <section class="surface product-watch-card">
+                    <div class="product-watch-card-head">
+                        <div class="product-watch-title">
+                            <span class="product-watch-icon"><i class="bi bi-box-seam"></i></span>
+                            <div>
+                                <span class="tag">@metadata.Category</span>
+                                <h2>@ProductTitle(group.Symbol)</h2>
+                                <p>@HostLabel(group.Symbol) · @metadata.LocationLabel()</p>
+                            </div>
+                        </div>
+                        <div class="product-watch-actions">
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@firstAlert.Id"><i class="bi bi-pencil-square me-1"></i>Edit</a>
+                            <form class="alerts-inline-form" method="post" asp-page-handler="ToggleGroup">
+                                <input type="hidden" name="marketType" value="@group.MarketType" />
+                                <input type="hidden" name="symbol" value="@group.Symbol" />
+                                <button class="btn btn-sm @(enabled ? "btn-outline-secondary" : "btn-primary")" type="submit">@(enabled ? "Pause" : "Activate")</button>
+                            </form>
+                            <button class="btn btn-sm btn-outline-danger" type="button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteProductWatchModal"
+                                    data-delete-handler="DeleteGroup"
+                                    data-delete-kind="product"
+                                    data-delete-title="@ProductTitle(group.Symbol)"
+                                    data-delete-market="@group.MarketType"
+                                    data-delete-symbol="@group.Symbol">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="product-watch-meta">
+                        <span><i class="bi bi-shop"></i>@metadata.TrustedStores</span>
+                        <span><i class="bi bi-arrow-repeat"></i>@metadata.SecondHandSites</span>
+                        <span><i class="bi bi-envelope"></i>@(string.IsNullOrWhiteSpace(metadata.ReportEmail) ? "Account email" : metadata.ReportEmail)</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>Rule</th>
+                                    <th>Target</th>
+                                    <th>Margin</th>
+                                    <th>Frequency</th>
+                                    <th>Channel</th>
+                                    <th>Status</th>
+                                    <th>Last alert</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var alert in group.Alerts)
+                            {
+                                <tr>
+                                    <td><i class="bi @RuleIcon(alert.RuleType) me-2 @RuleClass(alert.RuleType)"></i>@alert.RuleType.DisplayName()</td>
+                                    <td>@ThresholdLabel(alert)</td>
+                                    <td>@MarginLabel(alert)</td>
+                                    <td>@CadenceLabel(alert.Timeframe)</td>
+                                    <td>@alert.Channel</td>
+                                    <td><span class="badge @(alert.IsEnabled ? "text-bg-success" : "text-bg-secondary")">@(alert.IsEnabled ? "Active" : "Paused")</span></td>
+                                    <td class="text-muted">@(alert.LastTriggeredAtUtc is null ? "Never" : alert.LastTriggeredAtUtc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
+                                    <td class="text-end">
+                                        <div class="alerts-row-actions">
+                                            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Edit" asp-route-id="@alert.Id">Edit</a>
+                                            <form class="alerts-inline-form" method="post" asp-page-handler="ToggleAlert">
+                                                <input type="hidden" name="id" value="@alert.Id" />
+                                                <button class="btn btn-sm btn-outline-secondary" type="submit">@(alert.IsEnabled ? "Pause" : "Activate")</button>
+                                            </form>
+                                            <button class="btn btn-sm btn-outline-danger" type="button"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteProductWatchModal"
+                                                    data-delete-handler="DeleteAlert"
+                                                    data-delete-kind="alert"
+                                                    data-delete-title="@alert.RuleType.DisplayName()"
+                                                    data-delete-id="@alert.Id">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button class="product-history-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#@historyId" aria-expanded="false" aria-controls="@historyId">
+                        <i class="bi bi-clock-history"></i> Recent history
+                    </button>
+                    <div class="collapse alerts-history-collapse" id="@historyId">
+                        @if (group.TriggerHistory.Any())
+                        {
+                            <div class="alerts-trigger-list mt-3">
+                                @foreach (var trigger in group.TriggerHistory)
+                                {
+                                    <div class="alerts-trigger-item">
+                                        <span class="alerts-trigger-icon @RuleClass(trigger.RuleType)">
+                                            <i class="bi @RuleIcon(trigger.RuleType)"></i>
+                                        </span>
+                                        <div class="alerts-trigger-copy">
+                                            <strong>@trigger.RuleType.DisplayName()</strong>
+                                            <span>@trigger.Message</span>
+                                            <small>@CadenceLabel(trigger.Timeframe) · @trigger.Threshold</small>
+                                        </div>
+                                        <time datetime="@trigger.TriggeredAtUtc.ToString("O")">@trigger.TriggeredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</time>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state compact mt-3">
+                                <i class="bi bi-bell"></i>
+                                <span>No alerts for this product yet.</span>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="deleteProductWatchModal" tabindex="-1" aria-labelledby="deleteProductWatchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal campaign-delete-modal">
+            <div class="modal-header border-0">
+                <div>
+                    <span class="tag">Delete monitoring</span>
+                    <h2 class="modal-title h3 mt-2 mb-0" id="deleteProductWatchModalLabel">Confirm deletion</h2>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="campaign-delete-warning">
+                    <span><i class="bi bi-exclamation-triangle"></i></span>
+                    <div>
+                        <strong>This action cannot be undone.</strong>
+                        <p data-delete-product-message>You will delete this alert and its associated history.</p>
+                    </div>
+                </div>
+                <dl class="campaign-delete-summary">
+                    <div><dt>Type</dt><dd data-delete-product-kind>alert</dd></div>
+                    <div><dt>Name</dt><dd data-delete-product-title>Product</dd></div>
+                </dl>
+            </div>
+            <div class="modal-footer border-0 campaign-delete-actions">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" id="deleteProductWatchForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" data-delete-product-id />
+                    <input type="hidden" name="marketType" data-delete-product-market />
+                    <input type="hidden" name="symbol" data-delete-product-symbol />
+                    <button class="btn btn-danger" type="submit"><i class="bi bi-trash3 me-1"></i>Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content account-modal alerts-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h3">Email delivery window</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="Schedule">
+                <div class="modal-body">
+                    <p class="fw-semibold mb-3">Send alerts between...</p>
+                    <div class="row g-3">
+                        <div class="col-5">
+                            <input class="form-control" type="time" name="startTime" value="@(Model.ScheduleSettings?.AlertWindowStart ?? "09:00")" />
+                        </div>
+                        <div class="col-2 d-flex align-items-center justify-content-center muted">and</div>
+                        <div class="col-5">
+                            <input class="form-control" type="time" name="endTime" value="@(Model.ScheduleSettings?.AlertWindowEnd ?? "18:00")" />
+                        </div>
+                    </div>
+                    <label class="modal-field-label mt-3" for="scheduleTimeZone">Time zone</label>
+                    <select class="form-select" id="scheduleTimeZone" name="timeZone" data-combo>
+                        @foreach (var zone in Model.ScheduleTimeZones)
+                        {
+                            <option value="@zone.Id" selected="@(zone.Id == Model.SelectedScheduleTimeZone)">@zone.Label</option>
+                        }
+                    </select>
+
+                    <p class="fw-semibold mt-4 mb-3">On these days...</p>
+                    <div class="schedule-days">
+                        @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
+                        {
+                            <label>
+                                <input class="form-check-input" type="checkbox" name="days" value="@day" checked="@DayChecked(day)" />
+                                <span>@day</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer border-0 campaign-delete-actions">
+                    @if (Model.ScheduleSettings?.AlertScheduleEnabled == true)
+                    {
+                        <button type="submit" formaction="?handler=RemoveSchedule" class="btn btn-outline-secondary">Use 24/7</button>
+                    }
+                    <button type="submit" class="btn btn-primary">Save window</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static string ProductTitle(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return url;
+
+        var segment = uri.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .FirstOrDefault(x => x.Length > 2 && x.Any(char.IsLetter));
+
+        if (string.IsNullOrWhiteSpace(segment))
+            return uri.Host;
+
+        return Uri.UnescapeDataString(segment).Replace("-", " ").Replace("_", " ");
+    }
+
+    private static string HostLabel(string url)
+    {
+        return Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.Host.Replace("www.", "", StringComparison.OrdinalIgnoreCase) : url;
+    }
+
+    private static string GroupHistoryId(MarketType market, string symbol)
+    {
+        var safeSymbol = new string(symbol.Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '-').ToArray());
+        return $"product-history-{market.ToString().ToLowerInvariant()}-{safeSymbol}";
+    }
+
+    private static string RuleIcon(AlertRuleType rule)
+    {
+        return rule switch
+        {
+            AlertRuleType.PriceBelow => "bi-tag-fill",
+            AlertRuleType.PriceBelowMargin => "bi-graph-down-arrow",
+            AlertRuleType.PriceZone => "bi-bullseye",
+            AlertRuleType.DailyOpportunityReport => "bi-newspaper",
+            _ => "bi-bell-fill"
+        };
+    }
+
+    private static string RuleClass(AlertRuleType rule)
+    {
+        return rule switch
+        {
+            AlertRuleType.PriceBelow or AlertRuleType.PriceBelowMargin => "text-success",
+            AlertRuleType.DailyOpportunityReport => "text-info",
+            AlertRuleType.PriceZone => "text-warning",
+            _ => "text-primary"
+        };
+    }
+
+    private static string ThresholdLabel(Alert alert)
+    {
+        return alert.RuleType == AlertRuleType.DailyOpportunityReport
+            ? $"score {alert.Threshold:0.##}+"
+            : $"EUR {alert.Threshold:0.##}";
+    }
+
+    private static string MarginLabel(Alert alert)
+    {
+        return alert.RuleType == AlertRuleType.PriceBelowMargin
+            ? $"{alert.ZonePercent:0.##}%"
+            : "-";
+    }
+
+    private static string CadenceLabel(string timeframe)
+    {
+        return timeframe switch
+        {
+            "1h" => "Hourly",
+            "6h" => "6 hours",
+            "12h" => "12 hours",
+            "1d" => "Daily",
+            "3d" => "3 days",
+            "1wk" => "Weekly",
+            "2wk" => "Every 2 weeks",
+            "1mo" => "Monthly",
+            _ => timeframe
+        };
+    }
+
+    private bool DayChecked(string day)
+    {
+        var days = Model.ScheduleSettings?.AlertWindowDays;
+        return string.IsNullOrWhiteSpace(days) || days.Split(',').Contains(day, StringComparer.OrdinalIgnoreCase);
+    }
+}
+
+@section Scripts {
+    <script src="~/js/workvert-combos.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const modal = document.getElementById('deleteProductWatchModal');
+            const form = document.getElementById('deleteProductWatchForm');
+            if (!modal || !form) return;
+
+            const fields = {
+                id: form.querySelector('[data-delete-product-id]'),
+                market: form.querySelector('[data-delete-product-market]'),
+                symbol: form.querySelector('[data-delete-product-symbol]'),
+                title: modal.querySelector('[data-delete-product-title]'),
+                kind: modal.querySelector('[data-delete-product-kind]'),
+                message: modal.querySelector('[data-delete-product-message]')
+            };
+
+            modal.addEventListener('show.bs.modal', event => {
+                const trigger = event.relatedTarget;
+                if (!trigger) return;
+
+                const handler = trigger.getAttribute('data-delete-handler') || 'DeleteAlert';
+                const kind = trigger.getAttribute('data-delete-kind') || 'alert';
+                const title = trigger.getAttribute('data-delete-title') || 'Product';
+
+                form.action = `${window.location.pathname}?handler=${encodeURIComponent(handler)}`;
+                fields.id.value = trigger.getAttribute('data-delete-id') || '';
+                fields.market.value = trigger.getAttribute('data-delete-market') || '';
+                fields.symbol.value = trigger.getAttribute('data-delete-symbol') || '';
+                fields.title.textContent = title;
+                fields.kind.textContent = kind;
+                fields.message.textContent = handler === 'DeleteGroup'
+                    ? 'You will delete all alerts for this product and their associated history.'
+                    : 'You will delete this alert and its associated history.';
+            });
+        })();
+    </script>
+}

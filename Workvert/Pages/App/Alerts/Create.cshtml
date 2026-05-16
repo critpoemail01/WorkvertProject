@@ -1,0 +1,283 @@
+@page
+@model Workvert.Pages.App.Alerts.CreateAlertModel
+@{
+    ViewData["Title"] = "New price alert";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+}
+
+<div class="alert-form-page product-watch-page">
+    <section class="app-page-hero product-hero">
+        <div>
+            <span class="tag mb-3">Price intelligence</span>
+            <h1 class="hero-title fw-bold mb-2">New price alert</h1>
+            <p class="lead muted mb-0">Paste the product URL, choose the region, and receive an email when a trusted store beats your target price.</p>
+        </div>
+        <div class="app-page-hero-actions">
+            <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        </div>
+    </section>
+
+    <div class="alert-form-grid mt-4">
+        <form method="post" class="surface app-panel alert-form-panel product-watch-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="product-form-section">
+                <span class="product-form-step">1</span>
+                <div>
+                    <h2>Product and rule</h2>
+                    <p>Use an Amazon, Fnac, Worten, or other store URL as the starting point.</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Input.Symbol" class="form-label"></label>
+                    <div class="symbol-input-shell">
+                        <i class="bi bi-link-45deg"></i>
+                        <input asp-for="Input.Symbol" class="form-control" placeholder="https://www.amazon.es/dp/..." autocomplete="off" />
+                    </div>
+                    <span asp-validation-for="Input.Symbol" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.MarketType" class="form-label"></label>
+                    <select asp-for="Input.MarketType" class="form-select" asp-items="Model.MarketTypeOptions"></select>
+                    <span asp-validation-for="Input.MarketType" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.RuleType" class="form-label"></label>
+                    <select asp-for="Input.RuleType" class="form-select" asp-items="Model.RuleTypeOptions"></select>
+                    <span asp-validation-for="Input.RuleType" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.Threshold" class="form-label"></label>
+                    <input asp-for="Input.Threshold" class="form-control" inputmode="decimal" />
+                    <span asp-validation-for="Input.Threshold" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.ZonePercent" class="form-label"></label>
+                    <input asp-for="Input.ZonePercent" class="form-control" inputmode="decimal" />
+                    <span asp-validation-for="Input.ZonePercent" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.Timeframe" class="form-label"></label>
+                    <select asp-for="Input.Timeframe" class="form-select" asp-items="Model.TimeframeOptions"></select>
+                    <span asp-validation-for="Input.Timeframe" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="product-form-section mt-4">
+                <span class="product-form-step">2</span>
+                <div>
+                    <h2>Region and markets</h2>
+                    <p>Define where to search and where to compare resale value.</p>
+                </div>
+            </div>
+
+            <div class="product-market-selector" data-product-market-selector>
+                <div class="market-scope-grid" role="radiogroup" aria-label="Search area">
+                    <label class="market-scope-option">
+                        <input asp-for="Input.LocationScope" type="radio" value="World" data-market-scope />
+                        <span><i class="bi bi-globe2"></i><strong>World</strong><small>Any trusted store or marketplace</small></span>
+                    </label>
+                    <label class="market-scope-option">
+                        <input asp-for="Input.LocationScope" type="radio" value="Country" data-market-scope />
+                        <span><i class="bi bi-flag"></i><strong>Country</strong><small>Filter by local stores and resale sites</small></span>
+                    </label>
+                    <label class="market-scope-option">
+                        <input asp-for="Input.LocationScope" type="radio" value="City" data-market-scope />
+                        <span><i class="bi bi-building"></i><strong>City</strong><small>Use a city as the buying context</small></span>
+                    </label>
+                    <label class="market-scope-option">
+                        <input asp-for="Input.LocationScope" type="radio" value="Custom" data-market-scope />
+                        <span><i class="bi bi-crosshair"></i><strong>Custom</strong><small>Pick a point on the map and radius</small></span>
+                    </label>
+                </div>
+                <span asp-validation-for="Input.LocationScope" class="text-danger"></span>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4" data-market-panel="country">
+                        <label asp-for="Input.Country" class="form-label"></label>
+                        <div class="market-autocomplete-field">
+                            <input asp-for="Input.Country" class="form-control" placeholder="Portugal, Spain..." autocomplete="off" data-market-country />
+                            <div class="market-autocomplete-menu" hidden data-market-menu="country"></div>
+                        </div>
+                        <span asp-validation-for="Input.Country" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4" data-market-panel="city">
+                        <label asp-for="Input.City" class="form-label"></label>
+                        <div class="market-autocomplete-field">
+                            <input asp-for="Input.City" class="form-control" placeholder="Lisbon, Madrid..." autocomplete="off" data-market-city />
+                            <div class="market-autocomplete-menu" hidden data-market-menu="city"></div>
+                        </div>
+                        <span asp-validation-for="Input.City" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.Category" class="form-label"></label>
+                        <div class="market-autocomplete-field">
+                            <input asp-for="Input.Category" class="form-control" placeholder="Consoles, phones, fashion..." autocomplete="off" data-market-category />
+                            <div class="market-autocomplete-menu" hidden data-market-menu="category"></div>
+                        </div>
+                        <span asp-validation-for="Input.Category" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="market-map-panel mt-3" hidden data-market-map-panel>
+                    <input asp-for="Input.Latitude" type="hidden" data-market-lat />
+                    <input asp-for="Input.Longitude" type="hidden" data-market-lng />
+                    <div class="market-radius-row">
+                        <label asp-for="Input.RadiusKm" class="form-label mb-0"></label>
+                        <input asp-for="Input.RadiusKm" class="form-control" inputmode="numeric" data-market-radius />
+                        <input type="range" min="1" max="250" value="@Model.Input.RadiusKm" data-market-radius-range aria-label="Radius in kilometers" />
+                        <span data-market-radius-label>@Model.Input.RadiusKm km</span>
+                    </div>
+                    <div class="market-map-wrap mt-3">
+                        <div class="market-map" data-market-map></div>
+                        <div class="market-map-meta">
+                            <span data-market-area-summary>Lisbon, Portugal within 25 km</span>
+                            <span data-market-coordinates>38.72230, -9.13930</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="market-suggestion-summary mt-3">
+                    <i class="bi bi-stars"></i>
+                    <span data-market-suggestion-summary>Suggestions are based on Portugal, Lisbon and Electronics.</span>
+                </div>
+
+                <div class="market-pickers-grid mt-3">
+                    <section class="market-picker" data-market-picker="trusted">
+                        <div class="market-picker-head">
+                            <div>
+                                <label asp-for="Input.TrustedStores" class="form-label"></label>
+                                <p>Multi-select the stores Workvert can trust for this region.</p>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-market-apply="trusted">Use suggestions</button>
+                        </div>
+                        <div class="market-chip-row" data-market-suggestions="trusted"></div>
+                        <div class="market-selected-list" data-market-selected="trusted"></div>
+                        <div class="market-add-row">
+                            <div class="market-autocomplete-field">
+                                <input class="form-control" type="text" placeholder="Add a trusted store..." autocomplete="off" data-market-autocomplete="trusted" />
+                                <div class="market-autocomplete-menu" hidden data-market-menu="trusted"></div>
+                            </div>
+                            <button class="btn btn-outline-secondary" type="button" data-market-add="trusted"><i class="bi bi-plus-lg"></i></button>
+                        </div>
+                        <textarea asp-for="Input.TrustedStores" hidden data-market-value="trusted"></textarea>
+                        <span asp-validation-for="Input.TrustedStores" class="text-danger"></span>
+                    </section>
+
+                    <section class="market-picker" data-market-picker="resale">
+                        <div class="market-picker-head">
+                            <div>
+                                <label asp-for="Input.SecondHandSites" class="form-label"></label>
+                                <p>Choose the resale marketplaces used to compare margin.</p>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-market-apply="resale">Use suggestions</button>
+                        </div>
+                        <div class="market-chip-row" data-market-suggestions="resale"></div>
+                        <div class="market-selected-list" data-market-selected="resale"></div>
+                        <div class="market-add-row">
+                            <div class="market-autocomplete-field">
+                                <input class="form-control" type="text" placeholder="Add a resale site..." autocomplete="off" data-market-autocomplete="resale" />
+                                <div class="market-autocomplete-menu" hidden data-market-menu="resale"></div>
+                            </div>
+                            <button class="btn btn-outline-secondary" type="button" data-market-add="resale"><i class="bi bi-plus-lg"></i></button>
+                        </div>
+                        <textarea asp-for="Input.SecondHandSites" hidden data-market-value="resale"></textarea>
+                        <span asp-validation-for="Input.SecondHandSites" class="text-danger"></span>
+                    </section>
+                </div>
+            </div>
+
+            <div class="product-form-section mt-4">
+                <span class="product-form-step">3</span>
+                <div>
+                    <h2>Delivery</h2>
+                    <p>Email for immediate alerts and daily category opportunity reports.</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Input.Channel" class="form-label"></label>
+                    <select asp-for="Input.Channel" class="form-select">
+                        <option>Email</option>
+                        <option>Webhook</option>
+                        <option>Slack</option>
+                        <option>Discord</option>
+                        <option>Teams</option>
+                        <option>Telegram</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.ReportEmail" class="form-label"></label>
+                    <input asp-for="Input.ReportEmail" class="form-control" placeholder="you@example.com" />
+                    <span asp-validation-for="Input.ReportEmail" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CooldownMinutes" class="form-label"></label>
+                    <input asp-for="Input.CooldownMinutes" class="form-control" />
+                    <span asp-validation-for="Input.CooldownMinutes" class="text-danger"></span>
+                </div>
+            </div>
+
+            <label class="form-check alert-form-check mt-4">
+                <input class="form-check-input" asp-for="Input.IsEnabled" />
+                <span class="form-check-label">Enable monitoring immediately</span>
+            </label>
+
+            <div class="alert-form-actions mt-4">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-bell-fill me-1"></i>Create alert</button>
+                <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Cancel</a>
+            </div>
+        </form>
+
+        <aside class="surface app-panel alert-form-aside product-watch-aside">
+            <div class="plan-badge mb-3"><i class="bi bi-shield-check"></i> Buy with margin</div>
+            @if (Model.IsUnlimited)
+            {
+                <h2>Unlimited plan active</h2>
+                <p>You can watch products, categories, and markets with no active alert limit.</p>
+            }
+            else
+            {
+                <h2>@Model.RemainingSlots active alert slot@(Model.RemainingSlots == 1 ? "" : "s") available</h2>
+                <p>Your plan allows <strong>@Model.Capacity</strong> active alerts and already uses <strong>@Model.ActiveAlerts</strong>.</p>
+                <a class="btn btn-outline-secondary w-100" asp-page="/Pricing">View plans</a>
+            }
+
+            <div class="product-watch-preview">
+                <div class="watch-preview-row hot">
+                    <span><i class="bi bi-bag-check"></i></span>
+                    <div><strong>Amazon.es</strong><small>EUR 92.40 below target</small></div>
+                </div>
+                <div class="watch-preview-row">
+                    <span><i class="bi bi-shop"></i></span>
+                    <div><strong>Verified store</strong><small>new stock in the country/city</small></div>
+                </div>
+                <div class="watch-preview-row">
+                    <span><i class="bi bi-arrow-repeat"></i></span>
+                    <div><strong>OLX / Vinted</strong><small>higher resale benchmark</small></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/workvert-market-selector.js" asp-append-version="true"></script>
+}

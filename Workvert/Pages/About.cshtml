@@ -1,0 +1,81 @@
+@page
+@model Workvert.Pages.AboutModel
+@{
+    ViewData["Title"] = "About";
+}
+
+<section class="hero-section">
+  <div class="container">
+    <div class="page-hero">
+      <div class="page-hero-grid">
+        <div>
+          <div class="hero-kicker mb-3">
+            <i class="bi bi-radar"></i>
+            <span>About Workvert</span>
+          </div>
+          <h1 class="hero-title display-5 fw-bold mb-3">A practical radar for buying at the right price.</h1>
+          <p class="lead muted mb-4">
+            Workvert helps disciplined buyers and resellers track product URLs, compare trusted stores, and spot opportunities before the price gap disappears.
+          </p>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-page="/HowItWorks">View workflow</a>
+          </div>
+          <div class="micro-proof-row">
+            <span><i class="bi bi-check2"></i> Product-first monitoring</span>
+            <span><i class="bi bi-check2"></i> Trusted stores only</span>
+            <span><i class="bi bi-check2"></i> Resale margin context</span>
+          </div>
+        </div>
+
+        <div class="quote-card">
+          <p class="mb-3">
+            "Paste the product once. Workvert keeps watching price, region, resale benchmark, and margin for you."
+          </p>
+          <div class="d-flex align-items-center gap-2 muted">
+            <i class="bi bi-shield-check"></i>
+            <span>Useful alerts first. Noise later.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="mt-5">
+      <div class="section-header">
+        <span class="section-eyebrow"><i class="bi bi-compass"></i> Principles</span>
+        <h2 class="section-title">Clarity, timing, and measurable margin.</h2>
+        <p class="section-copy">Every part of the product is designed to reduce guesswork between a product you want and a price you can act on.</p>
+      </div>
+
+      <div class="value-grid">
+        <div class="value-card">
+          <div class="icon-pill"><i class="bi bi-bullseye"></i></div>
+          <h2>Signal over volume</h2>
+          <p class="mb-0">Alerts are based on price, margin, and opportunity score instead of noisy generic lists.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon-pill"><i class="bi bi-wallet2"></i></div>
+          <h2>Fair capacity</h2>
+          <p class="mb-0">Credits cover occasional product watches. Unlimited covers continuous category scouting.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon-pill"><i class="bi bi-globe2"></i></div>
+          <h2>Regional context</h2>
+          <p class="mb-0">Country, city, trusted stores, and resale sites stay attached to every watch.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="conversion-band mt-4">
+      <div>
+        <span class="tag mb-2">Try it first</span>
+        <h2 class="h3 fw-bold mb-2">Start with 5 free credits.</h2>
+        <p class="mb-0 muted">Create a real product watch, review the dashboard, and then choose credits or unlimited when you need more active alerts.</p>
+      </div>
+      <div class="conversion-actions">
+        <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Create account</button>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View pricing</a>
+      </div>
+    </div>
+  </div>
+</section>

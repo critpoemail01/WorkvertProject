@@ -1,0 +1,114 @@
+@page "/campaign/{slug}"
+@model Workvert.Pages.CampaignModel
+@{
+    ViewData["Title"] = Model.LandingPage.Headline;
+}
+
+<section class="campaign-public-hero">
+    <div class="campaign-public-copy">
+        <span class="tag mb-3">Shared deal watch</span>
+        <h1>@Model.LandingPage.Headline</h1>
+        <p>@Model.LandingPage.Subheadline</p>
+        <div class="campaign-public-dna">
+            <strong>Watch context</strong>
+            <span>@Model.Plan.BusinessDna</span>
+        </div>
+    </div>
+
+    <aside class="campaign-public-form">
+        @if (Model.Submitted)
+        {
+            <div class="campaign-thank-you">
+                <i class="bi bi-check-circle"></i>
+                <h2>@Model.LandingPage.ThankYouMessage</h2>
+            </div>
+        }
+        else
+        {
+            <h2>Get notified about this watch</h2>
+            <p>Leave your details to receive follow-up about this product, price target, or opportunity.</p>
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label class="form-label" asp-for="Input.Name"></label>
+                <input class="form-control" asp-for="Input.Name" placeholder="Your name" />
+                <span class="text-danger" asp-validation-for="Input.Name"></span>
+
+                <label class="form-label mt-3" asp-for="Input.Email"></label>
+                <input class="form-control" asp-for="Input.Email" placeholder="you@company.com" />
+                <span class="text-danger" asp-validation-for="Input.Email"></span>
+
+                <label class="form-label mt-3" asp-for="Input.Company"></label>
+                <input class="form-control" asp-for="Input.Company" placeholder="Company" />
+
+                <label class="form-label mt-3" asp-for="Input.Role"></label>
+                <input class="form-control" asp-for="Input.Role" placeholder="Role" />
+
+                <label class="form-label mt-3" asp-for="Input.Phone"></label>
+                <input class="form-control" asp-for="Input.Phone" placeholder="Optional" />
+
+                <label class="form-label mt-3" asp-for="Input.Message"></label>
+                <textarea class="form-control" asp-for="Input.Message" rows="4" placeholder="Which product, price, or region should we watch?"></textarea>
+
+                <label class="campaign-consent-check mt-3">
+                    <input asp-for="Input.MarketingConsentAccepted" />
+                    <span>@Model.ConsentText</span>
+                </label>
+                <span class="text-danger" asp-validation-for="Input.MarketingConsentAccepted"></span>
+
+                <button class="btn btn-primary w-100 mt-4" type="submit">Notify me</button>
+            </form>
+        }
+    </aside>
+</section>
+
+<section class="campaign-public-body">
+    @foreach (var paragraph in Model.LandingPage.Body.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        <p>@paragraph</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.AgencyName) || !string.IsNullOrWhiteSpace(Model.AgencyReportFooter))
+    {
+        <div class="campaign-agency-footer" style="@(string.IsNullOrWhiteSpace(Model.AgencyBrandColor) ? null : $"border-color:{Model.AgencyBrandColor}")">
+            @if (!string.IsNullOrWhiteSpace(Model.AgencyName))
+            {
+                <strong>@Model.AgencyName</strong>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.AgencyReportFooter))
+            {
+                <span>@Model.AgencyReportFooter</span>
+            }
+        </div>
+    }
+</section>
+
+@section Scripts {
+    @if (!string.IsNullOrWhiteSpace(Model.GoogleAnalyticsMeasurementId))
+    {
+        <script async src="https://www.googletagmanager.com/gtag/js?id=@Model.GoogleAnalyticsMeasurementId"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '@Model.GoogleAnalyticsMeasurementId');
+        </script>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.MetaPixelId))
+    {
+        <script>
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '@Model.MetaPixelId');
+            fbq('track', 'PageView');
+        </script>
+        <noscript>
+            <img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=@Model.MetaPixelId&ev=PageView&noscript=1" />
+        </noscript>
+    }
+    <partial name="_ValidationScriptsPartial" />
+}

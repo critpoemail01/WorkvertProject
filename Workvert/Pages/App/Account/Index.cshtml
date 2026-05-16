@@ -1,0 +1,100 @@
+@page
+@model Workvert.Pages.App.Account.IndexModel
+@{
+    ViewData["Title"] = "My account";
+}
+
+<div class="account-page">
+    <div class="account-heading">
+        <div>
+            <span class="tag mb-2">Account & settings</span>
+            <h1 class="fw-bold mb-0">My account</h1>
+            <p class="muted mb-0">Manage your login details and account profile.</p>
+        </div>
+        <a class="btn btn-primary" asp-page="/App/Billing">Manage subscription</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+    }
+
+    <section class="account-section mt-4">
+        <div class="account-section-title">Account details</div>
+        <div class="account-rows">
+            <div class="account-row">
+                <span>Email</span>
+                <strong>@Model.Email</strong>
+            </div>
+            <div class="account-row">
+                <span>Phone number</span>
+                <strong>@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Not set" : Model.PhoneNumber)</strong>
+            </div>
+            <div class="account-row">
+                <span>Registered since</span>
+                <strong>@Model.RegisteredSince.ToLocalTime().ToString("MMMM d, yyyy")</strong>
+            </div>
+            <div class="account-row">
+                <span>Password</span>
+                <strong>@(Model.HasPassword ? "Configured" : "External login only")</strong>
+            </div>
+        </div>
+    </section>
+
+    <div class="account-form-grid mt-4">
+        <section class="account-section">
+            <div class="account-section-title">Update profile</div>
+            <form method="post" asp-page-handler="Contact" class="account-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control" id="email" name="email" type="email" value="@Model.Email" required />
+
+                <label class="form-label mt-3" for="phoneNumber">Phone number</label>
+                <input class="form-control" id="phoneNumber" name="phoneNumber" value="@Model.PhoneNumber" placeholder="+351 900 000 000" />
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button class="btn btn-primary" type="submit">Save profile</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="account-section">
+            <div class="account-section-title">Security</div>
+            <form method="post" asp-page-handler="Password" class="account-form">
+                @if (Model.HasPassword)
+                {
+                    <label class="form-label" for="currentPassword">Current password</label>
+                    <input class="form-control" id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" />
+                }
+                else
+                {
+                    <p class="muted mb-3">Your account currently signs in through an external provider. Set a password if you also want email/password login.</p>
+                }
+
+                <label class="form-label mt-3" for="newPassword">New password</label>
+                <input class="form-control" id="newPassword" name="newPassword" type="password" minlength="6" autocomplete="new-password" />
+
+                <label class="form-label mt-3" for="confirmPassword">Confirm password</label>
+                <input class="form-control" id="confirmPassword" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" />
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button class="btn btn-primary" type="submit">Update password</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <section class="account-section mt-4">
+        <div class="account-section-title account-section-title-danger">Delete account</div>
+        <p class="muted mb-3">
+            Account deletion removes profile data, product alerts, and delivery history. For now, deletion is handled by support so payment and audit records are reviewed before removal.
+        </p>
+        <a class="btn btn-outline-danger" href="mailto:support@workvert.local?subject=Delete%20my%20Workvert%20account">
+            Request account deletion
+        </a>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

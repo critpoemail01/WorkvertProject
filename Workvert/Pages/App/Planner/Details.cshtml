@@ -1,0 +1,17 @@
+@page "{id:int}"
+@model Workvert.Pages.App.Planner.DetailsModel
+@{
+    ViewData["Title"] = "Opportunity report";
+}
+
+<section class="app-page-hero product-hero">
+    <div>
+        <span class="tag mb-3">Opportunity report</span>
+        <h1 class="hero-title fw-bold mb-2">Product opportunity details now live in alerts and history.</h1>
+        <p class="lead muted mb-0">Use alert history to review triggered prices, delivery status, resale benchmark, and opportunity score.</p>
+    </div>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Log"><i class="bi bi-clock-history me-1"></i>Open history</a>
+    </div>
+</section>
