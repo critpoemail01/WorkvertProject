@@ -1,0 +1,390 @@
+@page
+@model Workvert.Pages.App.Career.IndexModel
+@{
+    ViewData["Title"] = "Professional assistant";
+}
+
+<section class="app-page-hero product-hero career-hero">
+    <div>
+        <span class="tag mb-3">Professional AI</span>
+        <h1 class="hero-title fw-bold mb-2">@Model.PathTitle</h1>
+        <p class="lead muted mb-0">@Model.PathDescription</p>
+    </div>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard"><i class="bi bi-grid me-1"></i>Dashboard</a>
+        <a class="btn btn-primary btn-lg" asp-page="/App/Services/Index"><i class="bi bi-briefcase me-1"></i>Request service</a>
+    </div>
+</section>
+
+<section class="surface app-panel path-mode-panel mt-4">
+    <div>
+        <span class="tag mb-2">Same account, multiple paths</span>
+        <h2>Start a different active search whenever you need it.</h2>
+        <p class="mb-0 muted">Choosing a path only changes the starting context. The same user can use job matching, freelance/service offers, and service hiring.</p>
+    </div>
+    <div class="path-mode-actions">
+        <a class="btn @(Model.ActivePath == "job" ? "btn-primary" : "btn-outline-secondary")" asp-page="/App/Career/Index" asp-route-path="job">Find the right work</a>
+        <a class="btn @(Model.ActivePath == "freelance" ? "btn-primary" : "btn-outline-secondary")" asp-page="/App/Career/Index" asp-route-path="freelance">Offer goods/services</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Services/Index">Find a good provider</a>
+    </div>
+</section>
+
+<div class="career-workspace mt-4">
+    <form method="post" class="surface app-panel career-profile-form">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Input.Path" />
+
+        @if (!string.IsNullOrWhiteSpace(Model.SavedMessage))
+        {
+            <div class="alert alert-success workvert-save-alert" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>@Model.SavedMessage</span>
+            </div>
+        }
+
+        <div class="app-panel-header">
+            <div>
+                <h2>@Model.PathTitle</h2>
+                <p>Complete the onboarding once and reuse the same profile across job, freelance/service, and hiring paths.</p>
+            </div>
+        </div>
+
+        <div class="onboarding-progress" aria-label="Profile onboarding steps">
+            <span><strong>1</strong><em>Profile</em></span>
+            <span><strong>2</strong><em>Skills</em></span>
+            <span><strong>3</strong><em>Preferences</em></span>
+            <span><strong>4</strong><em>Goal</em></span>
+            <span><strong>5</strong><em>Recommendations</em></span>
+        </div>
+
+        <div class="onboarding-step-card">
+            <div class="onboarding-step-head">
+                <span>Step 1</span>
+                <h3>Who are you professionally?</h3>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.CurrentProfession" class="form-label"></label>
+                    <input asp-for="Input.CurrentProfession" class="form-control" placeholder="Designer, electrician, accountant, developer..." />
+                    <span asp-validation-for="Input.CurrentProfession" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.ProfilePhotoLabel" class="form-label"></label>
+                    <input asp-for="Input.ProfilePhotoLabel" class="form-control" placeholder="Optional: profile photo or avatar" />
+                    <span asp-validation-for="Input.ProfilePhotoLabel" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Input.Experience" class="form-label"></label>
+                    <textarea asp-for="Input.Experience" class="form-control" rows="4" placeholder="Summary of roles, years of experience, sectors, and relevant outcomes"></textarea>
+                    <span asp-validation-for="Input.Experience" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="onboarding-step-card">
+            <div class="onboarding-step-head">
+                <span>Step 2</span>
+                <h3>What can you provide?</h3>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.TechnicalSkills" class="form-label"></label>
+                    <textarea asp-for="Input.TechnicalSkills" class="form-control" rows="3" placeholder="Technical skills, trade skills, creative skills, service skills..."></textarea>
+                    <span asp-validation-for="Input.TechnicalSkills" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.Tools" class="form-label"></label>
+                    <textarea asp-for="Input.Tools" class="form-control" rows="3" placeholder="Software, machines, platforms, tools, methods..."></textarea>
+                    <span asp-validation-for="Input.Tools" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.SoftSkills" class="form-label"></label>
+                    <input asp-for="Input.SoftSkills" class="form-control" placeholder="Communication, autonomy, leadership..." />
+                    <span asp-validation-for="Input.SoftSkills" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.Education" class="form-label"></label>
+                    <input asp-for="Input.Education" class="form-control" placeholder="Degree, certifications, technical training" />
+                    <span asp-validation-for="Input.Education" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="onboarding-step-card">
+            <div class="onboarding-step-head">
+                <span>Step 3</span>
+                <h3>Where and how do you want to work?</h3>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Input.Languages" class="form-label"></label>
+                    <input asp-for="Input.Languages" class="form-control" placeholder="English, Portuguese..." />
+                    <span asp-validation-for="Input.Languages" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Input.DesiredLocation" class="form-label"></label>
+                    <input asp-for="Input.DesiredLocation" class="form-control" placeholder="Portugal, Lisbon, remote..." />
+                    <span asp-validation-for="Input.DesiredLocation" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Input.WorkMode" class="form-label"></label>
+                    <select asp-for="Input.WorkMode" class="form-select">
+                        <option>Remote</option>
+                        <option>On-site</option>
+                        <option>Hybrid</option>
+                        <option>Flexible</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="onboarding-step-card">
+            <div class="onboarding-step-head">
+                <span>Step 4</span>
+                <h3>What result do you want first?</h3>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Input.EngagementType" class="form-label"></label>
+                    <select asp-for="Input.EngagementType" class="form-select">
+                        <option>Full-time job</option>
+                        <option>Freelance</option>
+                        <option>Service work</option>
+                        <option>Full-time and freelance</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Input.CompensationGoal" class="form-label"></label>
+                    <input asp-for="Input.CompensationGoal" class="form-control" placeholder="EUR 35k/year, EUR 35/hour..." />
+                    <span asp-validation-for="Input.CompensationGoal" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Input.PortfolioUrl" class="form-label"></label>
+                    <input asp-for="Input.PortfolioUrl" class="form-control" placeholder="https://linkedin.com/in/..." />
+                    <span asp-validation-for="Input.PortfolioUrl" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Input.InterestAreas" class="form-label"></label>
+                    <textarea asp-for="Input.InterestAreas" class="form-control" rows="3" placeholder="Areas where you want to grow, move into, provide services, or find projects"></textarea>
+                    <span asp-validation-for="Input.InterestAreas" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-form-actions mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-stars me-1"></i>Analyze and save</button>
+            <a class="btn btn-outline-secondary" asp-page="/App/Career/Index">Clear results</a>
+        </div>
+    </form>
+
+    <aside class="surface app-panel career-side-panel">
+        <div class="plan-badge mb-3"><i class="bi bi-shield-check"></i> Recommendation rules</div>
+        <h2>Personalized without discrimination</h2>
+        <p>Compatibility uses skills, experience, goals, location, and work preferences. Profile images never influence recommendations.</p>
+        <div class="profile-completion-meter" aria-label="Profile completion">
+            <div>
+                <span>Profile completion</span>
+                <strong>@Model.ProfileCompletion%</strong>
+            </div>
+            <div class="profile-completion-track">
+                <em style="width:@Model.ProfileCompletion%"></em>
+            </div>
+        </div>
+        @if (Model.LastProfileUpdateUtc is not null)
+        {
+            <p class="small muted">Last saved: @Model.LastProfileUpdateUtc.Value.ToLocalTime().ToString("MMM d, yyyy HH:mm")</p>
+        }
+        <div class="saved-summary-grid">
+            <span><strong>@Model.SavedJobMatches</strong> job matches</span>
+            <span><strong>@Model.SavedServiceOffers</strong> service offers</span>
+            <span><strong>@Model.SavedAssets</strong> assets</span>
+        </div>
+        <div class="career-rule-list">
+            <span><i class="bi bi-check2"></i> Full-time jobs</span>
+            <span><i class="bi bi-check2"></i> Freelance projects</span>
+            <span><i class="bi bi-check2"></i> Growth plan</span>
+            <span><i class="bi bi-check2"></i> Resume, LinkedIn, and proposals</span>
+        </div>
+    </aside>
+</div>
+
+@if (Model.Analysis is not null)
+{
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Suggested skills</h2>
+                <p>@Model.Analysis.PhotoUsageNote</p>
+            </div>
+        </div>
+        <div class="career-chip-row">
+            @foreach (var skill in Model.Analysis.SuggestedSkills)
+            {
+                <span>@skill</span>
+            }
+        </div>
+    </section>
+
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Recommended job opportunities</h2>
+                <p>Ranked by compatibility with the submitted profile.</p>
+            </div>
+        </div>
+        <div class="career-result-grid">
+            @foreach (var opportunity in Model.Analysis.JobOpportunities)
+            {
+                <article class="career-result-card">
+                    <div class="career-result-head">
+                        <div>
+                            <span class="badge badge-soft">@opportunity.Type</span>
+                            <h3>@opportunity.Title</h3>
+                            <p>@opportunity.Organization / @opportunity.Location / @opportunity.WorkMode</p>
+                        </div>
+                        <strong>@opportunity.CompatibilityScore%</strong>
+                    </div>
+                    <ul>
+                        @foreach (var reason in opportunity.MatchReasons)
+                        {
+                            <li>@reason</li>
+                        }
+                    </ul>
+                    <div class="match-detail-grid">
+                        <div>
+                            <span>Matched skills</span>
+                            <strong>@(opportunity.MatchedSkills.Any() ? string.Join(", ", opportunity.MatchedSkills) : "Related profile context")</strong>
+                        </div>
+                        <div>
+                            <span>Missing or useful skills</span>
+                            <strong>@(opportunity.MissingSkills.Any() ? string.Join(", ", opportunity.MissingSkills) : "No critical gaps detected")</strong>
+                        </div>
+                    </div>
+                    @if (opportunity.MissingSkills.Any())
+                    {
+                        <p class="muted mb-2">Improve: @(string.Join(", ", opportunity.MissingSkills))</p>
+                    }
+                    <div class="career-result-footer">
+                        <span>@opportunity.CompensationRange</span>
+                        <em>@opportunity.SuggestedAction</em>
+                    </div>
+                    <div class="result-action-row">
+                        <a class="btn btn-sm btn-primary" href="#generated-copy">Use generated application</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="#career-plan">View next steps</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Freelance projects and services</h2>
+                <p>Sellable service ideas with pricing, target client, and proposal angle.</p>
+            </div>
+        </div>
+        <div class="career-result-grid">
+            @foreach (var item in Model.Analysis.FreelanceOpportunities)
+            {
+                <article class="career-result-card">
+                    <div class="career-result-head">
+                        <div>
+                            <span class="badge badge-soft">Freelance</span>
+                            <h3>@item.Service</h3>
+                            <p>@item.TargetClient</p>
+                        </div>
+                        <strong>@item.CompatibilityScore%</strong>
+                    </div>
+                    <p>@item.ProposalAngle</p>
+                    <div class="match-detail-grid">
+                        <div>
+                            <span>Matched skills</span>
+                            <strong>@(item.MatchedSkills.Any() ? string.Join(", ", item.MatchedSkills) : "Related profile context")</strong>
+                        </div>
+                        <div>
+                            <span>Missing or useful skills</span>
+                            <strong>@(item.MissingSkills.Any() ? string.Join(", ", item.MissingSkills) : "No critical gaps detected")</strong>
+                        </div>
+                    </div>
+                    <p class="muted mb-2">Skills: @(string.Join(", ", item.RequiredSkills.Take(6)))</p>
+                    <div class="career-result-footer">
+                        <span>@item.PriceSuggestion</span>
+                        <em>@item.SuggestedAction</em>
+                    </div>
+                    <div class="result-action-row">
+                        <a class="btn btn-sm btn-primary" href="#generated-copy">Use proposal pitch</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="#career-plan">View offer gaps</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="surface app-panel mt-4" id="career-plan">
+        <div class="app-panel-header">
+            <div>
+                <h2>Career growth plan</h2>
+                <p>@Model.Analysis.CareerPlan.Positioning</p>
+            </div>
+        </div>
+        <div class="career-plan-grid">
+            <div>
+                <h3>Skill gaps</h3>
+                <ul>
+                    @foreach (var item in Model.Analysis.CareerPlan.SkillGaps)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+            <div>
+                <h3>Recommended learning</h3>
+                <ul>
+                    @foreach (var item in Model.Analysis.CareerPlan.RecommendedLearning)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+            <div>
+                <h3>Resume improvements</h3>
+                <ul>
+                    @foreach (var item in Model.Analysis.CareerPlan.CvImprovements)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+            <div>
+                <h3>Next steps</h3>
+                <ul>
+                    @foreach (var item in Model.Analysis.CareerPlan.NextSteps)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="surface app-panel mt-4" id="generated-copy">
+        <div class="app-panel-header">
+            <div>
+                <h2>Generated copy</h2>
+                <p>Base copy for resume, LinkedIn, professional bio, and application messages.</p>
+            </div>
+        </div>
+        <div class="career-copy-grid">
+            <article><strong>Resume summary</strong><p>@Model.Analysis.GeneratedAssets.CvSummary</p></article>
+            <article><strong>LinkedIn headline</strong><p>@Model.Analysis.GeneratedAssets.LinkedInHeadline</p></article>
+            <article><strong>Professional bio</strong><p>@Model.Analysis.GeneratedAssets.ProfessionalBio</p></article>
+            <article><strong>Application message</strong><p>@Model.Analysis.GeneratedAssets.CoverMessage</p></article>
+            <article><strong>Freelance pitch</strong><p>@Model.Analysis.GeneratedAssets.FreelancePitch</p></article>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

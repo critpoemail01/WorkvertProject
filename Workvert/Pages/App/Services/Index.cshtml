@@ -1,0 +1,410 @@
+@page
+@model Workvert.Pages.App.Services.IndexModel
+@{
+    ViewData["Title"] = "Hire services";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+}
+
+<section class="app-page-hero product-hero career-hero">
+    <div>
+        <span class="tag mb-3">Professional marketplace</span>
+        <h1 class="hero-title fw-bold mb-2">Describe the service and find the right professional</h1>
+        <p class="lead muted mb-0">Workvert interprets the request, identifies the area, estimates complexity, and recommends the professional type and required skills.</p>
+    </div>
+    <div class="app-page-hero-actions">
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Career/Index"><i class="bi bi-person-vcard me-1"></i>Professional profile</a>
+    </div>
+</section>
+
+<section class="surface app-panel path-mode-panel mt-4">
+    <div>
+        <span class="tag mb-2">Same account, multiple paths</span>
+        <h2>I need someone who can do a good service</h2>
+        <p class="mb-0 muted">This path is for finding a reliable provider. You can still use the same account later to find work or offer goods and services.</p>
+    </div>
+    <div class="path-mode-actions">
+        <a class="btn btn-outline-secondary" asp-page="/App/Career/Index" asp-route-path="job">Find the right work</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Career/Index" asp-route-path="freelance">Offer goods/services</a>
+        <a class="btn btn-primary" asp-page="/App/Services/Index">Find a good provider</a>
+    </div>
+</section>
+
+<div class="career-workspace service-request-workspace mt-4">
+    <form method="post" enctype="multipart/form-data" class="surface app-panel career-profile-form">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SavedMessage))
+        {
+            <div class="alert alert-success workvert-save-alert" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>@Model.SavedMessage</span>
+            </div>
+        }
+
+        <div class="app-panel-header">
+            <div>
+                <h2>Client request</h2>
+                <p>Write in natural language. The app turns the request into a professional brief.</p>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="Input.Description" class="form-label"></label>
+                <textarea asp-for="Input.Description" class="form-control" rows="7"></textarea>
+                <span asp-validation-for="Input.Description" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <div class="service-photo-uploader" data-service-photo-uploader>
+                    <div class="service-photo-copy">
+                        <div>
+                            <label asp-for="Input.Photos" class="form-label mb-1"></label>
+                            <p>Add photos that help explain the job, such as the room, equipment, damage, measurements or visual references.</p>
+                        </div>
+                        <label class="btn btn-outline-secondary service-photo-trigger" for="servicePhotosInput">
+                            <i class="bi bi-images me-1"></i>Add photos
+                        </label>
+                    </div>
+                    <input asp-for="Input.Photos" id="servicePhotosInput" class="service-photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple data-service-photo-input />
+                    <div class="service-photo-preview" data-service-photo-preview>
+                        <div class="service-photo-empty">
+                            <i class="bi bi-card-image"></i>
+                            <span>No photos selected yet. You can upload up to 5 images.</span>
+                        </div>
+                    </div>
+                    <div class="service-photo-meta">
+                        <span data-service-photo-count>0 photos selected</span>
+                        <span>JPG, PNG or WebP. Max 5 MB each.</span>
+                    </div>
+                    <span asp-validation-for="Input.Photos" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="service-location-selector" data-service-location-selector>
+                    <input asp-for="Input.Location" type="hidden" data-service-location-value />
+
+                    <div class="service-location-head">
+                        <div>
+                            <label class="form-label mb-1">Location</label>
+                            <p>Choose worldwide, one country, or a city/region with a service radius.</p>
+                        </div>
+                        <div class="service-location-summary">
+                            <span data-service-location-summary>@Model.Input.Location</span>
+                            <small data-service-location-coordinates>No map point selected.</small>
+                        </div>
+                    </div>
+
+                    <div class="service-location-modes" role="radiogroup" aria-label="Service location scope">
+                        <label>
+                            <input asp-for="Input.LocationScope" type="radio" value="World" data-service-location-scope />
+                            <span><i class="bi bi-globe2"></i><strong>World</strong><small>Remote or global service search</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.LocationScope" type="radio" value="Country" data-service-location-scope />
+                            <span><i class="bi bi-flag"></i><strong>Country</strong><small>Search across one national market</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.LocationScope" type="radio" value="Region" data-service-location-scope />
+                            <span><i class="bi bi-crosshair"></i><strong>City or region</strong><small>Use a map point and radius</small></span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Input.LocationScope" class="text-danger"></span>
+
+                    <div class="service-location-grid mt-3">
+                        <div class="service-location-field" data-service-location-panel="country">
+                            <label asp-for="Input.Country" class="form-label"></label>
+                            <div class="service-location-autocomplete-field">
+                                <input asp-for="Input.Country" class="form-control" placeholder="Portugal, Spain..." autocomplete="off" data-service-country />
+                                <div class="service-location-autocomplete" hidden data-service-country-menu></div>
+                            </div>
+                            <span asp-validation-for="Input.Country" class="text-danger"></span>
+                        </div>
+
+                        <div class="service-location-field" data-service-location-panel="region">
+                            <div class="service-location-label-row">
+                                <label asp-for="Input.CityOrRegion" class="form-label"></label>
+                                <button class="service-current-location-button" type="button" data-service-current-location>
+                                    <i class="bi bi-geo-alt"></i>
+                                    Use current location
+                                </button>
+                            </div>
+                            <div class="service-location-autocomplete-field">
+                                <input asp-for="Input.CityOrRegion" class="form-control" placeholder="Lisbon, Porto, Algarve..." autocomplete="off" data-service-place />
+                                <div class="service-location-autocomplete" hidden data-service-place-menu></div>
+                            </div>
+                            <span class="service-location-detection" hidden data-service-location-status></span>
+                            <span asp-validation-for="Input.CityOrRegion" class="text-danger"></span>
+                        </div>
+
+                        <div class="service-location-field" data-service-location-panel="region">
+                            <label asp-for="Input.RadiusKm" class="form-label"></label>
+                            <div class="service-radius-row">
+                                <input asp-for="Input.RadiusKm" class="form-control" inputmode="numeric" data-service-radius />
+                                <input type="range" min="1" max="250" value="@Model.Input.RadiusKm" data-service-radius-range aria-label="Radius in kilometers" />
+                                <span data-service-radius-label>@Model.Input.RadiusKm km</span>
+                            </div>
+                            <span asp-validation-for="Input.RadiusKm" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="service-location-map-panel mt-3" hidden data-service-map-panel>
+                        <input asp-for="Input.Latitude" type="hidden" data-service-lat />
+                        <input asp-for="Input.Longitude" type="hidden" data-service-lng />
+                        <div class="service-map-panel-head">
+                            <div>
+                                <strong>Selected service area</strong>
+                                <span>Choose a city, drag the marker, or click the map to adjust the area.</span>
+                            </div>
+                            <span data-service-map-radius>@Model.Input.RadiusKm km radius</span>
+                        </div>
+                        <div class="service-map-wrap">
+                            <div class="service-location-map" data-service-map></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="service-budget-selector" data-service-budget-selector>
+                    <input asp-for="Input.Budget" type="hidden" data-service-budget-value />
+                    <div class="service-budget-head">
+                        <div>
+                            <label class="form-label mb-1">Budget</label>
+                            <p>Choose a realistic budget range, or ask providers to quote after reviewing the request.</p>
+                        </div>
+                        <div class="service-budget-controls">
+                            <select asp-for="Input.BudgetCurrency" class="form-select" data-service-budget-currency>
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CHF">CHF</option>
+                                <option value="CAD">CAD</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                            <span data-service-budget-summary>@Model.Input.Budget</span>
+                        </div>
+                    </div>
+
+                    <div class="service-budget-options" role="radiogroup" aria-label="Service budget">
+                        <label>
+                            <input asp-for="Input.BudgetMode" type="radio" value="Quote" data-service-budget-option />
+                            <span><i class="bi bi-chat-square-text"></i><strong>Need a quote</strong><small>Let providers estimate it</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.BudgetMode" type="radio" value="Under300" data-service-budget-option />
+                            <span><i class="bi bi-tools"></i><strong>Small task</strong><small>Up to 300</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.BudgetMode" type="radio" value="Standard" data-service-budget-option />
+                            <span><i class="bi bi-briefcase"></i><strong>Standard project</strong><small>800 to 1500</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.BudgetMode" type="radio" value="Large" data-service-budget-option />
+                            <span><i class="bi bi-building"></i><strong>Larger project</strong><small>1500 to 5000</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.BudgetMode" type="radio" value="Custom" data-service-budget-option />
+                            <span><i class="bi bi-sliders"></i><strong>Custom range</strong><small>Set min and max</small></span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Input.BudgetMode" class="text-danger"></span>
+
+                    <div class="service-budget-range mt-3" hidden data-service-budget-range>
+                        <div>
+                            <label asp-for="Input.BudgetMin" class="form-label"></label>
+                            <input asp-for="Input.BudgetMin" class="form-control" inputmode="decimal" data-service-budget-min />
+                            <span asp-validation-for="Input.BudgetMin" class="text-danger"></span>
+                        </div>
+                        <div>
+                            <label asp-for="Input.BudgetMax" class="form-label"></label>
+                            <input asp-for="Input.BudgetMax" class="form-control" inputmode="decimal" data-service-budget-max />
+                            <span asp-validation-for="Input.BudgetMax" class="text-danger"></span>
+                        </div>
+                        <span class="service-budget-hint">Leave one side empty if you only know the minimum or maximum.</span>
+                    </div>
+                    <span asp-validation-for="Input.Budget" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="service-urgency-selector" data-service-urgency-selector>
+                    <input asp-for="Input.Urgency" type="hidden" data-service-urgency-value />
+                    <div class="service-urgency-head">
+                        <label class="form-label mb-0">Urgency</label>
+                        <span data-service-urgency-summary>@Model.Input.Urgency</span>
+                    </div>
+                    <div class="service-urgency-options" role="radiogroup" aria-label="Service urgency">
+                        <label>
+                            <input asp-for="Input.UrgencyPreset" type="radio" value="Urgent" data-service-urgency-option />
+                            <span><i class="bi bi-lightning-charge"></i><strong>Urgent</strong><small>As soon as possible</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.UrgencyPreset" type="radio" value="ThisWeek" data-service-urgency-option />
+                            <span><i class="bi bi-calendar-week"></i><strong>This week</strong><small>Fast availability</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.UrgencyPreset" type="radio" value="ThisMonth" data-service-urgency-option />
+                            <span><i class="bi bi-calendar3"></i><strong>This month</strong><small>Standard timeline</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.UrgencyPreset" type="radio" value="NextMonths" data-service-urgency-option />
+                            <span><i class="bi bi-calendar-range"></i><strong>Next months</strong><small>Choose a range</small></span>
+                        </label>
+                        <label>
+                            <input asp-for="Input.UrgencyPreset" type="radio" value="Flexible" data-service-urgency-option />
+                            <span><i class="bi bi-hourglass-split"></i><strong>Flexible</strong><small>No strict deadline</small></span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Input.UrgencyPreset" class="text-danger"></span>
+
+                    <div class="service-urgency-months mt-3" hidden data-service-urgency-months>
+                        <label asp-for="Input.UrgencyMonths" class="form-label"></label>
+                        <div class="service-months-row">
+                            <input asp-for="Input.UrgencyMonths" class="form-control" inputmode="numeric" data-service-urgency-months-input />
+                            <input type="range" min="1" max="24" value="@Model.Input.UrgencyMonths" data-service-urgency-months-range aria-label="Number of months" />
+                            <span data-service-urgency-months-label>@Model.Input.UrgencyMonths months</span>
+                        </div>
+                        <span asp-validation-for="Input.UrgencyMonths" class="text-danger"></span>
+                    </div>
+                    <span asp-validation-for="Input.Urgency" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-check alert-form-check">
+                    <input class="form-check-input" asp-for="Input.RemoteAllowed" />
+                    <span class="form-check-label">This service can be delivered remotely</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="alert-form-actions mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Analyze request</button>
+            <a class="btn btn-outline-secondary" asp-page="/App/Services/Index">Clear results</a>
+        </div>
+    </form>
+
+    <aside class="surface app-panel career-side-panel">
+        <div class="plan-badge mb-3"><i class="bi bi-people"></i> Matching</div>
+        <h2>From request to recommended professional</h2>
+        <p>The analysis considers area, work type, complexity, location, urgency, budget, and required skills.</p>
+        <div class="saved-summary-grid">
+            <span><strong>@Model.SavedRequests</strong> saved requests</span>
+            <span><strong>@Model.SavedProviderMatches</strong> provider matches</span>
+        </div>
+        @if (Model.LastRequestUtc is not null)
+        {
+            <p class="small muted">Last saved: @Model.LastRequestUtc.Value.ToLocalTime().ToString("MMM d, yyyy HH:mm")</p>
+        }
+        <div class="career-rule-list">
+            <span><i class="bi bi-check2"></i> Developers</span>
+            <span><i class="bi bi-check2"></i> Designers</span>
+            <span><i class="bi bi-check2"></i> Electricians</span>
+            <span><i class="bi bi-check2"></i> Accountants</span>
+            <span><i class="bi bi-check2"></i> Qualified technicians</span>
+        </div>
+    </aside>
+</div>
+
+@if (Model.Analysis is not null)
+{
+    @if (Model.UploadedPhotoPaths.Count > 0)
+    {
+        <section class="surface app-panel mt-4">
+            <div class="app-panel-header">
+                <div>
+                    <h2>Attached photos</h2>
+                    <p>These photos were saved with the service request to help professionals understand the work.</p>
+                </div>
+            </div>
+            <div class="service-saved-photo-grid">
+                @foreach (var path in Model.UploadedPhotoPaths)
+                {
+                    <a href="@path" target="_blank" rel="noopener">
+                        <img src="@path" alt="Service request photo" />
+                    </a>
+                }
+            </div>
+        </section>
+    }
+
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Request analysis</h2>
+                <p>@Model.Analysis.BriefForClient</p>
+            </div>
+        </div>
+        <div class="career-summary-grid">
+            <article><span>Area</span><strong>@Model.Analysis.ServiceArea</strong></article>
+            <article><span>Recommended professional</span><strong>@Model.Analysis.ProfessionalType</strong></article>
+            <article><span>Complexity</span><strong>@Model.Analysis.Complexity</strong></article>
+            <article><span>Mode</span><strong>@Model.Analysis.DeliveryMode</strong></article>
+            <article><span>Budget</span><strong>@Model.Analysis.BudgetSignal</strong></article>
+        </div>
+    </section>
+
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Required skills</h2>
+                <p>Use these skills to filter professionals and validate proposals.</p>
+            </div>
+        </div>
+        <div class="career-chip-row">
+            @foreach (var skill in Model.Analysis.RequiredSkills)
+            {
+                <span>@skill</span>
+            }
+        </div>
+    </section>
+
+    <section class="surface app-panel mt-4">
+        <div class="app-panel-header">
+            <div>
+                <h2>Recommended professionals</h2>
+                <p>Demo data for validating the marketplace flow; in a real integration these would come from verified profiles.</p>
+            </div>
+        </div>
+        <div class="career-result-grid">
+            @foreach (var professional in Model.Analysis.RecommendedProfessionals)
+            {
+                <article class="career-result-card">
+                    <div class="career-result-head">
+                        <div>
+                            <span class="badge badge-soft">@professional.ProfessionalArea</span>
+                            <h3>@professional.Name</h3>
+                            <p>@professional.Location / Available in @professional.Availability</p>
+                        </div>
+                        <strong>@professional.CompatibilityScore%</strong>
+                    </div>
+                    <p>@professional.PortfolioSummary</p>
+                    <ul>
+                        @foreach (var reason in professional.MatchReasons)
+                        {
+                            <li>@reason</li>
+                        }
+                    </ul>
+                    <p class="muted mb-2">Skills: @(string.Join(", ", professional.Skills))</p>
+                    <div class="career-result-footer">
+                        <span>@professional.AveragePrice</span>
+                        <em>Validate references, timeline, contract, and work guarantee.</em>
+                    </div>
+                    <div class="result-action-row">
+                        <button type="button" class="btn btn-sm btn-primary">Request proposal</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Save provider</button>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/workvert-service-budget.js" asp-append-version="true"></script>
+    <script src="~/js/workvert-service-location.js" asp-append-version="true"></script>
+    <script src="~/js/workvert-service-urgency.js" asp-append-version="true"></script>
+    <script src="~/js/workvert-service-photos.js" asp-append-version="true"></script>
+}

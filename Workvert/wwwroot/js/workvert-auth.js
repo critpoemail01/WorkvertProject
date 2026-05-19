@@ -20,12 +20,14 @@
     return meta ? (meta.getAttribute('content') || '') : '';
   }
 
-  function currentReturnUrl() {
-    return '/App/Dashboard';
+  function normalizeReturnUrl(value) {
+    if (!value || typeof value !== 'string') return '/App/Dashboard';
+    if (!value.startsWith('/') || value.startsWith('//')) return '/App/Dashboard';
+    return value;
   }
 
   function setReturnUrl(value) {
-    const v = '/App/Dashboard';
+    const v = normalizeReturnUrl(value);
     if (loginReturnUrl) loginReturnUrl.value = v;
     if (registerReturnUrl) registerReturnUrl.value = v;
     googleLinks.forEach((link) => {
@@ -63,7 +65,7 @@
   document.querySelectorAll('[data-auth-open]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const tab = btn.getAttribute('data-auth-open') || 'login';
-      setReturnUrl(currentReturnUrl());
+      setReturnUrl(btn.getAttribute('data-auth-return') || '/App/Dashboard');
       openModal(tab);
     });
   });
@@ -84,21 +86,31 @@
     const fd = new FormData(form);
     const res = await fetch(url, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
         'RequestVerificationToken': csrfToken()
       },
       body: fd
     });
 
     let payload = null;
+    let rawBody = '';
     try {
-      payload = await res.json();
+      rawBody = await res.text();
+      payload = rawBody ? JSON.parse(rawBody) : null;
     } catch {
       payload = null;
     }
 
     if (!res.ok) {
-      const msg = payload && payload.message ? payload.message : 'Could not complete the request. Please check your details.';
+      let msg = payload && payload.message ? payload.message : 'Could not complete the request. Please check your details.';
+      if (!payload && res.status === 400) {
+        msg = 'Your session expired. Refresh the page and try again.';
+      } else if (!payload && res.status === 429) {
+        msg = 'Too many attempts. Wait a minute and try again.';
+      }
       showError(errorEl, msg);
       return;
     }

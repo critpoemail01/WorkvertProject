@@ -1,18 +1,31 @@
 @page
 @model Workvert.Pages.App.DashboardModel
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Overview";
 }
 
-<section class="app-page-hero product-hero">
+<section class="app-page-hero product-hero career-hero">
     <div>
-        <span class="tag mb-3">Price radar</span>
-        <h1 class="hero-title fw-bold mb-2">Dashboard</h1>
-        <p class="lead muted mb-0">Summary of watched products, triggered alerts, sent emails, and plan capacity.</p>
+        <span class="tag mb-3">Workvert</span>
+        <h1 class="hero-title fw-bold mb-2">Find the right work, offer goods and services, or find a good provider</h1>
+        <p class="lead muted mb-0">Use Workvert for three types of necessities: right work, valuable offers, and reliable service providers. The same account can use all three.</p>
     </div>
     <div class="app-page-hero-actions">
-        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
-        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Alerts/Index"><i class="bi bi-bell me-1"></i>View alerts</a>
+        <a class="btn btn-primary btn-lg app-new-alert-action" asp-page="/App/Career/Index" asp-route-path="job"><i class="bi bi-stars me-1"></i>Find right work</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Services/Index"><i class="bi bi-briefcase me-1"></i>Request service</a>
+    </div>
+</section>
+
+<section class="surface app-panel path-mode-panel mt-4">
+    <div>
+        <span class="tag mb-2">Start a type</span>
+        <h2>One account can serve all three types of necessities.</h2>
+        <p class="mb-0 muted">Use each choice as a separate active search or alert context when needed. The user is never locked into one role.</p>
+    </div>
+    <div class="path-mode-actions">
+        <a class="btn btn-primary" asp-page="/App/Career/Index" asp-route-path="job">Find right work</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Career/Index" asp-route-path="freelance">Offer goods/services</a>
+        <a class="btn btn-outline-secondary" asp-page="/App/Services/Index">Find a good provider</a>
     </div>
 </section>
 
@@ -27,7 +40,7 @@
     </div>
     <div class="dashboard-plan-usage">
         <div class="dashboard-plan-meter-head">
-            <span>@Model.ActiveAlerts active alerts</span>
+            <span>@Model.ActiveAlerts active searches</span>
             <strong>@Model.PlanCapacityLabel</strong>
         </div>
         <div class="dashboard-plan-meter" aria-label="Plan usage">
@@ -43,37 +56,37 @@
     </div>
     <div class="dashboard-plan-actions">
         <a class="btn btn-primary" asp-page="/App/Billing">Manage plan</a>
-        <a class="btn btn-outline-secondary" asp-page="/Pricing">Compare plans</a>
+        <a class="btn btn-outline-secondary" asp-page="/Pricing" asp-fragment="plans">View plans</a>
     </div>
 </section>
 
 <div class="dashboard-stat-grid mt-4">
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-box-seam"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-person-vcard"></i></span>
         <div>
-            <div class="app-stat-label">Watched products</div>
-            <div class="app-stat-value">@Model.UniqueSymbols</div>
+            <div class="app-stat-label">Professional profile</div>
+            <div class="app-stat-value">@Model.ProfileCompletion%</div>
         </div>
     </div>
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-bell-fill"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-briefcase"></i></span>
         <div>
-            <div class="app-stat-label">Active alerts</div>
-            <div class="app-stat-value">@Model.ActiveAlerts</div>
+            <div class="app-stat-label">Job matches</div>
+            <div class="app-stat-value">@Model.SavedJobMatches</div>
         </div>
     </div>
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-lightning-charge"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-tools"></i></span>
         <div>
-            <div class="app-stat-label">Signals 7 days</div>
-            <div class="app-stat-value">@Model.TriggersLast7Days</div>
+            <div class="app-stat-label">Service offers</div>
+            <div class="app-stat-value">@Model.SavedServiceOffers</div>
         </div>
     </div>
     <div class="surface app-stat-card">
-        <span class="app-stat-icon"><i class="bi bi-envelope-check"></i></span>
+        <span class="app-stat-icon"><i class="bi bi-file-earmark-text"></i></span>
         <div>
-            <div class="app-stat-label">Failures 7 days</div>
-            <div class="app-stat-value">@Model.FailedDeliveriesLast7Days</div>
+            <div class="app-stat-label">Requests / assets</div>
+            <div class="app-stat-value">@Model.SavedClientRequests/@Model.GeneratedAssets</div>
         </div>
     </div>
 </div>
@@ -81,133 +94,170 @@
 <section class="surface app-panel product-opportunity-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Opportunity flow</h2>
-            <p>Workvert combines the source URL, trusted stores, region, and resale benchmark to decide when to notify you.</p>
+            <h2>Your workspace</h2>
+            <p>@Model.ProfileSummary</p>
         </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Career/Index" asp-route-path="job"><i class="bi bi-arrow-right me-1"></i>Open assistant</a>
     </div>
 
-    <div class="product-flow-grid">
+    <div class="dashboard-work-grid">
+        <article class="dashboard-profile-card">
+            <span class="app-stat-icon"><i class="bi bi-person-vcard"></i></span>
+            <div>
+                <strong>@Model.ProfileHeadline</strong>
+                <p>Profile completion: @Model.ProfileCompletion%. Complete the profile once and reuse it across all paths.</p>
+                <div class="profile-completion-meter" aria-label="Profile completion">
+                    <div>
+                        <span>Profile quality</span>
+                        <strong>@Model.ProfileCompletion%</strong>
+                    </div>
+                    <div class="profile-completion-track">
+                        <em style="width:@Model.ProfileCompletion%"></em>
+                    </div>
+                </div>
+            </div>
+        </article>
+
         <article>
-            <span><i class="bi bi-link-45deg"></i></span>
-            <strong>Product URL</strong>
-            <p>Amazon.es or another store used as the starting reference.</p>
+            <span><i class="bi bi-briefcase-fill"></i></span>
+            <strong>@Model.SavedJobMatches job matches</strong>
+            <p>Saved recommendations with compatibility, reasons, matched skills, gaps and next steps.</p>
         </article>
         <article>
-            <span><i class="bi bi-shield-check"></i></span>
-            <strong>Trusted stores</strong>
-            <p>Worten, Fnac, PcComponentes, MediaMarkt, and custom lists.</p>
+            <span><i class="bi bi-cash-coin"></i></span>
+            <strong>@Model.SavedServiceOffers service offers</strong>
+            <p>Generated freelance/service offers from what the user can provide.</p>
         </article>
         <article>
-            <span><i class="bi bi-arrow-repeat"></i></span>
-            <strong>Resale market</strong>
-            <p>OLX, Vinted, Wallapop, and other resale benchmarks.</p>
+            <span><i class="bi bi-search-heart"></i></span>
+            <strong>@Model.SavedProviderMatches provider matches</strong>
+            <p>Recommended professionals for saved service requests.</p>
         </article>
-        <article>
-            <span><i class="bi bi-envelope-paper"></i></span>
-            <strong>Actionable email</strong>
-            <p>Price, store, margin, category, and check time.</p>
-        </article>
+    </div>
+</section>
+
+<section class="dashboard-live-grid mt-4">
+    <div class="surface app-panel">
+        <div class="app-panel-header">
+            <div>
+                <h2>Latest recommendations</h2>
+                <p>Most relevant saved matches from the professional assistant.</p>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Career/Index">Open profile</a>
+        </div>
+        <div class="compact-activity-list">
+            @if (Model.LatestRecommendations.Any())
+            {
+                @foreach (var item in Model.LatestRecommendations)
+                {
+                    <article>
+                        <div>
+                            <strong>@item.Title</strong>
+                            <span>@item.Type / @item.Location</span>
+                        </div>
+                        <em>@item.Score%</em>
+                    </article>
+                }
+            }
+            else
+            {
+                <article>
+                    <div>
+                        <strong>No saved recommendations yet</strong>
+                        <span>Analyze a profile to generate the first matches.</span>
+                    </div>
+                    <em>0</em>
+                </article>
+            }
+        </div>
+    </div>
+
+    <div class="surface app-panel">
+        <div class="app-panel-header">
+            <div>
+                <h2>Latest service requests</h2>
+                <p>Requests saved from the hiring path.</p>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Services/Index">Request service</a>
+        </div>
+        <div class="compact-activity-list">
+            @if (Model.LatestRequests.Any())
+            {
+                @foreach (var item in Model.LatestRequests)
+                {
+                    <article>
+                        <div>
+                            <strong>@item.Title</strong>
+                            <span>@item.Area / @item.CreatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</span>
+                        </div>
+                        <em>@item.Status</em>
+                    </article>
+                }
+            }
+            else
+            {
+                <article>
+                    <div>
+                        <strong>No service requests yet</strong>
+                        <span>Describe a need to find the right provider.</span>
+                    </div>
+                    <em>0</em>
+                </article>
+            }
+        </div>
     </div>
 </section>
 
 <section class="surface app-panel mt-4">
     <div class="app-panel-header">
         <div>
-            <h2>Recent alerts</h2>
-            <p>Signals generated when the price or opportunity score matched the rule.</p>
+            <h2>Next actions</h2>
+            <p>Use these shortcuts to validate the new application flow.</p>
         </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Log">Open history</a>
     </div>
 
-    @if (!Model.LatestTriggers.Any())
-    {
-        <div class="empty-state compact">
-            <i class="bi bi-bell"></i>
-            <span>No signals yet. Create an alert and set a target price to start.</span>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>When</th>
-                        <th>Product</th>
-                        <th>Signal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var row in Model.LatestTriggers)
-                {
-                    <tr>
-                        <td class="text-muted" style="white-space:nowrap">@row.TriggeredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                        <td><span class="badge badge-soft">@row.Symbol</span></td>
-                        <td>@row.Message</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-</section>
-
-<section class="surface app-panel mt-4">
-    <div class="app-panel-header">
-        <div>
-            <h2>Recent deliveries</h2>
-            <p>Emails, webhooks, and team channels used to deliver alerts.</p>
-        </div>
-        <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Settings">Configure channels</a>
+    <div class="career-result-grid">
+        <article class="career-result-card">
+            <div class="career-result-head">
+                <div>
+                    <span class="badge badge-soft">Candidate</span>
+                    <h3>Find the right work</h3>
+                    <p>Generate company job matches, CV copy, application messages, skill gaps, and next steps.</p>
+                </div>
+                <i class="bi bi-person-vcard fs-3"></i>
+            </div>
+            <div class="career-result-footer">
+                <span>2 minutes</span>
+                <a asp-page="/App/Career/Index" asp-route-path="job">Open</a>
+            </div>
+        </article>
+        <article class="career-result-card">
+            <div class="career-result-head">
+                <div>
+                    <span class="badge badge-soft">Provider</span>
+                    <h3>Offer goods and services</h3>
+                    <p>Turn what you know, make, or deliver into sellable offers, proposals, and pricing.</p>
+                </div>
+                <i class="bi bi-cash-coin fs-3"></i>
+            </div>
+            <div class="career-result-footer">
+                <span>2 minutes</span>
+                <a asp-page="/App/Career/Index" asp-route-path="freelance">Open</a>
+            </div>
+        </article>
+        <article class="career-result-card">
+            <div class="career-result-head">
+                <div>
+                    <span class="badge badge-soft">Client</span>
+                    <h3>Find someone who can do a good service</h3>
+                    <p>Describe what you need and identify area, professional type, skills, and recommended profiles.</p>
+                </div>
+                <i class="bi bi-briefcase fs-3"></i>
+            </div>
+            <div class="career-result-footer">
+                <span>1 minute</span>
+                <a asp-page="/App/Services/Index">Open</a>
+            </div>
+        </article>
     </div>
-
-    @if (!Model.LatestDeliveries.Any())
-    {
-        <div class="empty-state compact">
-            <i class="bi bi-send"></i>
-            <span>No delivery attempts yet.</span>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-sm align-middle">
-                <thead>
-                    <tr>
-                        <th>When</th>
-                        <th>Product</th>
-                        <th>Channel</th>
-                        <th>Status</th>
-                        <th>Detail</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var row in Model.LatestDeliveries)
-                {
-                    <tr>
-                        <td class="text-muted" style="white-space:nowrap">@row.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                        <td><span class="badge badge-soft">@row.Symbol</span></td>
-                        <td>@row.Channel</td>
-                        <td>
-                            @if (row.Status == "Sent")
-                            {
-                                <span class="badge text-bg-success">Sent</span>
-                            }
-                            else if (row.Status == "Failed")
-                            {
-                                <span class="badge text-bg-danger">Failed</span>
-                            }
-                            else
-                            {
-                                <span class="badge text-bg-secondary">Skipped</span>
-                            }
-                        </td>
-                        <td class="text-muted">@row.ErrorMessage</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
 </section>

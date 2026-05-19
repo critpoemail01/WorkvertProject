@@ -4,14 +4,17 @@
     ViewData["Title"] = "My account";
 }
 
-<div class="account-page">
+<div class="account-page account-profile-page">
     <div class="account-heading">
         <div>
-            <span class="tag mb-2">Account & settings</span>
+            <span class="tag mb-2">Account and settings</span>
             <h1 class="fw-bold mb-0">My account</h1>
-            <p class="muted mb-0">Manage your login details and account profile.</p>
+            <p class="muted mb-0">Manage sign-in details and account profile information.</p>
         </div>
-        <a class="btn btn-primary" asp-page="/App/Billing">Manage subscription</a>
+        <div class="account-heading-actions">
+            <span><i class="bi bi-shield-check"></i> Secure workspace</span>
+            <a class="btn btn-primary" asp-page="/App/Billing">Manage subscription</a>
+        </div>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
@@ -19,30 +22,37 @@
         <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
     }
 
-    <section class="account-section mt-4">
-        <div class="account-section-title">Account details</div>
-        <div class="account-rows">
-            <div class="account-row">
+    <section class="account-profile-summary mt-4">
+        <div class="account-profile-main">
+            <span class="account-profile-avatar"><i class="bi bi-person"></i></span>
+            <div>
+                <span class="support-panel-kicker">Signed in account</span>
+                <h2>@Model.Email</h2>
+                <p>Use this area to keep your access details ready for job matching, service offers and provider requests.</p>
+            </div>
+        </div>
+        <div class="account-detail-card-grid">
+            <article>
                 <span>Email</span>
                 <strong>@Model.Email</strong>
-            </div>
-            <div class="account-row">
+            </article>
+            <article>
                 <span>Phone number</span>
                 <strong>@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Not set" : Model.PhoneNumber)</strong>
-            </div>
-            <div class="account-row">
+            </article>
+            <article>
                 <span>Registered since</span>
                 <strong>@Model.RegisteredSince.ToLocalTime().ToString("MMMM d, yyyy")</strong>
-            </div>
-            <div class="account-row">
+            </article>
+            <article>
                 <span>Password</span>
                 <strong>@(Model.HasPassword ? "Configured" : "External login only")</strong>
-            </div>
+            </article>
         </div>
     </section>
 
-    <div class="account-form-grid mt-4">
-        <section class="account-section">
+    <div class="account-form-grid account-profile-grid mt-4">
+        <section class="account-section account-profile-panel">
             <div class="account-section-title">Update profile</div>
             <form method="post" asp-page-handler="Contact" class="account-form">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -58,7 +68,7 @@
             </form>
         </section>
 
-        <section class="account-section">
+        <section class="account-section account-profile-panel">
             <div class="account-section-title">Security</div>
             <form method="post" asp-page-handler="Password" class="account-form">
                 @if (Model.HasPassword)
@@ -84,14 +94,26 @@
         </section>
     </div>
 
-    <section class="account-section mt-4">
-        <div class="account-section-title account-section-title-danger">Delete account</div>
-        <p class="muted mb-3">
-            Account deletion removes profile data, product alerts, and delivery history. For now, deletion is handled by support so payment and audit records are reviewed before removal.
-        </p>
-        <a class="btn btn-outline-danger" href="mailto:support@workvert.local?subject=Delete%20my%20Workvert%20account">
-            Request account deletion
-        </a>
+    <section class="account-danger-zone mt-4">
+        <div class="account-danger-icon">
+            <i class="bi bi-shield-exclamation"></i>
+        </div>
+        <div class="account-danger-copy">
+            <span class="support-panel-kicker">Danger zone</span>
+            <h2>Delete account</h2>
+            <p>
+                Account deletion removes profile data, professional searches and notification history. Support reviews the request manually so payment and audit records can be checked before removal.
+            </p>
+            <div class="account-danger-note">
+                <i class="bi bi-info-circle"></i>
+                <span>This action is handled by support before any irreversible removal happens.</span>
+            </div>
+        </div>
+        <div class="account-danger-action">
+            <a class="btn btn-outline-danger" href="mailto:support@workvert.local?subject=Delete%20my%20Workvert%20account">
+                Request deletion
+            </a>
+        </div>
     </section>
 </div>
 

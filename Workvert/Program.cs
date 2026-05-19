@@ -45,6 +45,7 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
 // Redirect unauthenticated users to the home page (where we open a modal)
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.Cookie.Name = ".Workvert.Auth";
     options.LoginPath = "/";
     options.AccessDeniedPath = "/";
     options.ReturnUrlParameter = "returnUrl";
@@ -59,6 +60,11 @@ builder.Services.ConfigureApplicationCookie(options =>
         context.Response.Redirect("/?login=1");
         return Task.CompletedTask;
     };
+});
+
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.Name = ".Workvert.External";
 });
 
 // JSON auth endpoints used by the modal (instead of full-page Identity UI)
@@ -97,7 +103,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 
-// Price alert activity + delivery workflow (MVP: existing trigger engine + DB activity records)
+// Notification and recommendation workflow (legacy alert engine plus professional assistant services)
 builder.Services.AddSingleton<FakeMarketDataService>();
 builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
 builder.Services.AddSingleton<ITechnicalIndicatorService, TechnicalIndicatorService>();
@@ -107,6 +113,7 @@ builder.Services.AddSingleton<IAiMarketingPlannerService, TemplateAiMarketingPla
 builder.Services.AddSingleton<ICampaignLibraryService, CampaignLibraryService>();
 builder.Services.AddSingleton<IIntegrationAuthorizationService, IntegrationAuthorizationService>();
 builder.Services.AddSingleton<ICampaignBusinessAnalyticsService, CampaignBusinessAnalyticsService>();
+builder.Services.AddSingleton<IProfessionalAdvisorService, ProfessionalAdvisorService>();
 builder.Services.AddSingleton<CrmLeadImportService>();
 builder.Services.AddScoped<ICompanyCampaignLearningService, CompanyCampaignLearningService>();
 builder.Services.AddScoped<IAlertDispatcher, AlertDispatcher>();

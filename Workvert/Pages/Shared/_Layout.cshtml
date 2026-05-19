@@ -17,7 +17,6 @@
     var howItWorksActive = isActive("/HowItWorks");
     var aboutActive = isActive("/About");
     var newsActive = isActive("/News");
-    var dashboardActive = isActive("/App/Dashboard");
 }
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -39,14 +38,14 @@
 <body>
 <header>
     <nav class="navbar navbar-expand-lg workvert-nav">
-        <div class="container">
+        <div class="container-fluid public-nav-inner">
             <a class="navbar-brand brand-lockup" asp-page="/Index" aria-label="Workvert home">
                 <span class="brand-mark">
                     <img src="~/assets/brand/workvert_brand_mark.svg" width="42" height="42" asp-append-version="true" alt="" />
                 </span>
                 <span class="brand-wordmark">
                     <span class="brand-title">Workvert<sup>TM</sup></span>
-                    <span class="brand-subtitle">Price Radar</span>
+                    <span class="brand-subtitle">Work and Services AI</span>
                 </span>
             </a>
             <button class="navbar-toggler workvert-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Open navigation menu">
@@ -56,16 +55,12 @@
             </button>
 
             <div class="collapse navbar-collapse" id="nav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link @(pricingActive ? "active" : "")" asp-page="/Pricing" aria-current="@(pricingActive ? "page" : null)"><i class="bi bi-credit-card-2-front"></i><span>Pricing</span></a></li>
+                <ul class="navbar-nav public-nav-links me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link @(pricingActive ? "active" : "")" asp-page="/Pricing" aria-current="@(pricingActive ? "page" : null)"><i class="bi bi-credit-card-2-front"></i><span>Plans</span></a></li>
                     <li class="nav-item"><a class="nav-link @(howItWorksActive ? "active" : "")" asp-page="/HowItWorks" aria-current="@(howItWorksActive ? "page" : null)"><i class="bi bi-diagram-3"></i><span>How it works</span></a></li>
                     <li class="nav-item"><a class="nav-link @(aboutActive ? "active" : "")" asp-page="/About" aria-current="@(aboutActive ? "page" : null)"><i class="bi bi-info-circle"></i><span>About</span></a></li>
                     <li class="nav-item"><a class="nav-link @(newsActive ? "active" : "")" asp-page="/News" aria-current="@(newsActive ? "page" : null)"><i class="bi bi-megaphone"></i><span>News</span></a></li>
 
-                    @if (User?.Identity?.IsAuthenticated == true)
-                    {
-                        <li class="nav-item"><a class="nav-link @(dashboardActive ? "active" : "")" asp-page="/App/Dashboard" aria-current="@(dashboardActive ? "page" : null)"><i class="bi bi-bar-chart-fill"></i><span>Dashboard</span></a></li>
-                    }
                 </ul>
 
                 <partial name="_LoginPartial" />
@@ -74,7 +69,7 @@
     </nav>
 </header>
 
-<main class="py-4">
+<main class="public-main @(isActive("/Index") ? "homepage-main" : "")">
     @RenderBody()
 </main>
 
@@ -88,12 +83,12 @@
                     </span>
                     <span class="brand-wordmark">
                         <span class="brand-title">Workvert<sup>TM</sup></span>
-                        <span class="brand-subtitle">Price Radar</span>
+                        <span class="brand-subtitle">Work and Services AI</span>
                     </span>
                 </a>
-                <p>URL-based price alerts, trusted-store comparison, and daily resale opportunity reports.</p>
+                <p>AI for three types of necessities: find the right work, offer goods and services, or find someone who can do a good service.</p>
                 <div class="footer-badges">
-                    <span><i class="bi bi-bell-fill"></i> Email alerts</span>
+                    <span><i class="bi bi-stars"></i> Professional AI</span>
                     <span><i class="bi bi-shield-check"></i> Secure area</span>
                 </div>
             </div>
@@ -101,29 +96,29 @@
             <nav class="footer-nav-grid" aria-label="Footer navigation">
                 <div>
                     <h2>Product</h2>
-                    <a class="footer-link" asp-page="/Pricing">Pricing</a>
+                    <a class="footer-link" asp-page="/Pricing">Plans</a>
                     <a class="footer-link" asp-page="/HowItWorks">How it works</a>
                     <a class="footer-link" asp-page="/News">News</a>
                 </div>
                 <div>
                     <h2>Platform</h2>
                     <a class="footer-link" asp-page="/About">About</a>
-                    <a class="footer-link" asp-page="/App/HelpDesk">Help desk</a>
-                    <a class="footer-link" asp-page="/App/Settings">Email and channels</a>
+                    <a class="footer-link" asp-page="/App/HelpDesk">Help</a>
+                    <a class="footer-link" asp-page="/App/Settings">Notifications</a>
                 </div>
                 <div>
                     <h2>Account</h2>
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
                         <a class="footer-link" asp-page="/App/Dashboard">Dashboard</a>
-                        <a class="footer-link" asp-page="/App/Alerts/Index">Alerts</a>
+                        <a class="footer-link" asp-page="/App/Career/Index">Profile and AI</a>
                         <a class="footer-link" asp-page="/App/Billing">Subscription</a>
                     }
                     else
                     {
                         <button type="button" class="footer-link footer-button-link" data-auth-open="register">Create account</button>
                         <button type="button" class="footer-link footer-button-link" data-auth-open="login">Log in</button>
-                        <a class="footer-link" asp-page="/Pricing">Compare pricing</a>
+                        <a class="footer-link" asp-page="/Pricing" asp-fragment="plans">Compare plans</a>
                     }
                 </div>
             </nav>
@@ -131,7 +126,7 @@
 
         <div class="footer-bottom">
             <span>&copy; @DateTime.Now.Year Workvert. All rights reserved.</span>
-            <span>Price radar for better buying and opportunity discovery.</span>
+            <span>Find work, offer value, or find the right provider.</span>
         </div>
     </div>
 </footer>
@@ -152,7 +147,7 @@
             </span>
             <span class="brand-wordmark">
               <span class="brand-title">Workvert<sup>TM</sup></span>
-              <span class="brand-subtitle">Price Radar</span>
+              <span class="brand-subtitle">Work and Services AI</span>
             </span>
             <span class="auth-security-badge">Secure access</span>
           </div>
@@ -174,7 +169,7 @@
             <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
               <div class="auth-copy">
                 <h2>Welcome back</h2>
-                <p>Log in to manage alerts, reports, and notification channels.</p>
+                <p>Log in to manage your profile, recommendations, proposals, and notifications.</p>
               </div>
 
               <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
@@ -221,7 +216,7 @@
             <div class="tab-pane fade" id="pane-register" role="tabpanel">
               <div class="auth-copy">
                 <h2>Create your account</h2>
-                <p>Start with free credits and upgrade when you want to watch more products and categories.</p>
+                <p>Start free and use Workvert to find work, offer goods and services, or request a good provider.</p>
               </div>
 
               <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
@@ -266,15 +261,15 @@
         <aside class="auth-aside">
           <div class="auth-aside-badge">
             <i class="bi bi-lightning-charge-fill"></i>
-            Price intelligence
+            Work and services AI
           </div>
-          <h3>Turn any product URL into a price and opportunity radar.</h3>
-          <p>Compare trusted stores, track resale benchmarks, and get notified when the margin appears.</p>
+          <h3>One system for three types of necessities: right work, valuable offers, and reliable service providers.</h3>
+          <p>Match your profile to the right work, turn skills into goods or services, or describe a request and find the right provider.</p>
 
           <div class="auth-metric-grid">
             <div>
               <span>5</span>
-              <small>free alerts</small>
+              <small>free analyses</small>
             </div>
             <div>
               <span>EUR 49.99</span>
@@ -283,9 +278,9 @@
           </div>
 
           <div class="auth-aside-list">
-            <div><i class="bi bi-check2"></i> Product URL, country, city, and category</div>
-            <div><i class="bi bi-check2"></i> Alerts by target price or margin below target</div>
-            <div><i class="bi bi-check2"></i> Daily reports with OLX, Vinted, and other marketplaces</div>
+            <div><i class="bi bi-check2"></i> Find the right work from your profile</div>
+            <div><i class="bi bi-check2"></i> Offer goods and services from your skills</div>
+            <div><i class="bi bi-check2"></i> Find someone who can do a good service</div>
           </div>
         </div>
         </aside>

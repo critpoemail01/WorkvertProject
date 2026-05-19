@@ -25,6 +25,15 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
     public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
     public DbSet<UserNotificationSettings> UserNotificationSettings => Set<UserNotificationSettings>();
+    public DbSet<ProfessionalProfile> ProfessionalProfiles => Set<ProfessionalProfile>();
+    public DbSet<ProfessionalSkill> ProfessionalSkills => Set<ProfessionalSkill>();
+    public DbSet<WorkOpportunity> WorkOpportunities => Set<WorkOpportunity>();
+    public DbSet<ProfessionalOpportunityMatch> ProfessionalOpportunityMatches => Set<ProfessionalOpportunityMatch>();
+    public DbSet<FreelancerServiceListing> FreelancerServiceListings => Set<FreelancerServiceListing>();
+    public DbSet<ClientServiceRequest> ClientServiceRequests => Set<ClientServiceRequest>();
+    public DbSet<ClientServiceMatch> ClientServiceMatches => Set<ClientServiceMatch>();
+    public DbSet<CareerActionPlan> CareerActionPlans => Set<CareerActionPlan>();
+    public DbSet<GeneratedProfessionalAsset> GeneratedProfessionalAssets => Set<GeneratedProfessionalAsset>();
 
     
     public override int SaveChanges()
@@ -188,6 +197,100 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                 else if (entry.State == EntityState.Modified)
                 {
                     ticket.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is ProfessionalProfile professionalProfile)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (professionalProfile.CreatedAtUtc == default) professionalProfile.CreatedAtUtc = now;
+                    professionalProfile.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    professionalProfile.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is ProfessionalSkill professionalSkill)
+            {
+                if (entry.State == EntityState.Added && professionalSkill.CreatedAtUtc == default)
+                {
+                    professionalSkill.CreatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is WorkOpportunity workOpportunity)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (workOpportunity.CreatedAtUtc == default) workOpportunity.CreatedAtUtc = now;
+                    if (workOpportunity.LastSeenAtUtc == default) workOpportunity.LastSeenAtUtc = now;
+                    workOpportunity.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    workOpportunity.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is ProfessionalOpportunityMatch professionalOpportunityMatch)
+            {
+                if (entry.State == EntityState.Added && professionalOpportunityMatch.CreatedAtUtc == default)
+                {
+                    professionalOpportunityMatch.CreatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is FreelancerServiceListing freelancerServiceListing)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (freelancerServiceListing.CreatedAtUtc == default) freelancerServiceListing.CreatedAtUtc = now;
+                    freelancerServiceListing.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    freelancerServiceListing.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is ClientServiceRequest clientServiceRequest)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (clientServiceRequest.CreatedAtUtc == default) clientServiceRequest.CreatedAtUtc = now;
+                    clientServiceRequest.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    clientServiceRequest.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is ClientServiceMatch clientServiceMatch)
+            {
+                if (entry.State == EntityState.Added && clientServiceMatch.CreatedAtUtc == default)
+                {
+                    clientServiceMatch.CreatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is CareerActionPlan careerActionPlan)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (careerActionPlan.CreatedAtUtc == default) careerActionPlan.CreatedAtUtc = now;
+                    careerActionPlan.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    careerActionPlan.UpdatedAtUtc = now;
+                }
+            }
+            else if (entry.Entity is GeneratedProfessionalAsset generatedProfessionalAsset)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    if (generatedProfessionalAsset.CreatedAtUtc == default) generatedProfessionalAsset.CreatedAtUtc = now;
+                    generatedProfessionalAsset.UpdatedAtUtc = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    generatedProfessionalAsset.UpdatedAtUtc = now;
                 }
             }
         }
@@ -360,5 +463,135 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 
         builder.Entity<SupportTicket>()
             .HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+
+        builder.Entity<ProfessionalProfile>()
+            .HasIndex(x => x.UserId)
+            .IsUnique();
+
+        builder.Entity<ProfessionalProfile>()
+            .HasIndex(x => new { x.CurrentProfession, x.DesiredLocation });
+
+        builder.Entity<ProfessionalSkill>()
+            .HasIndex(x => new { x.ProfessionalProfileId, x.Category, x.Name })
+            .IsUnique();
+
+        builder.Entity<ProfessionalSkill>()
+            .HasOne(x => x.ProfessionalProfile)
+            .WithMany(x => x.Skills)
+            .HasForeignKey(x => x.ProfessionalProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<WorkOpportunity>()
+            .HasIndex(x => new { x.Source, x.ExternalId })
+            .IsUnique()
+            .HasFilter("[ExternalId] IS NOT NULL");
+
+        builder.Entity<WorkOpportunity>()
+            .HasIndex(x => new { x.OpportunityType, x.WorkMode, x.Location });
+
+        builder.Entity<WorkOpportunity>()
+            .HasIndex(x => new { x.Status, x.LastSeenAtUtc });
+
+        builder.Entity<WorkOpportunity>()
+            .Property(x => x.CompensationMin)
+            .HasPrecision(18, 2);
+
+        builder.Entity<WorkOpportunity>()
+            .Property(x => x.CompensationMax)
+            .HasPrecision(18, 2);
+
+        builder.Entity<ProfessionalOpportunityMatch>()
+            .HasIndex(x => new { x.ProfessionalProfileId, x.Status, x.CompatibilityScore });
+
+        builder.Entity<ProfessionalOpportunityMatch>()
+            .HasIndex(x => new { x.WorkOpportunityId, x.ProfessionalProfileId })
+            .IsUnique();
+
+        builder.Entity<ProfessionalOpportunityMatch>()
+            .HasOne(x => x.ProfessionalProfile)
+            .WithMany(x => x.OpportunityMatches)
+            .HasForeignKey(x => x.ProfessionalProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ProfessionalOpportunityMatch>()
+            .HasOne(x => x.WorkOpportunity)
+            .WithMany(x => x.Matches)
+            .HasForeignKey(x => x.WorkOpportunityId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<FreelancerServiceListing>()
+            .HasIndex(x => new { x.ProfessionalProfileId, x.IsActive });
+
+        builder.Entity<FreelancerServiceListing>()
+            .HasIndex(x => new { x.Category, x.Location, x.RemoteAvailable });
+
+        builder.Entity<FreelancerServiceListing>()
+            .Property(x => x.HourlyRate)
+            .HasPrecision(18, 2);
+
+        builder.Entity<FreelancerServiceListing>()
+            .Property(x => x.ProjectRateFrom)
+            .HasPrecision(18, 2);
+
+        builder.Entity<FreelancerServiceListing>()
+            .Property(x => x.ProjectRateTo)
+            .HasPrecision(18, 2);
+
+        builder.Entity<FreelancerServiceListing>()
+            .HasOne(x => x.ProfessionalProfile)
+            .WithMany(x => x.ServiceListings)
+            .HasForeignKey(x => x.ProfessionalProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ClientServiceRequest>()
+            .HasIndex(x => new { x.UserId, x.Status, x.CreatedAtUtc });
+
+        builder.Entity<ClientServiceRequest>()
+            .HasIndex(x => new { x.ServiceArea, x.Location, x.RemoteAllowed });
+
+        builder.Entity<ClientServiceRequest>()
+            .Property(x => x.BudgetMin)
+            .HasPrecision(18, 2);
+
+        builder.Entity<ClientServiceRequest>()
+            .Property(x => x.BudgetMax)
+            .HasPrecision(18, 2);
+
+        builder.Entity<ClientServiceMatch>()
+            .HasIndex(x => new { x.ClientServiceRequestId, x.CompatibilityScore });
+
+        builder.Entity<ClientServiceMatch>()
+            .HasIndex(x => new { x.ClientServiceRequestId, x.FreelancerServiceListingId })
+            .IsUnique();
+
+        builder.Entity<ClientServiceMatch>()
+            .HasOne(x => x.ClientServiceRequest)
+            .WithMany(x => x.Matches)
+            .HasForeignKey(x => x.ClientServiceRequestId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ClientServiceMatch>()
+            .HasOne(x => x.FreelancerServiceListing)
+            .WithMany(x => x.ClientMatches)
+            .HasForeignKey(x => x.FreelancerServiceListingId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<CareerActionPlan>()
+            .HasIndex(x => new { x.ProfessionalProfileId, x.CreatedAtUtc });
+
+        builder.Entity<CareerActionPlan>()
+            .HasOne(x => x.ProfessionalProfile)
+            .WithMany(x => x.CareerActionPlans)
+            .HasForeignKey(x => x.ProfessionalProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<GeneratedProfessionalAsset>()
+            .HasIndex(x => new { x.ProfessionalProfileId, x.AssetType, x.CreatedAtUtc });
+
+        builder.Entity<GeneratedProfessionalAsset>()
+            .HasOne(x => x.ProfessionalProfile)
+            .WithMany(x => x.GeneratedAssets)
+            .HasForeignKey(x => x.ProfessionalProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

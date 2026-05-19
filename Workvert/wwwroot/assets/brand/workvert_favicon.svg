@@ -1,20 +1,30 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="workvertFavGlow" x1="12" y1="54" x2="55" y2="10" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#22C55E"/>
-      <stop offset="0.52" stop-color="#14B8A6"/>
-      <stop offset="1" stop-color="#38BDF8"/>
+    <linearGradient id="frame" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#86EFAC"/>
+      <stop offset="0.48" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#7DD3FC"/>
     </linearGradient>
-    <linearGradient id="workvertFavTagFill" x1="18" y1="45" x2="46" y2="17" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#052E1A"/>
-      <stop offset="1" stop-color="#0F3B47"/>
+    <linearGradient id="mark" x1="14" y1="45" x2="52" y2="18" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#86EFAC"/>
+      <stop offset="0.52" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#7DD3FC"/>
     </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(32 30) rotate(90) scale(32)">
+      <stop stop-color="#2DD4BF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#2DD4BF" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect x="4" y="4" width="56" height="56" rx="17" fill="#07111E"/>
-  <rect x="5.5" y="5.5" width="53" height="53" rx="15.5" stroke="url(#workvertFavGlow)" stroke-width="3"/>
-  <path d="M19 32.2C19 24.9 24.9 19 32.2 19C37.6 19 42.2 22.2 44.3 26.8" stroke="#38BDF8" stroke-width="2.4" stroke-linecap="round" opacity="0.42"/>
-  <path d="M15.5 31.8C15.5 22.8 22.8 15.5 31.8 15.5C38.8 15.5 44.7 19.9 47 26.1" stroke="#22C55E" stroke-width="2.4" stroke-linecap="round" opacity="0.36"/>
-  <path d="M18.6 29.2L30 17.8H43.1L51.2 25.9V39L35.9 54.3L18.6 37V29.2Z" fill="url(#workvertFavTagFill)" stroke="url(#workvertFavGlow)" stroke-width="3" stroke-linejoin="round"/>
-  <circle cx="39.5" cy="25.4" r="3.2" fill="#E8F7FF"/>
-  <path d="M28 38.3L33 43.1L43.8 31.5" stroke="#FACC15" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="#07111F"/>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="url(#glow)"/>
+  <rect x="6.5" y="6.5" width="51" height="51" rx="15.5" stroke="url(#frame)" stroke-width="3"/>
+
+  <path d="M14.5 24.5L23.2 43L32 25.8L40.8 43L49.5 24.5" stroke="url(#mark)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="14.5" cy="24.5" r="4.7" fill="#07111F" stroke="url(#mark)" stroke-width="3"/>
+  <circle cx="32" cy="25.8" r="4.7" fill="#07111F" stroke="url(#mark)" stroke-width="3"/>
+  <circle cx="49.5" cy="24.5" r="4.7" fill="#07111F" stroke="url(#mark)" stroke-width="3"/>
+  <circle cx="23.2" cy="43" r="3" fill="#E8F7FF"/>
+  <circle cx="40.8" cy="43" r="3" fill="#E8F7FF"/>
+  <path d="M48.2 14.8L49.6 18.1L52.9 19.5L49.6 20.9L48.2 24.2L46.8 20.9L43.5 19.5L46.8 18.1L48.2 14.8Z" fill="#E8F7FF" opacity="0.92"/>
 </svg>

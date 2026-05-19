@@ -9,6 +9,9 @@
         <a class="nav-link" asp-page="/App/Account/Index"><i class="bi bi-person-circle"></i><span>Hello, @User.Identity?.Name</span></a>
     </li>
     <li class="nav-item">
+        <a class="btn nav-cta nav-cta-primary" asp-page="/App/Dashboard"><i class="bi bi-grid-1x2-fill"></i> Open workspace</a>
+    </li>
+    <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index")" method="post">
             <button type="submit" class="btn nav-cta nav-cta-secondary"><i class="bi bi-box-arrow-right"></i> Sign out</button>
         </form>
@@ -17,10 +20,10 @@
 else
 {
     <li class="nav-item">
-        <button type="button" class="btn nav-cta nav-cta-primary" data-auth-open="register"><i class="bi bi-lightning-charge-fill"></i> Start</button>
+        <button type="button" class="btn nav-cta nav-cta-primary nav-get-started" data-auth-open="register"><i class="bi bi-lightning-charge-fill"></i><span>Get started</span></button>
     </li>
     <li class="nav-item">
-        <button type="button" class="btn nav-cta nav-cta-secondary" data-auth-open="login"><i class="bi bi-box-arrow-in-right"></i> Log in</button>
+        <button type="button" class="btn nav-cta nav-cta-secondary" data-auth-open="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</button>
     </li>
 }
 </ul>

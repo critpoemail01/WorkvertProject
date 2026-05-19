@@ -4,12 +4,12 @@
     ViewData["Title"] = "Subscription";
 }
 
-<div class="account-page">
+<div class="account-page billing-page">
     <div class="account-heading">
         <div>
             <span class="tag mb-2">Account and settings</span>
             <h1 class="fw-bold mb-0">Subscription details</h1>
-            <p class="muted mb-0">Review your plan, payments, and alert capacity.</p>
+            <p class="muted mb-0">Review your plan, payments and professional search capacity.</p>
         </div>
         @if (Model.IsUnlimited)
         {
@@ -17,7 +17,7 @@
         }
         else
         {
-            <a class="btn btn-primary" href="#change-subscription">Upgrade</a>
+            <a class="btn btn-primary" href="#change-subscription">Upgrade plan</a>
         }
     </div>
 
@@ -26,7 +26,7 @@
         <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
     }
 
-    <section class="account-section mt-4">
+    <section class="account-section billing-overview-panel mt-4">
         <div class="account-section-title">Subscription details</div>
         <div class="account-rows">
             <div class="account-row">
@@ -38,7 +38,7 @@
                 }
                 else
                 {
-                    <a href="#change-subscription">Upgrade</a>
+                    <a href="#change-subscription">Upgrade plan</a>
                 }
             </div>
             <div class="account-row">
@@ -73,28 +73,31 @@
         </div>
     </section>
 
-    <div class="row g-3 mt-3">
-        <div class="col-md-4">
-            <div class="surface metric-card">
-                <div class="small muted">Credit capacity</div>
-                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.Capacity)</div>
+    <div class="billing-metric-grid mt-3">
+        <article class="billing-metric-card">
+            <span><i class="bi bi-lightning-charge"></i></span>
+            <div>
+                <small>Credit capacity</small>
+                <strong>@(Model.IsUnlimited ? "Unlimited" : Model.Capacity)</strong>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="surface metric-card">
-                <div class="small muted">Active alert credits</div>
-                <div class="display-6 fw-bold">@Model.ActiveAlerts</div>
+        </article>
+        <article class="billing-metric-card">
+            <span><i class="bi bi-search"></i></span>
+            <div>
+                <small>Active searches</small>
+                <strong>@Model.ActiveAlerts</strong>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="surface metric-card">
-                <div class="small muted">Credits remaining</div>
-                <div class="display-6 fw-bold">@(Model.IsUnlimited ? "Unlimited" : Model.RemainingSlots)</div>
+        </article>
+        <article class="billing-metric-card">
+            <span><i class="bi bi-wallet2"></i></span>
+            <div>
+                <small>Credits remaining</small>
+                <strong>@(Model.IsUnlimited ? "Unlimited" : Model.RemainingSlots)</strong>
             </div>
-        </div>
+        </article>
     </div>
 
-    <section class="account-section mt-4">
+    <section class="account-section billing-payment-section mt-4">
         <div class="account-section-title">Payment</div>
         <div class="billing-payment-panel">
             <div class="billing-payment-icon">
@@ -114,17 +117,17 @@
         </div>
     </section>
 
-    <section class="account-section mt-4" id="change-subscription">
+    <section class="account-section billing-plan-section mt-4" id="change-subscription">
         <div class="account-section-title">Change subscription</div>
         <div class="subscription-choice-grid">
             <div class="subscription-choice">
                 <div class="plan-badge mb-3"><i class="bi bi-arrow-repeat"></i> Flexible</div>
-                <h2 class="h3 fw-bold mb-1">Monthly unlimited</h2>
+                <h2 class="h3 fw-bold mb-1">Monthly Unlimited</h2>
                 <div class="plan-price">@Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)<span class="fs-6 muted">/month</span></div>
-                <p class="muted mt-2">Unlimited products, categories, channels, and report cadence with 30 days of access.</p>
+                <p class="muted mt-2">Professional searches, recommendations, channels and reports with 30 days of access.</p>
                 <ul class="muted">
                     <li>No annual commitment</li>
-                    <li>Email, webhooks, and team channels</li>
+                    <li>Email, webhooks and team channels</li>
                     <li>Manual renewal through checkout</li>
                 </ul>
                 <div class="d-grid gap-2 mt-3">
@@ -136,9 +139,9 @@
                             data-checkout-kind="unlimited"
                             data-checkout-plan="monthly"
                             data-checkout-pack=""
-                            data-checkout-title="Monthly unlimited"
+                            data-checkout-title="Monthly Unlimited"
                             data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedMonthlyAmount, Model.UnlimitedMonthlyCurrency)}/month")"
-                            data-checkout-detail="Unlimited active product alerts for 30 days.">
+                            data-checkout-detail="Unlimited professional searches for 30 days.">
                         <i class="bi bi-credit-card-2-front me-1"></i> Pay monthly
                     </button>
                 </div>
@@ -146,13 +149,13 @@
 
             <div class="subscription-choice subscription-choice-highlight">
                 <div class="plan-badge plan-badge-warm mb-3"><i class="bi bi-stars"></i> Best value</div>
-                <h2 class="h3 fw-bold mb-1">Annual unlimited</h2>
+                <h2 class="h3 fw-bold mb-1">Annual Unlimited</h2>
                 <div class="plan-price">@Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)<span class="fs-6 muted">/year</span></div>
-                <p class="muted mt-2">One year of unlimited alerts with more than 50% saved compared with monthly billing.</p>
+                <p class="muted mt-2">One year of unlimited recommendations with more than 50% savings versus monthly billing.</p>
                 <ul class="muted">
-                    <li>Unlimited active product alerts for 1 year</li>
-                    <li>Best option for active deal research workflows</li>
-                    <li>No alert counting or capacity checks</li>
+                    <li>Unlimited professional searches for 1 year</li>
+                    <li>Best option for recurring career monitoring</li>
+                    <li>No alert counts or capacity checks</li>
                 </ul>
                 <div class="d-grid gap-2 mt-3">
                     <button type="button"
@@ -163,9 +166,9 @@
                             data-checkout-kind="unlimited"
                             data-checkout-plan="annual"
                             data-checkout-pack=""
-                            data-checkout-title="Annual unlimited"
+                            data-checkout-title="Annual Unlimited"
                             data-checkout-price="@($"{Model.FormatMoney(Model.UnlimitedAnnualAmount, Model.UnlimitedAnnualCurrency)}/year")"
-                            data-checkout-detail="One year of unlimited alerts at the best price.">
+                            data-checkout-detail="One year of unlimited recommendations at the best price.">
                         <i class="bi bi-credit-card-2-front me-1"></i> Pay annually
                     </button>
                 </div>
@@ -173,9 +176,9 @@
         </div>
     </section>
 
-    <section class="account-section mt-4" id="credit-packs">
+    <section class="account-section billing-credit-section mt-4" id="credit-packs">
         <div class="account-section-title">Credit packs</div>
-        <p class="muted mb-4">1 paid credit = 1 active alert for @Model.CreditPackValidityDays days after payment confirmation. Packs are for occasional monitoring without a subscription.</p>
+        <p class="muted mb-4">1 paid credit = 1 active professional search for @Model.CreditPackValidityDays days after payment confirmation. Packs are for occasional use without a subscription.</p>
         <div class="row g-3">
             @foreach (var pack in Model.Packs)
             {
@@ -184,7 +187,7 @@
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
                                 <div class="fw-semibold">@pack.Credits credits</div>
-                                <div class="muted small">Adds @pack.Credits active alert credits for @Model.CreditPackValidityDays days</div>
+                                <div class="muted small">Adds @pack.Credits active searches for @Model.CreditPackValidityDays days</div>
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold">@Model.FormatMoney(pack.Amount, pack.Currency)</div>
@@ -193,7 +196,7 @@
                         </div>
                         <div class="credit-validity-note mt-3">
                             <i class="bi bi-hourglass-split"></i>
-                            <span>Expires @Model.CreditPackValidityDays days after payment. Choose unlimited for continuous capacity.</span>
+                            <span>Expires @Model.CreditPackValidityDays days after payment. Choose Unlimited for continuous use.</span>
                         </div>
                         <div class="d-grid gap-2 mt-3">
                             <button type="button"
@@ -206,7 +209,7 @@
                                     data-checkout-pack="@pack.Id"
                                     data-checkout-title="@($"{pack.Credits} credits")"
                                     data-checkout-price="@Model.FormatMoney(pack.Amount, pack.Currency)"
-                                    data-checkout-detail="@($"Adds {pack.Credits} active alert credits for {Model.CreditPackValidityDays} days after payment confirmation.")">
+                                    data-checkout-detail="@($"Adds {pack.Credits} active professional searches for {Model.CreditPackValidityDays} days after payment confirmation.")">
                                 <i class="bi bi-credit-card-2-front me-1"></i> Buy @pack.Credits credits
                             </button>
                         </div>
@@ -216,7 +219,7 @@
         </div>
     </section>
 
-    <section class="account-section mt-4">
+    <section class="account-section billing-history-panel mt-4">
         <div class="account-section-title">Purchase history</div>
         @if (!Model.Purchases.Any())
         {

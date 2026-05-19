@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Net.Http.Json;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
 
 namespace Workvert.Pages.App;
@@ -18,15 +21,18 @@ public class SettingsModel : PageModel
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IOptionsMonitor<NotificationOptions> _notificationOptions;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public SettingsModel(
         ApplicationDbContext db,
         UserManager<IdentityUser> userManager,
-        IOptionsMonitor<NotificationOptions> notificationOptions)
+        IOptionsMonitor<NotificationOptions> notificationOptions,
+        IHttpClientFactory httpClientFactory)
     {
         _db = db;
         _userManager = userManager;
         _notificationOptions = notificationOptions;
+        _httpClientFactory = httpClientFactory;
     }
 
     [BindProperty]
@@ -34,6 +40,9 @@ public class SettingsModel : PageModel
 
     [TempData]
     public string? StatusMessage { get; set; }
+
+    [TempData]
+    public string? StatusMessageKind { get; set; }
 
     public bool TelegramBotConfigured { get; private set; }
     public bool EmailTransportConfigured { get; private set; }
@@ -250,7 +259,23 @@ public class SettingsModel : PageModel
 
         await _db.SaveChangesAsync();
         StatusMessage = "Notification channel settings saved.";
+        StatusMessageKind = "success";
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSendTestAsync(string channel, CancellationToken ct)
+    {
+        TelegramBotConfigured = !string.IsNullOrWhiteSpace(_notificationOptions.CurrentValue.TelegramBotToken);
+        EmailTransportConfigured = IsEmailTransportConfigured();
+        EmailSenderProfileCount = CountEmailSenderProfiles();
+
+        ModelState.Clear();
+
+        var result = await SendTestNotificationAsync(channel, ct);
+        StatusMessage = result.Message;
+        StatusMessageKind = result.Success ? "success" : "warning";
+
+        return Page();
     }
 
     private void ApplyOfficialIntegrations(UserNotificationSettings settings)
@@ -365,5 +390,241 @@ public class SettingsModel : PageModel
     private int CountEmailSenderProfiles()
     {
         return EmailSenderPool.GetConfiguredSenders(_notificationOptions.CurrentValue.Email).Count;
+    }
+
+    private async Task<TestNotificationResult> SendTestNotificationAsync(string channel, CancellationToken ct)
+    {
+        var normalized = NormalizeTestChannel(channel);
+        if (normalized is null)
+            return TestNotificationResult.Warning("Choose a valid notification channel to test.");
+
+        return normalized switch
+        {
+            "Email" => await SendEmailTestAsync(ct),
+            "Webhook" => await PostJsonTestAsync(
+                "Webhook",
+                Input.WebhookUrl,
+                BuildGenericPayload("Webhook"),
+                "configured webhook",
+                ct),
+            "Slack" => await PostJsonTestAsync(
+                "Slack",
+                Input.SlackWebhookUrl,
+                new { text = BuildPlainTestMessage("Slack") },
+                "Slack webhook",
+                ct),
+            "Discord" => await PostJsonTestAsync(
+                "Discord",
+                Input.DiscordWebhookUrl,
+                new
+                {
+                    content = BuildPlainTestMessage("Discord"),
+                    allowed_mentions = new { parse = Array.Empty<string>() }
+                },
+                "Discord webhook",
+                ct),
+            "Teams" => await PostJsonTestAsync(
+                "Microsoft Teams",
+                Input.TeamsWebhookUrl,
+                new Dictionary<string, object>
+                {
+                    ["@type"] = "MessageCard",
+                    ["@context"] = "https://schema.org/extensions",
+                    ["summary"] = "Workvert test notification",
+                    ["themeColor"] = "2dd4bf",
+                    ["title"] = "Workvert test notification",
+                    ["text"] = BuildPlainTestMessage("Microsoft Teams")
+                },
+                "Microsoft Teams webhook",
+                ct),
+            "Telegram" => await SendTelegramTestAsync(ct),
+            _ => TestNotificationResult.Warning("Choose a valid notification channel to test.")
+        };
+    }
+
+    private async Task<TestNotificationResult> SendEmailTestAsync(CancellationToken ct)
+    {
+        if (!Input.EmailEnabled)
+            return TestNotificationResult.Warning("Email test was not sent because email alerts are muted.");
+
+        var senderProfiles = EmailSenderPool.GetConfiguredSenders(_notificationOptions.CurrentValue.Email);
+        if (senderProfiles.Count == 0)
+            return TestNotificationResult.Warning("Email test was not sent because no SMTP sender profile is configured.");
+
+        var user = await _userManager.GetUserAsync(User);
+        var recipientEmail = user?.Email ?? user?.UserName;
+        if (string.IsNullOrWhiteSpace(recipientEmail))
+            return TestNotificationResult.Warning("Email test was not sent because this account has no email address.");
+
+        MailAddress recipient;
+        try
+        {
+            recipient = new MailAddress(recipientEmail.Trim());
+        }
+        catch (FormatException)
+        {
+            return TestNotificationResult.Warning("Email test was not sent because this account email address is invalid.");
+        }
+
+        var sender = EmailSenderPool.SelectSender(senderProfiles, 0, recipient.Address, 0);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TestTimeout());
+
+        try
+        {
+            using var client = new SmtpClient(sender.SmtpServer, sender.SmtpPort)
+            {
+                EnableSsl = sender.EnableSsl,
+                Credentials = new NetworkCredential(sender.Username, sender.Password)
+            };
+
+            using var mail = new MailMessage
+            {
+                From = new MailAddress(sender.FromEmail, sender.FromName),
+                Subject = "Workvert test notification",
+                Body = BuildPlainTestMessage("Email"),
+                IsBodyHtml = false
+            };
+            mail.To.Add(recipient);
+
+            await client.SendMailAsync(mail, timeout.Token);
+            return TestNotificationResult.Ok($"Email test sent to {recipient.Address}.");
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+        {
+            return TestNotificationResult.Warning("Email test timed out before the SMTP server replied.");
+        }
+        catch (Exception ex)
+        {
+            return TestNotificationResult.Warning($"Email test failed: {Truncate(ex.Message, 220)}");
+        }
+    }
+
+    private async Task<TestNotificationResult> SendTelegramTestAsync(CancellationToken ct)
+    {
+        var token = _notificationOptions.CurrentValue.TelegramBotToken;
+        if (string.IsNullOrWhiteSpace(token))
+            return TestNotificationResult.Warning("Telegram test was not sent because the bot token is not configured.");
+
+        if (string.IsNullOrWhiteSpace(Input.TelegramChatId))
+            return TestNotificationResult.Warning("Telegram test was not sent because the chat ID is empty.");
+
+        var uri = new Uri($"https://api.telegram.org/bot{token.Trim()}/sendMessage");
+        var payload = new
+        {
+            chat_id = Input.TelegramChatId.Trim(),
+            text = BuildPlainTestMessage("Telegram"),
+            disable_web_page_preview = true
+        };
+
+        return await PostJsonTestAsync("Telegram", uri, payload, $"Telegram chat {Input.TelegramChatId.Trim()}", ct);
+    }
+
+    private async Task<TestNotificationResult> PostJsonTestAsync(
+        string channel,
+        string? url,
+        object payload,
+        string destination,
+        CancellationToken ct)
+    {
+        if (!TryAbsoluteHttpUri(url, out var uri))
+            return TestNotificationResult.Warning($"{channel} test was not sent because the URL is empty or invalid.");
+
+        return await PostJsonTestAsync(channel, uri, payload, destination, ct);
+    }
+
+    private async Task<TestNotificationResult> PostJsonTestAsync(
+        string channel,
+        Uri uri,
+        object payload,
+        string destination,
+        CancellationToken ct)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TestTimeout());
+
+        try
+        {
+            using var response = await _httpClientFactory
+                .CreateClient("notifications")
+                .PostAsJsonAsync(uri, payload, timeout.Token);
+
+            if (response.IsSuccessStatusCode)
+                return TestNotificationResult.Ok($"{channel} test sent to {destination}.");
+
+            var body = await response.Content.ReadAsStringAsync(timeout.Token);
+            var detail = string.IsNullOrWhiteSpace(body)
+                ? $"HTTP {(int)response.StatusCode}"
+                : Truncate(body, 220);
+            return TestNotificationResult.Warning($"{channel} test failed: {detail}");
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+        {
+            return TestNotificationResult.Warning($"{channel} test timed out before the destination replied.");
+        }
+        catch (Exception ex)
+        {
+            return TestNotificationResult.Warning($"{channel} test failed: {Truncate(ex.Message, 220)}");
+        }
+    }
+
+    private static object BuildGenericPayload(string channel)
+    {
+        return new
+        {
+            type = "workvert.notification_test",
+            channel,
+            sentAtUtc = DateTime.UtcNow,
+            message = BuildPlainTestMessage(channel),
+            sample = new
+            {
+                jobMatches = true,
+                serviceWork = true,
+                clientRequests = true
+            }
+        };
+    }
+
+    private static string BuildPlainTestMessage(string channel)
+    {
+        return $"Workvert test notification via {channel}. If you received this, your channel is ready for job matches, service work and client request alerts.";
+    }
+
+    private static string? NormalizeTestChannel(string? channel)
+    {
+        return Clean(channel)?.ToUpperInvariant() switch
+        {
+            "EMAIL" => "Email",
+            "WEBHOOK" => "Webhook",
+            "SLACK" => "Slack",
+            "DISCORD" => "Discord",
+            "TEAMS" => "Teams",
+            "TELEGRAM" => "Telegram",
+            _ => null
+        };
+    }
+
+    private TimeSpan TestTimeout()
+    {
+        return TimeSpan.FromSeconds(Math.Clamp(_notificationOptions.CurrentValue.RequestTimeoutSeconds, 1, 30));
+    }
+
+    private static bool TryAbsoluteHttpUri(string? url, out Uri uri)
+    {
+        uri = null!;
+        return !string.IsNullOrWhiteSpace(url) &&
+            Uri.TryCreate(url.Trim(), UriKind.Absolute, out uri!) &&
+            (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
+    }
+
+    private static string Truncate(string value, int maxLength)
+    {
+        return value.Length <= maxLength ? value : value[..maxLength];
+    }
+
+    private sealed record TestNotificationResult(bool Success, string Message)
+    {
+        public static TestNotificationResult Ok(string message) => new(true, message);
+        public static TestNotificationResult Warning(string message) => new(false, message);
     }
 }

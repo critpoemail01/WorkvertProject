@@ -1,22 +1,27 @@
 @page
 @model Workvert.Pages.App.SettingsModel
 @{
-    ViewData["Title"] = "Email and channels";
+    ViewData["Title"] = "Notifications";
 }
 
-<div class="account-page">
+<div class="account-page settings-page">
     <div class="account-heading">
         <div>
             <span class="tag mb-2">Account and settings</span>
-            <h1 class="fw-bold mb-0">Email and channels</h1>
-            <p class="muted mb-0">Choose where Workvert sends price alerts, daily opportunity reports, and webhook payloads.</p>
+            <h1 class="fw-bold mb-0">Notifications</h1>
+            <p class="muted mb-0">Choose where Workvert sends recommendations, professional alerts, reports and webhooks.</p>
         </div>
-        <a class="btn btn-outline-secondary" asp-page="/App/Alerts/Index">Back to alerts</a>
+        <div class="settings-hero-actions">
+            <span><i class="bi bi-briefcase"></i> Job matches</span>
+            <span><i class="bi bi-person-workspace"></i> Service work</span>
+            <span><i class="bi bi-tools"></i> Client requests</span>
+        </div>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
-        <div class="alert alert-success mt-4 mb-0">@Model.StatusMessage</div>
+        var statusKind = Model.StatusMessageKind is "warning" or "danger" ? Model.StatusMessageKind : "success";
+        <div class="alert alert-@statusKind mt-4 mb-0">@Model.StatusMessage</div>
     }
 
     <form method="post">
@@ -47,24 +52,41 @@
         <input type="hidden" asp-for="Input.AgencyReportFooter" />
         <input type="hidden" asp-for="Input.AgencyPermissionMode" />
 
-        <section class="account-section mt-4">
-            <div class="account-section-title">Delivery preferences</div>
-            <div class="notification-channel-intro">
+        <section class="account-section notification-settings-panel mt-4">
+            <div class="notification-settings-head">
                 <div>
-                    <span class="tag">Primary channels</span>
-                    <h2>Receive alerts where you can act quickly</h2>
-                    <p>Email covers price alerts and daily reports. Webhooks connect the radar to automations, teams, or your own dashboards.</p>
+                    <span class="support-panel-kicker">Delivery preferences</span>
+                    <h2>Route every recommendation to the right place.</h2>
+                    <p>Email covers recommendations and reports. Webhooks connect Workvert to automations, teams or your own dashboards.</p>
                 </div>
-                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+                <a class="btn btn-primary app-new-alert-action" asp-page="/App/Career/Index" asp-route-path="job"><i class="bi bi-stars me-1"></i>Analyze profile</a>
             </div>
 
-            <div class="notification-channel-grid">
+            <div class="settings-snapshot-grid">
+                <article>
+                    <span>Email</span>
+                    <strong>@(Model.Input.EmailEnabled ? "Enabled" : "Muted")</strong>
+                    <small>@(Model.EmailTransportConfigured ? "Sender configured" : "Needs sender setup")</small>
+                </article>
+                <article>
+                    <span>Automation</span>
+                    <strong>@(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "Not connected" : "Connected")</strong>
+                    <small>Webhook destination</small>
+                </article>
+                <article>
+                    <span>Team channels</span>
+                    <strong>@((!string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) || !string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) || !string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl)) ? "Active" : "Optional")</strong>
+                    <small>Slack, Discord or Teams</small>
+                </article>
+            </div>
+
+            <div class="notification-channel-grid settings-channel-grid">
                 <article class="notification-channel-card">
                     <div class="notification-channel-head">
                         <span class="notification-channel-icon"><i class="bi bi-envelope"></i></span>
                         <div>
                             <h3>Email</h3>
-                            <p>Main channel for price alerts and daily opportunity reports.</p>
+                            <p>Main channel for professional recommendations and reports.</p>
                         </div>
                         <span class="notification-channel-status @(Model.Input.EmailEnabled && Model.EmailTransportConfigured ? "ready" : Model.Input.EmailEnabled ? "setup" : "muted")">
                             @(Model.Input.EmailEnabled && Model.EmailTransportConfigured ? "Ready" : Model.Input.EmailEnabled ? "Setup" : "Muted")
@@ -82,6 +104,9 @@
                     <small class="notification-channel-note">
                         @(Model.EmailTransportConfigured ? $"{Model.EmailSenderProfileCount} sender profile{(Model.EmailSenderProfileCount == 1 ? "" : "s")} configured." : "Configure Notifications:Email or Notifications:Email:SenderProfiles before sending emails.")
                     </small>
+                    <button class="btn btn-outline-secondary notification-test-button" type="submit" asp-page-handler="SendTest" name="channel" value="Email" formnovalidate>
+                        <i class="bi bi-send me-1"></i>Send test
+                    </button>
                 </article>
 
                 <article class="notification-channel-card">
@@ -89,7 +114,7 @@
                         <span class="notification-channel-icon"><i class="bi bi-braces"></i></span>
                         <div>
                             <h3>Webhook</h3>
-                            <p>Send structured deal alerts to automation tools, bots, spreadsheets, or custom dashboards.</p>
+                            <p>Send structured recommendations to automations, bots, spreadsheets or dashboards.</p>
                         </div>
                         <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.WebhookUrl) ? "Setup" : "Ready")</span>
                     </div>
@@ -98,6 +123,9 @@
                         <input asp-for="Input.WebhookUrl" class="form-control" placeholder="https://example.com/workvert-webhook" />
                     </label>
                     <span asp-validation-for="Input.WebhookUrl" class="text-danger"></span>
+                    <button class="btn btn-outline-secondary notification-test-button" type="submit" asp-page-handler="SendTest" name="channel" value="Webhook" formnovalidate>
+                        <i class="bi bi-send me-1"></i>Send test
+                    </button>
                 </article>
 
                 <article class="notification-channel-card">
@@ -105,7 +133,7 @@
                         <span class="notification-channel-icon"><i class="bi bi-slack"></i></span>
                         <div>
                             <h3>Slack</h3>
-                            <p>Post high-margin product signals into a team channel.</p>
+                            <p>Post relevant professional opportunities to a team channel.</p>
                         </div>
                         <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.SlackWebhookUrl) ? "Setup" : "Ready")</span>
                     </div>
@@ -114,6 +142,9 @@
                         <input asp-for="Input.SlackWebhookUrl" class="form-control" placeholder="https://hooks.slack.com/services/..." />
                     </label>
                     <span asp-validation-for="Input.SlackWebhookUrl" class="text-danger"></span>
+                    <button class="btn btn-outline-secondary notification-test-button" type="submit" asp-page-handler="SendTest" name="channel" value="Slack" formnovalidate>
+                        <i class="bi bi-send me-1"></i>Send test
+                    </button>
                 </article>
 
                 <article class="notification-channel-card">
@@ -121,7 +152,7 @@
                         <span class="notification-channel-icon"><i class="bi bi-discord"></i></span>
                         <div>
                             <h3>Discord</h3>
-                            <p>Route opportunities to private resale, buying, or research communities.</p>
+                            <p>Forward opportunities to private communities, teams or work groups.</p>
                         </div>
                         <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.DiscordWebhookUrl) ? "Setup" : "Ready")</span>
                     </div>
@@ -130,6 +161,9 @@
                         <input asp-for="Input.DiscordWebhookUrl" class="form-control" placeholder="https://discord.com/api/webhooks/..." />
                     </label>
                     <span asp-validation-for="Input.DiscordWebhookUrl" class="text-danger"></span>
+                    <button class="btn btn-outline-secondary notification-test-button" type="submit" asp-page-handler="SendTest" name="channel" value="Discord" formnovalidate>
+                        <i class="bi bi-send me-1"></i>Send test
+                    </button>
                 </article>
 
                 <article class="notification-channel-card">
@@ -137,7 +171,7 @@
                         <span class="notification-channel-icon"><i class="bi bi-microsoft-teams"></i></span>
                         <div>
                             <h3>Microsoft Teams</h3>
-                            <p>Send price signals to procurement or operations workspaces.</p>
+                            <p>Send recommendations to HR, recruiting or operations teams.</p>
                         </div>
                         <span class="notification-channel-status @(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "setup" : "ready")">@(string.IsNullOrWhiteSpace(Model.Input.TeamsWebhookUrl) ? "Setup" : "Ready")</span>
                     </div>
@@ -146,6 +180,9 @@
                         <input asp-for="Input.TeamsWebhookUrl" class="form-control" placeholder="https://outlook.office.com/webhook/..." />
                     </label>
                     <span asp-validation-for="Input.TeamsWebhookUrl" class="text-danger"></span>
+                    <button class="btn btn-outline-secondary notification-test-button" type="submit" asp-page-handler="SendTest" name="channel" value="Teams" formnovalidate>
+                        <i class="bi bi-send me-1"></i>Send test
+                    </button>
                 </article>
 
                 <article class="notification-channel-card">
@@ -165,52 +202,57 @@
                     </label>
                     <small class="notification-channel-note">@(Model.TelegramBotConfigured ? "Telegram bot is configured." : "Configure the Telegram bot token before Telegram alerts can send.")</small>
                     <span asp-validation-for="Input.TelegramChatId" class="text-danger"></span>
+                    <button class="btn btn-outline-secondary notification-test-button" type="submit" asp-page-handler="SendTest" name="channel" value="Telegram" formnovalidate>
+                        <i class="bi bi-send me-1"></i>Send test
+                    </button>
                 </article>
             </div>
 
             <div class="notification-channel-actions">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Save channels</button>
-                <span>These destinations become available when you create or edit alerts.</span>
+                <span>These destinations are available for recommendations, reports and alerts.</span>
             </div>
         </section>
 
-        <section class="account-section mt-4">
-            <div class="account-section-title">Time zone settings</div>
+        <section class="account-section settings-timezone-section mt-4">
             <div class="settings-timezone-panel" data-settings-timezone>
                 <div class="settings-timezone-copy">
                     <span class="settings-timezone-icon"><i class="bi bi-globe2"></i></span>
                     <div>
-                        <h2>Local timestamps in every alert</h2>
-                        <p>Activity stays stored in UTC. This setting controls the local timestamp shown in emails, webhooks, and the alert history.</p>
+                        <span class="support-panel-kicker">Time zone</span>
+                        <h2>Local time in every notification</h2>
+                        <p>Activity is stored in UTC. This setting controls the local time shown in emails, webhooks and history.</p>
                     </div>
                 </div>
 
-                <div class="settings-timezone-control">
-                    <label class="modal-field-label" for="notificationTimeZone">Notification time zone</label>
-                    <select asp-for="Input.AlertTimeZone" class="form-select settings-timezone" id="notificationTimeZone" data-combo data-settings-timezone-select>
-                        @foreach (var zone in Model.NotificationTimeZones)
-                        {
-                            <option value="@zone.Id" selected="@(zone.Id == Model.Input.AlertTimeZone)">@zone.Label</option>
-                        }
-                    </select>
-                    <span asp-validation-for="Input.AlertTimeZone" class="text-danger"></span>
-                </div>
-
-                <div class="schedule-timezone-card settings-timezone-card">
-                    <div>
-                        <span>Detected on this device</span>
-                        <strong data-settings-browser-timezone>Detecting browser time zone...</strong>
+                <div class="settings-timezone-tools">
+                    <div class="settings-timezone-control">
+                        <label class="modal-field-label" for="notificationTimeZone">Notification time zone</label>
+                        <select asp-for="Input.AlertTimeZone" class="form-select settings-timezone" id="notificationTimeZone" data-combo data-settings-timezone-select>
+                            @foreach (var zone in Model.NotificationTimeZones)
+                            {
+                                <option value="@zone.Id" selected="@(zone.Id == Model.Input.AlertTimeZone)">@zone.Label</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.AlertTimeZone" class="text-danger"></span>
                     </div>
-                    <button class="btn btn-outline-secondary btn-sm" type="button" data-settings-use-browser-timezone disabled>Use detected</button>
-                    <div>
-                        <span>Selected local time</span>
-                        <strong data-settings-selected-timezone-clock>Checking selected time...</strong>
-                    </div>
-                </div>
 
-                <div class="settings-timezone-actions">
-                    <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Save settings</button>
-                    <span>Use UTC for neutral timestamps, or choose your local city for clearer alert delivery times.</span>
+                    <div class="schedule-timezone-card settings-timezone-card">
+                        <div>
+                            <span>Detected on this device</span>
+                            <strong data-settings-browser-timezone>Detecting browser time zone...</strong>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-settings-use-browser-timezone disabled>Use detected</button>
+                        <div>
+                            <span>Selected local time</span>
+                            <strong data-settings-selected-timezone-clock>Checking selected time...</strong>
+                        </div>
+                    </div>
+
+                    <div class="settings-timezone-actions">
+                        <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Save settings</button>
+                        <span>Use UTC for neutral records or choose a local city for clearer notifications.</span>
+                    </div>
                 </div>
             </div>
         </section>

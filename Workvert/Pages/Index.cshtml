@@ -1,36 +1,36 @@
 @page
 @model Workvert.Pages.IndexModel
 @{
-    ViewData["Title"] = "URL price alerts";
+    ViewData["Title"] = "Intelligent professional assistant";
 }
 
 <section class="hero-section product-landing">
     <div class="container">
         <div class="promo-strip mb-4">
             <div>
-                <span class="promo-label">Deal radar</span>
-                <span class="promo-copy">Track products by URL, compare trusted stores, and receive resale opportunities by email.</span>
+                <span class="promo-label">Workvert</span>
+                <span class="promo-copy">AI for three types of necessities: find the right work, offer goods and services, or find someone who can do the service you need.</span>
             </div>
-            <a class="promo-link" asp-page="/Pricing">View plans <i class="bi bi-arrow-right-short"></i></a>
+            <a class="promo-link" asp-page="/Pricing" asp-fragment="plans">View plans <i class="bi bi-arrow-right-short"></i></a>
         </div>
 
         <div class="surface hero-card product-landing-hero p-4 p-md-5">
             <div class="row align-items-center g-4">
                 <div class="col-lg-7">
                     <div class="hero-kicker mb-3">
-                        <i class="bi bi-radar"></i>
-                        <span>Price alerts and product arbitrage</span>
+                        <i class="bi bi-stars"></i>
+                        <span>Three types of necessities. One solution.</span>
                     </div>
 
-                    <h1 class="display-5 fw-bold hero-title mb-3">Workvert tells you when a product is cheap enough to buy.</h1>
+                    <h1 class="display-5 fw-bold hero-title mb-3">Find the right work, offer goods and services, or find someone who can do the service you need.</h1>
                     <p class="lead mb-4 muted">
-                        Paste an Amazon.es URL or another store link, choose a country, city, target price, and margin. Workvert watches trusted stores and emails you when it finds an opportunity.
+                        Workvert helps people who want better work, people who can provide value, and people who need a reliable provider for a real service.
                     </p>
 
                     <div class="d-flex flex-wrap gap-2">
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create">Create alert</a>
+                            <a class="btn btn-primary btn-lg" asp-page="/App/Career/Index">Analyze profile</a>
                             <a class="btn btn-outline-secondary btn-lg" asp-page="/App/Dashboard">Open dashboard</a>
                         }
                         else
@@ -41,59 +41,59 @@
                     </div>
 
                     <div class="micro-proof-row">
-                        <span><i class="bi bi-check2"></i> Product URL</span>
-                        <span><i class="bi bi-check2"></i> Country, city, and category</span>
-                        <span><i class="bi bi-check2"></i> Email at the right price</span>
+                        <span><i class="bi bi-check2"></i> Find the right work</span>
+                        <span><i class="bi bi-check2"></i> Offer goods and services</span>
+                        <span><i class="bi bi-check2"></i> Find a good provider</span>
                     </div>
 
                     <div class="hero-proof mt-4">
                         <div>
-                            <strong>5</strong>
-                            <span>free alerts</span>
+                            <strong>3</strong>
+                            <span>types of necessities</span>
+                        </div>
+                        <div>
+                            <strong>AI</strong>
+                            <span>profile and request matching</span>
                         </div>
                         <div>
                             <strong>24/7</strong>
-                            <span>monitoring</span>
-                        </div>
-                        <div>
-                            <strong>resale</strong>
-                            <span>daily benchmark</span>
+                            <span>future opportunity alerts</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-5">
-                    <div class="deal-radar-panel">
-                        <div class="deal-radar-head">
-                            <span class="badge badge-soft">Active radar</span>
+                    <div class="career-preview-panel">
+                        <div class="career-preview-head">
+                            <span class="badge badge-soft">Profile analyzed</span>
                             <span class="market-dot"></span>
                         </div>
-                        <div class="deal-radar-product">
-                            <span><i class="bi bi-link-45deg"></i></span>
+                        <div class="career-preview-profile">
+                            <span><i class="bi bi-person-vcard"></i></span>
                             <div>
-                                <strong>amazon.es/dp/B0...</strong>
-                                <small>Consoles · Lisbon, Portugal</small>
+                                <strong>Professional profile</strong>
+                                <small>Skills / goals / location</small>
                             </div>
                         </div>
-                        <div class="deal-radar-row best">
+                        <div class="career-preview-row best">
                             <div>
-                                <strong>Amazon.es</strong>
-                                <small>trusted store</small>
+                                <strong>Company work path</strong>
+                                <small>Role fit, skills, and preferences</small>
                             </div>
-                            <span>EUR 389.90</span>
+                            <span>Match</span>
                         </div>
-                        <div class="deal-radar-row">
+                        <div class="career-preview-row">
                             <div>
-                                <strong>OLX / Vinted</strong>
-                                <small>resale benchmark</small>
+                                <strong>Independent work path</strong>
+                                <small>Services, pricing, and proposal angle</small>
                             </div>
-                            <span>EUR 455.00</span>
+                            <span>Plan</span>
                         </div>
-                        <div class="deal-radar-alert">
-                            <i class="bi bi-bell-fill"></i>
+                        <div class="career-preview-alert">
+                            <i class="bi bi-file-earmark-text-fill"></i>
                             <div>
-                                <strong>Margin found</strong>
-                                <span>17% below benchmark. Email ready.</span>
+                                <strong>Service request match</strong>
+                                <span>Need, required skills, and professional type identified.</span>
                             </div>
                         </div>
                     </div>
@@ -101,33 +101,120 @@
             </div>
         </div>
 
-        <section class="mt-5">
-            <div class="section-header">
-                <span class="section-eyebrow"><i class="bi bi-stars"></i> How it works</span>
-                <h2 class="section-title">From product page to the alert that matters.</h2>
-                <p class="section-copy">Built for disciplined buying: target price, minimum margin, trusted stores, and a daily category report.</p>
+        <section class="mt-5 path-choice-section">
+            <div class="section-header path-choice-section-header">
+                <span class="section-eyebrow"><i class="bi bi-diagram-3"></i> Three types of necessities</span>
+                <h2 class="section-title">Choose the need you have now. Use all three with one account.</h2>
+                <p class="section-copy">Start with work, an offer, or a service request. Your account stays flexible and can run separate searches or alerts for each path.</p>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 path-choice-grid">
+                <div class="col-md-4">
+                    <article class="surface path-choice-card h-100">
+                        <span class="path-choice-number">01</span>
+                        <div class="path-choice-top">
+                            <div class="path-choice-icon"><i class="bi bi-person-badge"></i></div>
+                        </div>
+                        <h3>I want to find the right work</h3>
+                        <p>Match your profile to company roles, understand missing skills, and generate CV or application messages.</p>
+                        <div class="path-choice-meta">
+                            <span><i class="bi bi-check2"></i> Company work</span>
+                            <span><i class="bi bi-check2"></i> Compatibility score</span>
+                        </div>
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Career/Index" asp-route-path="job">Start work path</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register" data-auth-return="/App/Career?path=job">Start work path</button>
+                        }
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="surface path-choice-card h-100">
+                        <span class="path-choice-number">02</span>
+                        <div class="path-choice-top">
+                            <div class="path-choice-icon"><i class="bi bi-cash-coin"></i></div>
+                        </div>
+                        <h3>I want to offer goods and services</h3>
+                        <p>Turn skills, tools, goods, or services you can provide into sellable offers, pricing, and proposals.</p>
+                        <div class="path-choice-meta">
+                            <span><i class="bi bi-check2"></i> Self-employed work</span>
+                            <span><i class="bi bi-check2"></i> Service offers</span>
+                        </div>
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Career/Index" asp-route-path="freelance">Start offer path</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register" data-auth-return="/App/Career?path=freelance">Start offer path</button>
+                        }
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="surface path-choice-card h-100">
+                        <span class="path-choice-number">03</span>
+                        <div class="path-choice-top">
+                            <div class="path-choice-icon"><i class="bi bi-search-heart"></i></div>
+                        </div>
+                        <h3>I need someone who can do a good service</h3>
+                        <p>Describe what you need and get the right professional type, required skills, and recommended provider profiles.</p>
+                        <div class="path-choice-meta">
+                            <span><i class="bi bi-check2"></i> Service request</span>
+                            <span><i class="bi bi-check2"></i> Provider match</span>
+                        </div>
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="btn btn-primary w-100" asp-page="/App/Services/Index">Start request path</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary w-100" data-auth-open="register" data-auth-return="/App/Services">Start request path</button>
+                        }
+                    </article>
+                </div>
+            </div>
+
+            <div class="path-choice-note mt-3">
+                <i class="bi bi-arrow-repeat"></i>
+                <span>One user can use all three necessity flows. Each choice can become a separate active search or alert later, but it never locks the account into one role.</span>
+            </div>
+        </section>
+
+        <section class="mt-5 workvert-connects-section">
+            <div class="section-header workvert-connects-header">
+                <span class="section-eyebrow"><i class="bi bi-lightning-charge-fill"></i> What Workvert connects</span>
+                <h2 class="section-title">
+                    One platform connecting
+                    <span>right work</span>
+                    <span>valuable offers</span>
+                    <span>reliable providers</span>
+                </h2>
+                <p class="section-copy">Profiles, offers, and requests become practical recommendations for the next action.</p>
+            </div>
+
+            <div class="row g-4 workvert-connects-grid">
                 <div class="col-md-4">
                     <div class="surface feature-card h-100">
-                        <div class="icon-pill mb-3"><i class="bi bi-link-45deg"></i></div>
-                        <h5>Paste the URL</h5>
-                        <p class="mb-0 muted">Start from a real product on Amazon.es, Fnac, Worten, PcComponentes, or another store.</p>
+                        <div class="icon-pill mb-3"><i class="bi bi-person-lines-fill"></i></div>
+                        <h5>Find the right work</h5>
+                        <p class="mb-0 muted">Use your profile to find roles where your skills, experience, and goals can create value.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="surface feature-card h-100">
-                        <div class="icon-pill mb-3"><i class="bi bi-geo-alt"></i></div>
-                        <h5>Set the region</h5>
-                        <p class="mb-0 muted">Country, city, category, trusted stores, and resale marketplaces to compare.</p>
+                        <div class="icon-pill mb-3"><i class="bi bi-cash-coin"></i></div>
+                        <h5>Offer goods and services</h5>
+                        <p class="mb-0 muted">Turn what you know, make, or deliver into sellable services, offers, and proposals.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="surface feature-card h-100">
-                        <div class="icon-pill mb-3"><i class="bi bi-envelope-check"></i></div>
-                        <h5>Get the signal</h5>
-                        <p class="mb-0 muted">Email when the price hits the target, clears your margin, or the category shows opportunities.</p>
+                        <div class="icon-pill mb-3"><i class="bi bi-briefcase"></i></div>
+                        <h5>Find a good provider</h5>
+                        <p class="mb-0 muted">Describe a need and find the right professional, service, or solution provider for it.</p>
                     </div>
                 </div>
             </div>
@@ -135,20 +222,20 @@
 
         <div class="conversion-band mt-4">
             <div>
-                <span class="tag mb-2">Best next step</span>
-                <h2 class="fw-bold mb-2">Create your first alert with an Amazon.es URL.</h2>
-                <p class="mb-0 muted">Start with a product you already want to buy or resell. Then add daily category reports.</p>
+                <span class="tag mb-2">Choose your type</span>
+                <h2 class="fw-bold mb-2">Use Workvert to find the right work, offer goods and services, or find someone who can do a good service.</h2>
+                <p class="mb-0 muted">Start with your profile when you want work or want to offer value, or describe a request when you need someone to deliver a service well.</p>
             </div>
             <div class="conversion-actions">
                 @if (User?.Identity?.IsAuthenticated == true)
                 {
-                    <a class="btn btn-primary btn-lg" asp-page="/App/Alerts/Create">New alert</a>
+                    <a class="btn btn-primary btn-lg" asp-page="/App/Career/Index">Analyze profile</a>
                 }
                 else
                 {
                     <button type="button" class="btn btn-primary btn-lg" data-auth-open="register">Start free</button>
                 }
-                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing">View plans</a>
+                <a class="btn btn-outline-secondary btn-lg" asp-page="/Pricing" asp-fragment="plans">View plans</a>
             </div>
         </div>
     </div>

@@ -1,19 +1,19 @@
 @page
 @model Workvert.Pages.App.LogModel
 @{
-    ViewData["Title"] = "History";
+    ViewData["Title"] = "Activity";
 }
 
 <div class="log-view">
     <section class="app-page-hero">
         <div>
-            <span class="tag mb-3">Alert history</span>
-            <h1 class="hero-title fw-bold mb-2">History</h1>
-            <p class="lead muted mb-0">Review sent emails, skipped windows, and channel failures.</p>
+            <span class="tag mb-3">History</span>
+            <h1 class="hero-title fw-bold mb-2">Activity</h1>
+            <p class="lead muted mb-0">Review emails, webhooks, notifications and channel failures.</p>
         </div>
         <form method="get" class="log-alert-picker app-page-hero-actions">
             <select class="form-select" name="alertId" onchange="this.form.submit()">
-                <option value="">All alerts</option>
+                <option value="">All records</option>
                 @foreach (var option in Model.AlertOptions)
                 {
                     <option value="@option.Id" selected="@(Model.AlertId == option.Id)">@option.Label</option>
@@ -45,8 +45,8 @@
                         </div>
                         <div class="log-empty-copy">
                             <span class="tag">Waiting for activity</span>
-                            <h2>No log entries yet</h2>
-                            <p>Email attempts, webhooks, and skipped windows appear here after there is activity.</p>
+                            <h2>No records yet</h2>
+                            <p>Email attempts, webhooks and notifications will appear here when there is activity.</p>
                         </div>
                         <div class="log-empty-highlights" aria-label="Log entry types">
                             <span><i class="bi bi-check2-circle"></i> Sent</span>
@@ -54,7 +54,7 @@
                             <span><i class="bi bi-exclamation-triangle"></i> Failed</span>
                         </div>
                         <div class="log-empty-actions">
-                            <a class="btn btn-primary" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
+                            <a class="btn btn-primary" asp-page="/App/Career/Index"><i class="bi bi-stars me-1"></i>Analyze profile</a>
                             <a class="btn btn-outline-secondary" asp-page="/App/Settings"><i class="bi bi-broadcast-pin me-1"></i>Channels</a>
                             @if (Model.AlertId is not null || Model.SelectedTimeframe != "all")
                             {
@@ -69,7 +69,7 @@
                         <thead>
                             <tr>
                                 <th>Rule</th>
-                                <th>Product</th>
+                                <th>Source</th>
                                 <th>Channel</th>
                                 <th>Status</th>
                                 <th class="text-end">Date</th>
@@ -112,7 +112,7 @@
             <div class="timeframe-filter-card">
                 <div class="timeframe-filter-head">
                     <div>
-                        <span>Timeframe</span>
+                        <span>Cadence</span>
                         <small>Filter by frequency</small>
                     </div>
                     @if (Model.SelectedTimeframe != "all")
@@ -123,7 +123,7 @@
                 <div class="timeframe-tabs" aria-label="Timeframe filter">
                     <a class="@(Model.SelectedTimeframe == "all" ? "active" : "")" href="@Model.AllTimeframesUrl()" aria-current="@(Model.SelectedTimeframe == "all" ? "page" : null)">
                         <span class="timeframe-label">All</span>
-                        <small>Every</small>
+                        <small>All</small>
                     </a>
                     @foreach (var timeframe in Model.Timeframes)
                     {
@@ -140,7 +140,7 @@
                 {
                     <div class="rule-filter-row disabled">
                         <span class="rule-dot"></span>
-                        <span>No alerts</span>
+                        <span>No records</span>
                         <i class="bi bi-lock"></i>
                     </div>
                 }
@@ -162,15 +162,15 @@
                 <div class="log-upgrade-card plan-included">
                     <span><i class="bi bi-check2-circle me-1"></i>Unlimited active</span>
                     <a asp-page="/App/Billing">Manage plan</a>
-                    <p>@Model.PlanCapacityLabel. Alerts, reports, and history are included in this account.</p>
+                    <p>@Model.PlanCapacityLabel. Recommendations, reports and history are included in this account.</p>
                 </div>
             }
             else
             {
                 <div class="log-upgrade-card">
-                    <span>Premium only</span>
+                    <span>Premium</span>
                     <a asp-page="/App/Billing">Upgrade</a>
-                    <p>@Model.PlanCapacityLabel. Unlimited keeps every product and category active.</p>
+                    <p>@Model.PlanCapacityLabel. The Unlimited plan keeps recurring professional searches active.</p>
                 </div>
             }
         </aside>

@@ -4,7 +4,9 @@
     var currentPath = Context.Request.Path.Value ?? string.Empty;
     var isActive = (string pagePath) => currentPath.Equals(pagePath, StringComparison.OrdinalIgnoreCase);
     var isActivePrefix = (string pagePath) => currentPath.StartsWith(pagePath, StringComparison.OrdinalIgnoreCase);
-    var isPriceAlertArea = isActivePrefix("/App/Alerts");
+    var isCareerArea = isActivePrefix("/App/Career");
+    var isServiceArea = isActivePrefix("/App/Services");
+    var pageTitle = ViewData["Title"]?.ToString() ?? "Workspace";
 }
 
 <!DOCTYPE html>
@@ -27,80 +29,96 @@
 
 <body>
 <div class="app-shell">
-    <aside class="app-sidebar">
+    <header class="app-topbar">
+        <div class="app-topbar-brandline">
+            <a class="brand-lockup app-topbar-brand" asp-page="/Index" aria-label="Workvert home">
+                <span class="brand-mark">
+                    <img src="~/assets/brand/workvert_brand_mark.svg" width="42" height="42" asp-append-version="true" alt="" />
+                </span>
+                <span class="brand-wordmark">
+                    <span class="brand-title">Workvert<sup>TM</sup></span>
+                    <span class="brand-subtitle">Work and Services AI</span>
+                </span>
+            </a>
+            <div class="app-topbar-title">
+                <span class="app-topbar-kicker"><i class="bi bi-command"></i> Workspace</span>
+                <strong>@pageTitle</strong>
+            </div>
+        </div>
+        <div class="app-topbar-account">
+            <span class="app-topbar-greeting">
+                <i class="bi bi-person-circle"></i>
+                Hello, @(User?.Identity?.Name ?? "Account")
+            </span>
+            @await Component.InvokeAsync("AppPlanBadge")
+            <div class="app-topbar-plan-action">
+                @await Component.InvokeAsync("AppPlanCta")
+            </div>
+            <a class="btn btn-sm btn-outline-secondary app-topbar-site-link" asp-page="/Index">
+                <i class="bi bi-arrow-left me-1"></i>Back to site
+            </a>
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index")" method="post">
+                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-right me-1"></i>Sign out</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <aside class="app-sidebar">
         <a class="app-brand brand-lockup app-brand-lockup" asp-page="/Index" aria-label="Workvert home">
             <span class="brand-mark">
                 <img src="~/assets/brand/workvert_brand_mark.svg" width="44" height="44" asp-append-version="true" alt="" />
             </span>
             <span class="brand-wordmark">
                 <span class="brand-title">Workvert<sup>TM</sup></span>
-                <span class="brand-subtitle">Price Radar</span>
+                <span class="brand-subtitle">Work and Services AI</span>
             </span>
         </a>
 
-        <nav class="app-nav mt-4" aria-label="App navigation">
-            <div class="app-nav-section">Main menu</div>
-            <a class="app-nav-link" asp-page="/Index">
-                <i class="bi bi-arrow-left"></i>
-                <span>Back to site</span>
+        <div class="app-sidebar-cta">
+            <a class="app-sidebar-cta-main" asp-page="/App/Career/Index" asp-route-path="job">
+                <i class="bi bi-stars"></i>
+                <span>
+                    <strong>Start matching</strong>
+                    <small>Jobs, freelance work or services</small>
+                </span>
             </a>
-            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index")" method="post">
-                <button type="submit" class="app-nav-link app-nav-button">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Sign out</span>
-                </button>
-            </form>
+        </div>
 
-            <div class="app-nav-section">Monitoring</div>
+        <nav class="app-nav mt-3" aria-label="App navigation">
+            <div class="app-nav-section">Workspace</div>
             <a class="app-nav-link @(isActive("/App/Dashboard") ? "active" : "")" asp-page="/App/Dashboard">
-                <i class="bi bi-bar-chart-fill"></i>
-                <span>Dashboard</span>
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Overview</span>
             </a>
-            <a class="app-nav-link @(isPriceAlertArea ? "active" : "")" asp-page="/App/Alerts/Index">
-                <i class="bi bi-bell-fill"></i>
-                <span>Price alerts</span>
+            <a class="app-nav-link @(isCareerArea ? "active" : "")" asp-page="/App/Career/Index">
+                <i class="bi bi-person-vcard-fill"></i>
+                <span>Find work</span>
             </a>
-            <a class="app-nav-link @(isActive("/App/Log") ? "active" : "")" asp-page="/App/Log">
-                <i class="bi bi-clock-history"></i>
-                <span>History</span>
+            <a class="app-nav-link @(isServiceArea ? "active" : "")" asp-page="/App/Services/Index">
+                <i class="bi bi-briefcase-fill"></i>
+                <span>Find a professional</span>
             </a>
-
             <div class="app-nav-section">Account and settings</div>
-            <a class="app-nav-link @(isActivePrefix("/App/Account") ? "active" : "")" asp-page="/App/Account/Index">
-                <i class="bi bi-person-fill"></i>
-                <span>Personal details</span>
-            </a>
             <a class="app-nav-link @(isActive("/App/Billing") ? "active" : "")" asp-page="/App/Billing">
                 <i class="bi bi-credit-card-2-front"></i>
                 <span>Subscription</span>
             </a>
             <a class="app-nav-link @(isActive("/App/Settings") ? "active" : "")" asp-page="/App/Settings">
                 <i class="bi bi-broadcast-pin"></i>
-                <span>Email and channels</span>
+                <span>Notifications</span>
             </a>
             <a class="app-nav-link @(isActive("/App/HelpDesk") ? "active" : "")" asp-page="/App/HelpDesk">
                 <i class="bi bi-chat-left-text-fill"></i>
                 <span>Help</span>
             </a>
+            <a class="app-nav-link @(isActivePrefix("/App/Account") ? "active" : "")" asp-page="/App/Account/Index">
+                <i class="bi bi-person-fill"></i>
+                <span>Personal details</span>
+            </a>
         </nav>
 
-        <div class="app-sidebar-footer mt-auto">
-            <div class="small text-muted">@User?.Identity?.Name</div>
-            @await Component.InvokeAsync("AppPlanCta")
-        </div>
-    </aside>
-
-    <div class="app-main">
-        <header class="app-topbar">
-            <div class="app-topbar-status">
-                <span class="app-status-badge"><i class="bi bi-radar"></i>Price radar active</span>
-                @await Component.InvokeAsync("AppPlanBadge")
-            </div>
-            <div class="app-topbar-actions">
-                <a class="btn btn-sm btn-outline-secondary" asp-page="/App/Account/Index"><i class="bi bi-person-circle me-1"></i>My account</a>
-                <a class="btn btn-sm btn-primary app-new-alert-action" asp-page="/App/Alerts/Create"><i class="bi bi-plus-lg me-1"></i>New alert</a>
-            </div>
-        </header>
+        </aside>
 
         <main class="app-content">
             @RenderBody()

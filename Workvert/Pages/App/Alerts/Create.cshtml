@@ -255,7 +255,7 @@
             {
                 <h2>@Model.RemainingSlots active alert slot@(Model.RemainingSlots == 1 ? "" : "s") available</h2>
                 <p>Your plan allows <strong>@Model.Capacity</strong> active alerts and already uses <strong>@Model.ActiveAlerts</strong>.</p>
-                <a class="btn btn-outline-secondary w-100" asp-page="/Pricing">View plans</a>
+                <a class="btn btn-outline-secondary w-100" asp-page="/Pricing" asp-fragment="plans">View plans</a>
             }
 
             <div class="product-watch-preview">

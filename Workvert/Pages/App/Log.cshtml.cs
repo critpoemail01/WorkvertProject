@@ -35,10 +35,10 @@ public class LogModel : PageModel
     public List<AlertOption> AlertOptions { get; private set; } = new();
     public List<LogRow> Rows { get; private set; } = new();
     public List<RuleFilterRow> RuleFilters { get; private set; } = new();
-    public string SelectedAlertName { get; private set; } = "All alerts";
+    public string SelectedAlertName { get; private set; } = "All records";
     public string SelectedTimeframe { get; private set; } = "all";
     public bool IsUnlimitedPlan { get; private set; }
-    public string PlanCapacityLabel { get; private set; } = "5 active alerts";
+    public string PlanCapacityLabel { get; private set; } = "5 active searches";
 
     public record AlertOption(int Id, string Label);
     public record LogRow(
@@ -59,8 +59,8 @@ public class LogModel : PageModel
         var limits = await _accounts.GetLimitsAsync(userId);
         IsUnlimitedPlan = limits.IsUnlimited;
         PlanCapacityLabel = limits.IsUnlimited
-            ? "Unlimited active alerts"
-            : $"{limits.ActiveAlerts}/{limits.Capacity} active alerts used";
+            ? "Unlimited active searches"
+            : $"{limits.ActiveAlerts}/{limits.Capacity} active searches used";
 
         var alerts = await _db.Alerts
             .AsNoTracking()
@@ -81,8 +81,8 @@ public class LogModel : PageModel
             AlertId = alerts[0].Id;
 
         SelectedAlertName = AlertId is null
-            ? "All alerts"
-            : AlertOptions.FirstOrDefault(x => x.Id == AlertId.Value)?.Label ?? "Selected alert";
+            ? "All records"
+            : AlertOptions.FirstOrDefault(x => x.Id == AlertId.Value)?.Label ?? "Selected record";
 
         SelectedTimeframe = NormalizeTimeframe(Timeframe);
 
@@ -151,9 +151,9 @@ public class LogModel : PageModel
     {
         return marketType switch
         {
-            MarketType.Crypto => "Trusted store",
-            MarketType.Traditional => "Resale opportunity",
-            _ => "Product"
+            MarketType.Crypto => "Source",
+            MarketType.Traditional => "Opportunity",
+            _ => "Source"
         };
     }
 
@@ -161,7 +161,7 @@ public class LogModel : PageModel
     {
         return timeframe switch
         {
-            "1h" => "Hourly",
+            "1h" => "Every hour",
             "6h" => "6 hours",
             "12h" => "12 hours",
             "1d" => "Daily",

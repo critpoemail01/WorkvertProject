@@ -9,19 +9,19 @@ public sealed class NewsModel : PageModel
     public List<Post> Posts { get; } = new()
     {
         new Post(
-            "Credit packs for occasional product watches",
+            "Professional profile assistant",
             "Product",
-            "Buy credit packs and keep running alerts without a monthly subscription.",
+            "Workvert now analyzes skills, experience, location, and goals to generate career recommendations.",
             DateTime.UtcNow.AddDays(-7)),
         new Post(
-            "Alert control: cadence and delivery windows",
-            "Product",
-            "We improved scheduling so price alerts stay inside the delivery window you choose.",
+            "Flow for clients who need services",
+            "Marketplace",
+            "Requests written in natural language can now be transformed into an area, professional type, skills, and recommended profiles.",
             DateTime.UtcNow.AddDays(-14)),
         new Post(
-            "Roadmap: more channels and marketplaces",
+            "Roadmap: alerts and real opportunity sources",
             "Roadmap",
-            "New sources and delivery channels are on the way. The same alert workflow, with more places to compare and notify.",
+            "Upcoming integrations will search for jobs, freelance projects, and service requests on a recurring basis.",
             DateTime.UtcNow.AddDays(-30)),
     };
 
